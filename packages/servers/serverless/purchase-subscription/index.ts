@@ -1,11 +1,13 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import MongoStorage from "../db/mongoDb/MongoStorage";
+import UserModel from "../db/mongoDb/schema/userSchema";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
   await MongoStorage.init(process.env.DB_CONNECTION_STRING);
+  const users = await UserModel.find();
   context.log("HTTP trigger function processed a request.");
   const name = req.query.name || (req.body && req.body.name);
   const responseMessage = name
