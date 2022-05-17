@@ -1,8 +1,8 @@
-import UserModel from "../../db/mongoDb/schema/userSchema";
-import { IUser } from "../../entities/interfaces/IUser";
-import { MongooseBaseRepository } from "../base/MongooseBaseRepository";
+import { UserModel } from "../../db/mongoDb/schema";
+import { IUser } from "../../entities/interfaces";
+import { MongooseRepository } from "./base";
 
-class UserRepository extends MongooseBaseRepository<IUser> {
+class UserRepository extends MongooseRepository<IUser> {
   constructor() {
     super(UserModel);
   }

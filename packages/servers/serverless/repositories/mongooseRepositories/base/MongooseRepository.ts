@@ -1,7 +1,7 @@
-import { IWriteRepository, IReadRepository } from "../interfaces";
+import { IWriteRepository, IReadRepository } from "../../interfaces";
 import { Model, Document } from "mongoose";
 
-export class MongooseBaseRepository<T>
+export class MongooseRepository<T>
   implements IWriteRepository, IReadRepository
 {
   private _model: Model<T>;
