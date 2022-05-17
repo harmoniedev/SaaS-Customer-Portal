@@ -1,15 +1,16 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import MongoStorage from "../db/mongoDb/MongoStorage";
-import UserRepository from "../repositories/mongooseRepositories/UserRepository";
+import { UserService } from "../services/business";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
   await MongoStorage.init(process.env.DB_CONNECTION_STRING);
-  const userRepository = new UserRepository();
+  const userService = new UserService();
   try {
-    const user = await userRepository.find({});
+    const users = await userService.findAll();
+    const user = await userService.findById("627d119662bf9a5ca84eb223");
     console.log({ user });
   } catch (error) {
     console.log({ error: error.message });
