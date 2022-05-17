@@ -26,6 +26,6 @@ const userSchema = new Schema<IUser>({
   settings: [{ type: Schema.Types.ObjectId, ref: "Settings" }],
 });
 
-const UserModel = model("User", userSchema);
+const UserModel = model<IUser>("User", userSchema);
 
 export default UserModel;

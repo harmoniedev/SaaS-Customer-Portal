@@ -1,5 +1,5 @@
 export interface IReadRepository {
-  find<TContext, TResults>(model: any, query: any): Promise<TResults[]>;
-  findOne<TContext, TResults>(model: any, query: any): Promise<TResults>;
-  findOneById<TContext, TResults>(model: any, id: string): Promise<TResults>;
+  find<TResults>(query: any): Promise<TResults[]>;
+  findOne<TResults>(query: any): Promise<TResults>;
+  findOneById<TResults>(id: string): Promise<TResults>;
 }
