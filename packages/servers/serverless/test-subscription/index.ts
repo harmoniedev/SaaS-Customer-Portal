@@ -1,22 +1,13 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
-import { UserController } from "../controllers/UserController";
-import { DataAccessFactory } from "../dataAccess/DataAccessFactory/DataAccessFactory";
-import { DbTypes } from "../entities";
-import { EditUser } from "../entities/uiModels/user";
-import { UserService, OrganizationService } from "../services/business";
+import { UserController } from "../controllers";
+import { EditUser } from "../entities";
+import { InitializedApp } from "../shared";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
-  const dbTypes: DbTypes = DbTypes[process.env.DbTypes];
-  const dataAccessFactory: DataAccessFactory = new DataAccessFactory();
-  await dataAccessFactory.initDataAccess(
-    dbTypes,
-    process.env.DB_CONNECTION_STRING
-  );
-  const userService = new UserService(dbTypes);
-  const organizationService = new OrganizationService();
+  const { dbTypes } = await InitializedApp.initializedApp();
   const userController = new UserController(dbTypes);
   const editUser = new EditUser(
     "amits@harmon.ie",

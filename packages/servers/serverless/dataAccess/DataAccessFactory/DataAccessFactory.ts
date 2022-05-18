@@ -2,8 +2,10 @@ import { DbTypes } from "../../entities";
 import MongoStorage from "../mongoDb/MongoStorage";
 
 export class DataAccessFactory {
-  private _dbType: DbTypes;
-  private async createDataAccess(dbType: DbTypes, connectionString: string) {
+  private static async createDataAccess(
+    dbType: DbTypes,
+    connectionString: string
+  ) {
     switch (dbType) {
       case DbTypes.mongoose:
         return await MongoStorage.init(connectionString);
@@ -11,10 +13,7 @@ export class DataAccessFactory {
         return await MongoStorage.init(connectionString);
     }
   }
-  async initDataAccess(dbType: DbTypes, connectionString: string) {
-    if (this._dbType === dbType) {
-    }
-    this._dbType === dbType;
+  static async initDataAccess(dbType: DbTypes, connectionString: string) {
     return await this.createDataAccess(dbType, connectionString);
   }
 }
