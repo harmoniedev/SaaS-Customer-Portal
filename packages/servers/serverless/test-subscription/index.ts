@@ -10,14 +10,14 @@ const httpTrigger: AzureFunction = async function (
   const { appConfig } = await InitializedApp.initializedApp();
   const userController = new UserController(appConfig);
   const editUser = new EditUser(
-    "amits@harmon.ie",
     "FREE",
-    "samir vladimir",
-    "silver"
+    "silver",
+    "amits@harmon.ie",
+    "rahmin vladimir"
   );
   userController.editUser(
     "03122737-f0d8-4f00-ae32-5ff087a3db8f",
-    "b8faffb9-6025-4f5c-aa13-8b975d47731e",
+    "b8faffb9-6025-4f5c-aa13-8b975d477xaz",
     editUser
   );
   try {

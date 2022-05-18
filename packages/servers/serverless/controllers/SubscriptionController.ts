@@ -9,6 +9,6 @@ export class SubscriptionController {
     this._subscriptionService = new SubscriptionService(this._configuration);
   }
   async resolveSubscription(token: string) {
-    this._subscriptionService.resolveSubscription(token);
+    await this._subscriptionService.resolveSubscription(token);
   }
 }
