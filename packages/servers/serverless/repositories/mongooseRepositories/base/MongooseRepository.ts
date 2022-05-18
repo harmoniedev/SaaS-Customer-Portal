@@ -1,12 +1,12 @@
 import { IWriteRepository, IReadRepository } from "../../interfaces";
 import { Model } from "mongoose";
+import { BaseRepository } from "../../base/BaseRepository";
 
-export class MongooseRepository<T>
-  implements IWriteRepository, IReadRepository
-{
+export class MongooseRepository<T> extends BaseRepository<T> {
   private _model: Model<T>;
 
   constructor(schemaModel: Model<T>) {
+    super();
     this._model = schemaModel;
   }
   async findOneAndUpdate<TResults>(

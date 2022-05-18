@@ -1,18 +1,23 @@
-import { IUser } from "../../entities";
+import { DbTypes, IOrganization, IUser } from "../../entities";
 import { EditUser } from "../../entities/uiModels/user";
-import { OrganizationRepository } from "../../repositories/mongooseRepositories";
-import UserRepository from "../../repositories/mongooseRepositories/UserRepository";
+import { BaseRepository } from "../../repositories/base/BaseRepository";
+import {
+  OrganizationRepositoryFactory,
+  UserRepositoryFactory,
+} from "../../repositories/repositoryFactory";
 import { IUserService } from "../interfaces";
 export class UserService implements IUserService {
-  private _userRepository: UserRepository;
-  private _organizationRepository: OrganizationRepository;
+  private readonly _userRepository: BaseRepository<IUser>;
+  private readonly _organizationRepository: BaseRepository<IOrganization>;
+  private readonly _userFactory = new UserRepositoryFactory();
+  private readonly _organizationFactory = new OrganizationRepositoryFactory();
 
-  constructor() {
-    //need to inject on runtime
-    this._userRepository = new UserRepository();
-    //need to inject on runtime
-    this._organizationRepository = new OrganizationRepository();
+  constructor(dbType: DbTypes) {
+    this._userRepository = this._userFactory.initRepository(dbType);
+    this._organizationRepository =
+      this._organizationFactory.initRepository(dbType);
   }
+
   async editUser(
     tenantId: string,
     userId: string,
@@ -28,11 +33,15 @@ export class UserService implements IUserService {
     );
     return !!updateResult;
   }
+
   async deleteUser(tenantId: string, userId: string): Promise<boolean> {
-    //delete user from subscription
-    //need to update subscription amount?
-    return await this._userRepository.delete("");
+    const userToEdit: IUser = { licenseType: "FREE", cp_role: "" };
+    return !!(await this._userRepository.findOneAndUpdate(
+      { tenantId, userId },
+      userToEdit
+    ));
   }
+
   async getAllUsers(tenantId: string): Promise<IUser[]> {
     const response: IUser[] = await this._userRepository.find({ tenantId });
     return response;

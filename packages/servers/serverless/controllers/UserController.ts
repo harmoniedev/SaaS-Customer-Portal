@@ -1,11 +1,12 @@
+import { DbTypes } from "../entities";
 import { IUser } from "../entities/interfaces";
 import { EditUser } from "../entities/uiModels/user";
 import { UserService } from "../services/business";
 
 export class UserController {
   private readonly _userService: UserService;
-  constructor() {
-    this._userService = new UserService();
+  constructor(dbType: DbTypes) {
+    this._userService = new UserService(dbType);
   }
   async createUser(tenantId: string, userId: string): Promise<boolean> {
     return true;

@@ -1,5 +1,5 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
-import MongoStorage from "../db/mongoDb/MongoStorage";
+import MongoStorage from "../dataAccess/mongoDb/MongoStorage";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,

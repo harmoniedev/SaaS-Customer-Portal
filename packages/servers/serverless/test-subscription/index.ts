@@ -1,7 +1,7 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { UserController } from "../controllers/UserController";
-import MongoStorage from "../db/mongoDb/MongoStorage";
-import { IOrganization } from "../entities/interfaces";
+import { DataAccessFactory } from "../dataAccess/DataAccessFactory/DataAccessFactory";
+import { DbTypes } from "../entities";
 import { EditUser } from "../entities/uiModels/user";
 import { UserService, OrganizationService } from "../services/business";
 
@@ -9,10 +9,15 @@ const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
-  await MongoStorage.init(process.env.DB_CONNECTION_STRING);
-  const userService = new UserService();
+  const dbTypes: DbTypes = DbTypes[process.env.DbTypes];
+  const dataAccessFactory: DataAccessFactory = new DataAccessFactory();
+  await dataAccessFactory.initDataAccess(
+    dbTypes,
+    process.env.DB_CONNECTION_STRING
+  );
+  const userService = new UserService(dbTypes);
   const organizationService = new OrganizationService();
-  const userController = new UserController();
+  const userController = new UserController(dbTypes);
   const editUser = new EditUser(
     "amits@harmon.ie",
     "FREE",

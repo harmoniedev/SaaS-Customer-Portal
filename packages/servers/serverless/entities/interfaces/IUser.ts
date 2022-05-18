@@ -4,7 +4,7 @@ export interface IUser {
   userId?: string;
   teamsUserId?: string;
   redirectUri?: string;
-  upn: string;
+  upn?: string;
   domain?: string;
   refreshToken?: string;
   token?: string;
@@ -15,12 +15,12 @@ export interface IUser {
   geography?: string;
   firstUsage?: Date;
   lastUsage?: Date;
-  name: string;
+  name?: string;
   emailSignature?: string;
   isNotifyOnCreateTask?: boolean;
   settings?: string[];
   //owner and?
-  cp_role: string;
+  cp_role?: string;
   //planId from subscription
-  licenseType: string;
+  licenseType?: string;
 }
