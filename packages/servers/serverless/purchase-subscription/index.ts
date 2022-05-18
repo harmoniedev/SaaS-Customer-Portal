@@ -1,8 +1,5 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import MongoStorage from "../db/mongoDb/MongoStorage";
-import { UserModel } from "../db/mongoDb/schema";
-import { IUser } from "../entities/interfaces/IUser";
-import { MongooseRepository } from "../repositories/mongooseRepositories/base/MongooseRepository";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,

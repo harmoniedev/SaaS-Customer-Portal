@@ -1,5 +1,5 @@
 import { IWriteRepository, IReadRepository } from "../../interfaces";
-import { Model, Document } from "mongoose";
+import { Model } from "mongoose";
 
 export class MongooseRepository<T>
   implements IWriteRepository, IReadRepository
@@ -8,6 +8,12 @@ export class MongooseRepository<T>
 
   constructor(schemaModel: Model<T>) {
     this._model = schemaModel;
+  }
+  async findOneAndUpdate<TResults>(
+    query: any,
+    item: TResults
+  ): Promise<TResults> {
+    return await this._model.findOneAndUpdate(query, item, { new: true });
   }
   async create<TResults>(item: TResults): Promise<boolean> {
     const result: any = await this._model.create(item);
