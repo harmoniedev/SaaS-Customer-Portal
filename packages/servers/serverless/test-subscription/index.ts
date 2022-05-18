@@ -1,7 +1,7 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { UserController } from "../controllers";
 import { EditUser } from "../entities";
-import { InitializedApp } from "../shared";
+import { InitializedApp } from "../utils";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
