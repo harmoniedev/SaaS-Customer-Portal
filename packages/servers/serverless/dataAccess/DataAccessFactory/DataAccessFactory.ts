@@ -1,5 +1,5 @@
 import { DbTypes } from "../../entities";
-import MongoStorage from "../mongoDb/MongoStorage";
+import MongoStorage from "../mongoDb";
 
 export class DataAccessFactory {
   private static async createDataAccess(
