@@ -1,1 +1,5 @@
-export * from "./dbTypes";
+export enum DbTypes {
+  mongoose,
+  mongo,
+  sql,
+}
