@@ -8,6 +8,8 @@ const userSchema = new Schema<IUser>({
   firstUsage: Date,
   lastUsage: Date,
   name: String,
+  cp_role: String,
+  licenseType: String,
 });
 
 export const UserModel = model<IUser>("User", userSchema);
