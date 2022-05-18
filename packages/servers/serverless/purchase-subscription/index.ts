@@ -6,6 +6,7 @@ const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
+  // const name = req.query.name || (req.body && req.body.name);
   const { log } = context;
   const { appConfig } = await InitializedApp.initializedApp();
   log.info(
@@ -13,9 +14,9 @@ const httpTrigger: AzureFunction = async function (
       appConfig.dbType
     }, Date ${new Date().toISOString()}`
   );
-  const name = req.query.name || (req.body && req.body.name);
   const purchaseController: SubscriptionController = new SubscriptionController(
-    appConfig
+    appConfig,
+    log
   );
   log.info(
     `[purchase-subscription] func finish, Date ${new Date().toISOString()}`

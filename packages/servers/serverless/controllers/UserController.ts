@@ -1,3 +1,4 @@
+import { Logger } from "@azure/functions";
 import { IConfig } from "../entities";
 import { IUser } from "../entities/interfaces";
 import { EditUser } from "../entities/uiModels/user";
@@ -5,7 +6,9 @@ import { IUserService, UserService } from "../services";
 export class UserController {
   private readonly _userService: IUserService;
   private readonly _configuration: IConfig;
-  constructor(configuration: IConfig) {
+  private _logger: Logger;
+  constructor(configuration: IConfig, log: Logger) {
+    this._logger = log;
     this._configuration = configuration;
     this._userService = new UserService(this._configuration);
   }

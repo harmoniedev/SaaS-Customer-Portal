@@ -1,5 +1,9 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
-import { UserController } from "../controllers";
+import {
+  OrganizationController,
+  SubscriptionController,
+  UserController,
+} from "../controllers";
 import { EditUser } from "../entities";
 import { InitializedApp } from "../utils";
 
@@ -8,18 +12,23 @@ const httpTrigger: AzureFunction = async function (
   req: HttpRequest
 ): Promise<void> {
   const { appConfig } = await InitializedApp.initializedApp();
-  const userController = new UserController(appConfig);
-  const editUser = new EditUser(
-    "FREE",
-    "silver",
-    "amits@harmon.ie",
-    "rahmin vladimir"
+  const subscriptionController = new SubscriptionController(
+    appConfig,
+    context.log
   );
-  userController.editUser(
-    "03122737-f0d8-4f00-ae32-5ff087a3db8f",
-    "b8faffb9-6025-4f5c-aa13-8b975d477xaz",
-    editUser
-  );
+  subscriptionController.resolveSubscription("safasfafsfasfasfdasfasfas");
+  // const userController = new UserController(appConfig);
+  // const editUser = new EditUser(
+  //   "FREE",
+  //   "silver",
+  //   "amits@harmon.ie",
+  //   "rahmin vladimir"
+  // );
+  // userController.editUser(
+  //   "03122737-f0d8-4f00-ae32-5ff087a3db8f",
+  //   "b8faffb9-6025-4f5c-aa13-8b975d477xaz",
+  //   editUser
+  // );
   try {
     // const users = await userService.findAll();
     // const user = await userService.findById("627d119662bf9a5ca84eb223");
