@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "mongodb": "^4.6.0",
-    "mongoose": "^6.3.3"
+    "mongoose": "^6.3.3",
+    "node-fetch": "^3.2.4"
   },
   "devDependencies": {
     "@azure/functions": "^3.0.0",
