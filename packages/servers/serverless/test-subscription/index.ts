@@ -7,8 +7,8 @@ const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
-  const { dbTypes } = await InitializedApp.initializedApp();
-  const userController = new UserController(dbTypes);
+  const { appConfig } = await InitializedApp.initializedApp();
+  const userController = new UserController(appConfig);
   const editUser = new EditUser(
     "amits@harmon.ie",
     "FREE",
