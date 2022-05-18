@@ -1,4 +1,4 @@
-import { DbTypes, IOrganization, OrgLicensesDetails } from "../../entities";
+import { IConfig, IOrganization, OrgLicensesDetails } from "../../entities";
 import {
   OrganizationRepositoryFactory,
   BaseRepository,
@@ -8,9 +8,12 @@ import { IOrganizationService } from "../interfaces";
 export class OrganizationService implements IOrganizationService {
   private readonly _organizationRepository: BaseRepository<IOrganization>;
   private readonly _organizationFactory = new OrganizationRepositoryFactory();
-  constructor(dbType: DbTypes) {
-    this._organizationRepository =
-      this._organizationFactory.initRepository(dbType);
+  private readonly _configuration: IConfig;
+  constructor(configuration: IConfig) {
+    this._configuration = configuration;
+    this._organizationRepository = this._organizationFactory.initRepository(
+      this._configuration.dbType
+    );
   }
   async getOrgLicenses(tenantId: string): Promise<OrgLicensesDetails> {
     const organizationSubscriptions = await this._organizationRepository.find({

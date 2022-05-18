@@ -1,13 +1,12 @@
 import { DataAccessFactory } from "../dataAccess/DataAccessFactory/DataAccessFactory";
 import { DbTypes } from "../entities";
-
+import { appConfig } from "./";
 export class InitializedApp {
   static async initializedApp() {
-    const dbTypes: DbTypes = DbTypes[process.env.DbTypes];
     await DataAccessFactory.initDataAccess(
-      dbTypes,
+      appConfig.dbType,
       process.env.DB_CONNECTION_STRING
     );
-    return { dbTypes };
+    return { appConfig };
   }
 }

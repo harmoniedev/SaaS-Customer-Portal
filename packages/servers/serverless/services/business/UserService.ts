@@ -1,4 +1,4 @@
-import { DbTypes, IOrganization, IUser, EditUser } from "../../entities";
+import { IOrganization, IUser, EditUser, IConfig } from "../../entities";
 import {
   BaseRepository,
   OrganizationRepositoryFactory,
@@ -11,11 +11,15 @@ export class UserService implements IUserService {
   private readonly _organizationRepository: BaseRepository<IOrganization>;
   private readonly _userFactory = new UserRepositoryFactory();
   private readonly _organizationFactory = new OrganizationRepositoryFactory();
-
-  constructor(dbType: DbTypes) {
-    this._userRepository = this._userFactory.initRepository(dbType);
-    this._organizationRepository =
-      this._organizationFactory.initRepository(dbType);
+  private readonly _configuration: IConfig;
+  constructor(configuration: IConfig) {
+    this._configuration = configuration;
+    this._userRepository = this._userFactory.initRepository(
+      this._configuration.dbType
+    );
+    this._organizationRepository = this._organizationFactory.initRepository(
+      this._configuration.dbType
+    );
   }
 
   async editUser(
