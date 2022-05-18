@@ -1,11 +1,11 @@
-import { DbTypes, IOrganization, IUser } from "../../entities";
-import { EditUser } from "../../entities/uiModels/user";
-import { BaseRepository } from "../../repositories/base/BaseRepository";
+import { DbTypes, IOrganization, IUser, EditUser } from "../../entities";
 import {
+  BaseRepository,
   OrganizationRepositoryFactory,
   UserRepositoryFactory,
-} from "../../repositories/repositoryFactory";
+} from "../../repositories";
 import { IUserService } from "../interfaces";
+
 export class UserService implements IUserService {
   private readonly _userRepository: BaseRepository<IUser>;
   private readonly _organizationRepository: BaseRepository<IOrganization>;
