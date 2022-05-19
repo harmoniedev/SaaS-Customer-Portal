@@ -3,3 +3,7 @@ export enum DbTypes {
   mongo,
   sql,
 }
+export enum Role {
+  Admin = "Admin",
+  Member = "Member",
+}

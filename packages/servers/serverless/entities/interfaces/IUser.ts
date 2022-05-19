@@ -6,8 +6,7 @@ export interface IUser {
   firstUsage?: Date;
   lastUsage?: Date;
   name?: string;
-  //owner and?
-  cp_role?: string;
-  //planId from subscription
-  licenseType?: string;
+  role?: string;
+  license?: string;
+  subscriptionId?: string;
 }

@@ -1,8 +1,7 @@
 import { ISubscription } from "./ISubscription";
 
 export interface IOrganization {
+  _id?: string;
   tenantId: string;
-  subscription: ISubscription[];
-  licenseCount: number;
-  assignedLicensesCount: number;
+  subscriptions?: ISubscription[];
 }

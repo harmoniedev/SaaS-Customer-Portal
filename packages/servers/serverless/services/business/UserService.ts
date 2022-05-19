@@ -8,9 +8,9 @@ import { IUserService } from "../interfaces";
 
 export class UserService implements IUserService {
   private readonly _userRepository: BaseRepository<IUser>;
-  private readonly _organizationRepository: BaseRepository<IOrganization>;
   private readonly _userFactory = new UserRepositoryFactory();
   private readonly _organizationFactory = new OrganizationRepositoryFactory();
+  private readonly _organizationRepository: BaseRepository<IOrganization>;
   private readonly _configuration: IConfig;
   constructor(configuration: IConfig) {
     this._configuration = configuration;
@@ -39,7 +39,7 @@ export class UserService implements IUserService {
   }
 
   async deleteUser(tenantId: string, userId: string): Promise<boolean> {
-    const userToEdit: IUser = { licenseType: "FREE", cp_role: "" };
+    const userToEdit: IUser = { license: "FREE", role: "" };
     return !!(await this._userRepository.findOneAndUpdate(
       { tenantId, userId },
       userToEdit
