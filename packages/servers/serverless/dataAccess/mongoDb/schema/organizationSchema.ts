@@ -42,6 +42,8 @@ const subscription = {
 };
 const organizationSchema = new Schema<IOrganization>({
   tenantId: { type: String, required: true },
+  licenseCount: { type: Number, required: false, default: 0 },
+  assignedLicensesCount: { type: Number, required: false, default: 0 },
   subscription: [subscription],
 });
 
