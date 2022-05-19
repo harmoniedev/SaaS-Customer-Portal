@@ -9,7 +9,10 @@ export class OrganizationController {
   constructor(configuration: IConfig, log: Logger) {
     this._logger = log;
     this._configuration = configuration;
-    this._organizationService = new OrganizationService(this._configuration);
+    this._organizationService = new OrganizationService(
+      this._configuration,
+      this._logger
+    );
   }
   async getLicense(tenantId: string) {
     this._logger.info(
