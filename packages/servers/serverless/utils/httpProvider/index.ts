@@ -6,7 +6,16 @@ export class HttpProvider {
     init?: RequestInit
   ): Promise<TResponse> {
     const response = await fetch(url, init);
-    return (await response.json()) as TResponse;
+    let res;
+    const bodyAsText = await response.text();
+    if (bodyAsText) {
+      try {
+        res = JSON.parse(bodyAsText) as TResponse;
+      } catch (error: any) {
+        throw error;
+      }
+    }
+    return res;
   }
 
   async get<TResponse>(

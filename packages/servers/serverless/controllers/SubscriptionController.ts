@@ -31,4 +31,19 @@ export class SubscriptionController {
       );
     }
   }
+  async unsubscribe(subscription: ISubscription): Promise<void> {
+    try {
+      this._logger.info(
+        `[SubscriptionController - unsubscribe] started ${new Date().toISOString()}`
+      );
+      await this._subscriptionService.removeSubscription(subscription);
+      this._logger.info(
+        `[SubscriptionController - unsubscribe] finish ${new Date().toISOString()}`
+      );
+    } catch (error: any) {
+      this._logger.error(
+        `[SubscriptionController - unsubscribe] error ${error.message}`
+      );
+    }
+  }
 }

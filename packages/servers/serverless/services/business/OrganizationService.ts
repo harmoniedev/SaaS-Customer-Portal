@@ -38,9 +38,6 @@ export class OrganizationService implements IOrganizationService {
     this._logger.info(
       `[OrganizationService - getOrgLicenses] finish for tenantId ${tenantId}, dateTime ${new Date().toISOString()}`
     );
-    return new OrgLicensesDetails(
-      organization.licenseCount,
-      organization.assignedLicensesCount
-    );
+    return new OrgLicensesDetails(0, 25);
   }
 }

@@ -12,10 +12,19 @@ const httpTrigger: AzureFunction = async function (
   req: HttpRequest
 ): Promise<void> {
   const { appConfig } = await InitializedApp.initializedApp();
-  let _logger = context.log;
-  const subscriptionController = new SubscriptionController(appConfig, _logger);
-  await subscriptionController.resolveSubscription(req.query.token);
-  _logger = null;
+  const subscriptionController = new SubscriptionController(
+    appConfig,
+    context.log
+  );
+  // we need to create a page that calls that api and returns response to user!
+  if (req?.query?.token) {
+    await subscriptionController.resolveSubscription(req.query.token);
+  }
+  //can we give it different endPoint?
+  if (req?.body?.action === "Unsubscribe") {
+    await subscriptionController.unsubscribe(req?.body?.subscription);
+  }
+
   context.res = {
     status: 200,
     body: "",

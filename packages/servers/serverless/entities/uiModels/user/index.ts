@@ -15,8 +15,8 @@ export class EditUser {
 
   toDataBaseModel(): IUser {
     return {
-      cp_role: this.role,
-      licenseType: this.license,
+      role: this.role,
+      license: this.license,
       upn: this.email,
       name: this.name,
     };

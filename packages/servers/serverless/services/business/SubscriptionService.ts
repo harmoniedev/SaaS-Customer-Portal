@@ -6,6 +6,9 @@ import {
   IOrganization,
   IUser,
   Role,
+  ActivateSubscription,
+  SaasSubscriptionStatus,
+  AddSubscription,
 } from "../../entities";
 import {
   BaseRepository,
@@ -36,11 +39,10 @@ export class SubscriptionService implements ISubscriptionService {
     );
     this.initStaticMembers();
   }
+
   private initStaticMembers() {
     this.initHttpProvider();
-    SubscriptionService._authenticationService = new AuthenticationProvider(
-      this._config
-    );
+    this.initAuthProvider();
   }
 
   private initHttpProvider() {
@@ -48,6 +50,7 @@ export class SubscriptionService implements ISubscriptionService {
       SubscriptionService._httpService = new HttpProvider();
     }
   }
+
   private initAuthProvider() {
     if (!SubscriptionService._authenticationService) {
       SubscriptionService._authenticationService = new AuthenticationProvider(
@@ -56,11 +59,103 @@ export class SubscriptionService implements ISubscriptionService {
     }
   }
 
+  async removeSubscription(subscription: ISubscription): Promise<void> {
+    const { id, quantity, purchaser, offerId } = subscription;
+    const { tenantId } = purchaser;
+    const logMessage = `subscriptionId ${id}, tenantId ${
+      purchaser.tenantId
+    } offerId ${offerId} quantity ${quantity}, userId ${
+      purchaser.objectId
+    }, dateTime ${new Date().toISOString()}`;
+    this._logger(
+      `[SubscriptionService - removeSubscription] start for ${logMessage}`
+    );
+    await this.removeAllSubscriptionUsers(tenantId, id);
+    await this.updateSubscriptionStatus(tenantId, subscription);
+    this._logger(
+      `[SubscriptionService - removeSubscription] finish for ${logMessage}`
+    );
+  }
+
+  private async updateSubscriptionStatus(
+    tenantId: string,
+    subscription: ISubscription
+  ) {
+    const logMessage = `tenantId ${tenantId}, subscriptionId ${
+      subscription.id
+    }, dateTime ${new Date().toISOString()}`;
+    this._logger(
+      `[SubscriptionService - removeSubscription] start for ${logMessage}`
+    );
+    try {
+      const organization =
+        await this._organizationRepository.findOne<IOrganization>({ tenantId });
+      const dbSubscription: ISubscription = this.getOrganizationSubscription(
+        organization,
+        subscription
+      );
+      dbSubscription.saasSubscriptionStatus =
+        SaasSubscriptionStatus.Unsubscribed;
+      organization.subscriptions = organization.subscriptions.filter(
+        (s: ISubscription) => s.id !== dbSubscription.id
+      );
+      await this.updateOrganizationSubscriptions(organization, dbSubscription);
+    } catch (error: any) {
+      this._logger.error(
+        `[SubscriptionService - removeSubscription] error for ${logMessage}, error: ${error.message}`
+      );
+      throw error;
+    }
+
+    this._logger(
+      `[SubscriptionService - removeSubscription] finish for ${logMessage}`
+    );
+  }
+
+  private async removeAllSubscriptionUsers(
+    tenantId: string,
+    subscriptionId: string
+  ) {
+    const logMessage = `for tenant Id ${tenantId}, subscriptionId ${subscriptionId}, dateTime ${new Date().toISOString()}`;
+    this._logger.info(
+      `[SubscriptionService - removeAllSubscriptionUsers] start for ${logMessage}`
+    );
+    const users = await this._userRepository.find<IUser>({
+      tenantId,
+      subscriptionId,
+    });
+    const defaultUserSubscription: IUser = {
+      role: Role.Member,
+      subscriptionId: "",
+      license: "Free",
+    };
+    try {
+      for (let index = 0; index < users.length; index++) {
+        const user = users[index];
+        await this._userRepository.findOneAndUpdate(
+          { _id: user._id },
+          defaultUserSubscription
+        );
+        this._logger.info(
+          `[SubscriptionService - removeAllSubscriptionUsers] remove subscription from user ${user._id}, ${logMessage}`
+        );
+      }
+    } catch (error: any) {
+      this._logger.error(
+        `[SubscriptionService - removeAllSubscriptionUsers] error for ${logMessage}, error: ${error.message}`
+      );
+      throw error;
+    }
+    this._logger.info(
+      `[SubscriptionService - removeAllSubscriptionUsers] finish for ${logMessage}`
+    );
+  }
+
   async resolveSubscription(token: string): Promise<ISubscription> {
     this._logger.info(
       `[resolveSubscription] started ${new Date().toISOString()}`
     );
-    let subscriptionRes: ISubscription;
+    let subscriptionRes: AddSubscription;
     try {
       const { access_token }: IAuthenticateResponse =
         await SubscriptionService._authenticationService.getAppAuthenticationToken();
@@ -69,18 +164,29 @@ export class SubscriptionService implements ISubscriptionService {
           access_token,
           token
         );
+        await this.activateSubscription(
+          subscriptionRes.subscription,
+          access_token
+        );
         if (subscriptionRes?.subscription) {
-          await this.getSubscriptionOwners(subscriptionRes);
           const organization: IOrganization =
-            await this.getOrCreateOrganization(subscriptionRes);
-          //check if subscription exists if not we will create one, else we will
-          //
-          if (!this.isSubScriptionAlreadyAdded(organization, subscriptionRes)) {
-            await this.addSubscriptionToOrganization(
-              organization,
-              subscriptionRes
+            await this.getOrCreateOrganization(subscriptionRes.subscription);
+          const dbSubscription = this.getOrganizationSubscription(
+            organization,
+            subscriptionRes.subscription
+          );
+          if (dbSubscription) {
+            organization.subscriptions = organization.subscriptions.filter(
+              (s: ISubscription) => s.id !== dbSubscription.id
             );
           }
+          await this.updateOrganizationSubscriptions(
+            organization,
+            subscriptionRes.subscription
+          );
+          await this.getOrCreateSubscriptionOwners(
+            subscriptionRes.subscription
+          );
         }
       }
     } catch (error: any) {
@@ -94,19 +200,61 @@ export class SubscriptionService implements ISubscriptionService {
     this._logger.info(
       `[resolveSubscription] finished ${new Date().toISOString()}`
     );
-    return subscriptionRes;
+    return subscriptionRes?.subscription;
   }
 
-  private isSubScriptionAlreadyAdded(
+  async activateSubscription(
+    subscriptionRes: ISubscription,
+    access_token: string
+  ): Promise<void> {
+    const isSubscriptionActive =
+      subscriptionRes.saasSubscriptionStatus ===
+      SaasSubscriptionStatus.Subscribed;
+    if (!isSubscriptionActive) {
+      const activatePayload: ActivateSubscription = {
+        planId: subscriptionRes.planId,
+        quantity: subscriptionRes.quantity,
+      };
+      await this.callActivateSubscriptionApi(
+        subscriptionRes.id,
+        access_token,
+        activatePayload
+      );
+      subscriptionRes.saasSubscriptionStatus =
+        SaasSubscriptionStatus.Subscribed;
+    }
+  }
+
+  private getOrganizationSubscription(
     organization: IOrganization,
     subscriptionRes: ISubscription
-  ) {
-    return organization?.subscriptions?.find(
-      (subscription: ISubscription) => subscription.id === subscriptionRes.id
+  ): ISubscription {
+    let dbSubscription;
+    const message = `tenantId ${organization.tenantId}, purchaser objectId ${
+      subscriptionRes.purchaser.objectId
+    } beneficiary objectId ${
+      subscriptionRes.beneficiary.objectId
+    } dateTime ${new Date().toISOString()}`;
+    this._logger.info(
+      `[SubscriptionService - isSubScriptionAlreadyAdded] start for ${message}`
     );
+    try {
+      dbSubscription = organization?.subscriptions?.find(
+        (subscription: ISubscription) => subscription.id === subscriptionRes.id
+      );
+    } catch (error: any) {
+      this._logger.error(
+        `[SubscriptionService - isSubScriptionAlreadyAdded] error for ${message}, error: ${error.message}`
+      );
+      throw error;
+    }
+    this._logger.info(
+      `[SubscriptionService - isSubScriptionAlreadyAdded] found subscription for subscription Id ${subscriptionRes.id}, ${message}`
+    );
+    return dbSubscription;
   }
 
-  private async addSubscriptionToOrganization(
+  private async updateOrganizationSubscriptions(
     organization: IOrganization,
     subscriptionRes: ISubscription
   ) {
@@ -128,47 +276,46 @@ export class SubscriptionService implements ISubscriptionService {
   ): Promise<IOrganization> {
     return await this._organizationRepository.findOneAndUpdate<IOrganization>(
       {
-        tenantId: subscriptionRes?.subscription.purchaser.tenantId,
+        tenantId: subscriptionRes?.purchaser.tenantId,
       },
-      { tenantId: subscriptionRes?.subscription.purchaser.tenantId }
+      { tenantId: subscriptionRes?.purchaser.tenantId }
     );
   }
 
-  private async getSubscriptionOwners(response: ISubscription) {
+  private async getOrCreateSubscriptionOwners(subscription: ISubscription) {
     //if purchaser is the same as the beneficiary we will return only one user
     const isPurchaserIsBeneficiary =
-      response?.subscription.purchaser.objectId ===
-      response?.subscription?.beneficiary?.objectId;
+      subscription?.purchaser.objectId === subscription?.beneficiary?.objectId;
 
     const usersQueries = this.prepareFindOwnerQuery(
       isPurchaserIsBeneficiary,
-      response
+      subscription
     );
-    return await this.findOwnerOrCreateUser(usersQueries, response);
+    return await this.findOwnerOrCreateUser(usersQueries, subscription);
   }
 
   private prepareFindOwnerQuery(
     isPurchaserIsBeneficiary: boolean,
-    response: ISubscription
+    subscription: ISubscription
   ) {
     return isPurchaserIsBeneficiary
       ? [
           {
-            userId: response?.subscription.purchaser.objectId,
-            tenantId: response?.subscription.purchaser.tenantId,
-            upn: response?.subscription.purchaser.emailId,
+            userId: subscription?.purchaser.objectId,
+            tenantId: subscription?.purchaser.tenantId,
+            upn: subscription?.purchaser.emailId,
           },
         ]
       : [
           {
-            userId: response?.subscription.purchaser.objectId,
-            tenantId: response?.subscription.purchaser.tenantId,
-            upn: response?.subscription.purchaser.emailId,
+            userId: subscription?.purchaser.objectId,
+            tenantId: subscription?.purchaser.tenantId,
+            upn: subscription?.purchaser.emailId,
           },
           {
-            tenantId: response?.subscription.beneficiary.tenantId,
-            userId: response?.subscription?.beneficiary?.objectId,
-            upn: response?.subscription?.beneficiary?.emailId,
+            tenantId: subscription?.beneficiary.tenantId,
+            userId: subscription?.beneficiary?.objectId,
+            upn: subscription?.beneficiary?.emailId,
           },
         ];
   }
@@ -177,14 +324,16 @@ export class SubscriptionService implements ISubscriptionService {
     usersQueries: { userId: string; tenantId: string; upn: string }[],
     subscription: ISubscription
   ) {
+    const isSubscribe =
+      subscription.saasSubscriptionStatus === SaasSubscriptionStatus.Subscribed;
     const owners: IUser[] = [];
     for (let index = 0; index < usersQueries.length; index++) {
       const userQuery = usersQueries[index];
       const userData: IUser = {
         ...userQuery,
-        role: Role.Admin,
-        license: subscription.planId,
-        subscriptionId: subscription.id,
+        role: isSubscribe ? Role.Admin : Role.Member,
+        license: isSubscribe ? subscription.planId : "",
+        subscriptionId: isSubscribe ? subscription.id : "",
       };
       const owner: IUser = await this._userRepository.findOneAndUpdate(
         userQuery,
@@ -201,21 +350,23 @@ export class SubscriptionService implements ISubscriptionService {
     this._logger.info(
       `[getSubscriptionDetails] started dateTime:${new Date().toISOString()}`
     );
-    let subscription: ISubscription;
+    let subscription: AddSubscription;
     const resolveUrl =
+      this._config.subscriptionBaseUrl +
       this._config.resolveSubscriptionEndPoint +
       this._config.fulfillmentApiVersion;
     try {
-      subscription = await SubscriptionService._httpService.post<ISubscription>(
-        resolveUrl,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${access_token}`,
-            "x-ms-marketplace-token": token,
-          },
-        }
-      );
+      subscription =
+        await SubscriptionService._httpService.post<AddSubscription>(
+          resolveUrl,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${access_token}`,
+              "x-ms-marketplace-token": token,
+            },
+          }
+        );
     } catch (error: any) {
       this._logger.error(
         `[getSubscriptionDetails] error ${
@@ -230,7 +381,29 @@ export class SubscriptionService implements ISubscriptionService {
     return subscription;
   }
 
-  async activateSubscription(): Promise<ISubscription> {
-    throw new Error("Method not implemented.");
+  async callActivateSubscriptionApi(
+    subscriptionId: string,
+    access_token: string,
+    confirmationPayload: ActivateSubscription
+  ): Promise<void> {
+    const activateUrl: string =
+      this._config.subscriptionBaseUrl +
+      this._config.activateSubscriptionEndPoint +
+      this._config.fulfillmentApiVersion;
+    const body = JSON.stringify(confirmationPayload);
+    const response = await SubscriptionService._httpService.post<{
+      Message: string;
+    }>(activateUrl.replace("*{subscriptionId}*", subscriptionId), {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${access_token}`,
+      },
+      body,
+    });
+    if (response?.Message) {
+      const errorMessage = `[callActivateSubscriptionApi] error for subscriptionId ${subscriptionId} body ${body}, api message ${response.Message}`;
+      this._logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
   }
 }
