@@ -20,13 +20,10 @@ import {
   HttpProvider,
   AuthenticationProvider,
   defaultLicense,
+  defaultUserSubscription,
 } from "../../utils";
 import { ISubscriptionService } from "../interfaces";
-const defaultUserSubscription: IUser = {
-  role: Role.Member,
-  subscriptionId: "",
-  license: defaultLicense,
-};
+
 export class SubscriptionService implements ISubscriptionService {
   private readonly _userRepository: BaseRepository<IUser>;
   private readonly _userFactory = new UserRepositoryFactory();
