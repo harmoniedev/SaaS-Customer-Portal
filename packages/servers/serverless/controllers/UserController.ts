@@ -10,7 +10,7 @@ export class UserController {
   constructor(configuration: IConfig, log: Logger) {
     this._logger = log;
     this._configuration = configuration;
-    this._userService = new UserService(this._configuration);
+    this._userService = new UserService(this._configuration, this._logger);
   }
   async createUser(tenantId: string, userId: string): Promise<boolean> {
     return true;
@@ -38,12 +38,12 @@ export class UserController {
     const logMessage = ` for tenantId ${tenantId}, orderBy ${orderBy} dateTime ${new Date().toISOString()}`;
     try {
       this._logger.info(`[UserController - getAllUsers] start ${logMessage}`);
-      const users: IUser[] = await this._userService.getAllUsers(
+      const users: ViewUser[] = await this._userService.getAllUsers(
         tenantId,
         orderBy
       );
       this._logger.info(`[UserController - getAllUsers] finish ${logMessage}`);
-      return users.map((user: IUser) => new ViewUser(user));
+      return users;
     } catch (error: any) {
       this._logger.error(
         `[UserController - getAllUsers] error ${logMessage}, error: ${error.message}`

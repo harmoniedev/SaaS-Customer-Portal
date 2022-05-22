@@ -1,4 +1,4 @@
-import { EditUser, IUser } from "../../../entities";
+import { EditUser, IUser, ViewUser } from "../../../entities";
 
 export interface IUserService {
   editUser(
@@ -7,5 +7,5 @@ export interface IUserService {
     userPayload: EditUser
   ): Promise<boolean>;
   deleteUser(tenantId: string, userId: string): Promise<boolean>;
-  getAllUsers(tenantId: string, orderBy: string): Promise<IUser[]>;
+  getAllUsers(tenantId: string, orderBy: string): Promise<ViewUser[]>;
 }

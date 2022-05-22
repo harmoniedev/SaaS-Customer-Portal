@@ -1,4 +1,11 @@
-import { IOrganization, IUser, EditUser, IConfig } from "../../entities";
+import { Logger } from "@azure/functions";
+import {
+  IOrganization,
+  IUser,
+  EditUser,
+  IConfig,
+  ViewUser,
+} from "../../entities";
 import {
   BaseRepository,
   OrganizationRepositoryFactory,
@@ -12,7 +19,9 @@ export class UserService implements IUserService {
   private readonly _organizationFactory = new OrganizationRepositoryFactory();
   private readonly _organizationRepository: BaseRepository<IOrganization>;
   private readonly _configuration: IConfig;
-  constructor(configuration: IConfig) {
+  private readonly _logger: Logger;
+  constructor(configuration: IConfig, log: Logger) {
+    this._logger = log;
     this._configuration = configuration;
     this._userRepository = this._userFactory.initRepository(
       this._configuration.dbType
@@ -46,13 +55,23 @@ export class UserService implements IUserService {
     ));
   }
 
-  async getAllUsers(tenantId: string, orderBy: string): Promise<IUser[]> {
+  async getAllUsers(tenantId: string, orderBy: string): Promise<ViewUser[]> {
     const sortQuery =
       orderBy === "lastActive" ? { lastActive: -1 } : { name: -1 };
-    const response: IUser[] = await this._userRepository.find(
-      { tenantId },
+    const logMessage = `for tenantId ${tenantId}, sortQuery ${JSON.stringify(
       sortQuery
-    );
-    return response;
+    )} dateTime ${new Date().toISOString()}`;
+    let users: IUser[];
+    this._logger.info(`[UserService - getAllUsers] start ${logMessage}`);
+    try {
+      users = await this._userRepository.find({ tenantId }, sortQuery);
+    } catch (error: any) {
+      this._logger.error(
+        `[UserService - getAllUsers] ${logMessage},error ${error.message}`
+      );
+      throw error;
+    }
+    this._logger.info(`[UserService - getAllUsers] finish ${logMessage}`);
+    return users.map((user: IUser) => new ViewUser(user));
   }
 }
