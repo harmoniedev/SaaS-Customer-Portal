@@ -1,35 +1,19 @@
 import { Logger } from "@azure/functions";
-import {
-  IConfig,
-  IOrganization,
-  ISubscription,
-  IUser,
-  OrgLicensesDetails,
-  SaasSubscriptionStatus,
-} from "../../entities";
-import {
-  OrganizationRepositoryFactory,
-  BaseRepository,
-  UserRepositoryFactory,
-} from "../../repositories";
-import { IOrganizationService } from "../interfaces";
+import { IConfig, ISubscription, OrgLicensesDetails } from "../../entities";
+import { IOrganizationService, ISubscriptionService } from "../interfaces";
+import { SubscriptionService } from "./SubscriptionService";
 
 export class OrganizationService implements IOrganizationService {
-  private readonly _organizationFactory = new OrganizationRepositoryFactory();
-  private readonly _organizationRepository: BaseRepository<IOrganization>;
-  private readonly _userRepository: BaseRepository<IUser>;
-  private readonly _userFactory = new UserRepositoryFactory();
+  private readonly _subscriptionService: ISubscriptionService;
   private readonly _configuration: IConfig;
   private readonly _logger: Logger;
 
   constructor(configuration: IConfig, log: Logger) {
     this._logger = log;
     this._configuration = configuration;
-    this._organizationRepository = this._organizationFactory.initRepository(
-      this._configuration.dbType
-    );
-    this._userRepository = this._userFactory.initRepository(
-      this._configuration.dbType
+    this._subscriptionService = new SubscriptionService(
+      this._configuration,
+      this._logger
     );
   }
 
@@ -37,11 +21,13 @@ export class OrganizationService implements IOrganizationService {
     this._logger.info(
       `[OrganizationService - getOrgLicenses] started for tenantId ${tenantId}, dateTime ${new Date().toISOString()}`
     );
-    let organization: IOrganization;
+    let orgLicensesDetails: OrgLicensesDetails;
     try {
-      organization = await this._organizationRepository.findOne<IOrganization>({
-        tenantId,
-      });
+      const validSubscription =
+        await this._subscriptionService.getValidSubscriptions(tenantId);
+      orgLicensesDetails = await this.getAssignedLicenseCount(
+        validSubscription
+      );
     } catch (error: any) {
       this._logger.info(
         `[OrganizationService - getOrgLicenses] error for tenantId ${tenantId}, error dateTime ${new Date().toISOString()}, error: ${
@@ -53,14 +39,6 @@ export class OrganizationService implements IOrganizationService {
     this._logger.info(
       `[OrganizationService - getOrgLicenses] finish for tenantId ${tenantId}, dateTime ${new Date().toISOString()}`
     );
-    const validSubscription =
-      organization?.subscriptions?.filter(
-        (subscription: ISubscription) =>
-          subscription.saasSubscriptionStatus ===
-          SaasSubscriptionStatus.Subscribed
-      ) || [];
-    const orgLicensesDetails: OrgLicensesDetails =
-      await this.getAssignedLicenseCount(validSubscription);
     return orgLicensesDetails;
   }
 
@@ -72,17 +50,11 @@ export class OrganizationService implements IOrganizationService {
     for (let index = 0; index < subscriptions.length; index++) {
       const subscription = subscriptions[index];
       licenseCount += subscription.quantity;
-      assignedLicensesCount += await this.getUsersCountBySubscriptionId(
-        subscription.id
-      );
+      assignedLicensesCount +=
+        await this._subscriptionService.getAssignedLicenseCount(
+          subscription.id
+        );
     }
     return new OrgLicensesDetails(licenseCount, assignedLicensesCount);
-  }
-
-  async getUsersCountBySubscriptionId(subscriptionId: string): Promise<number> {
-    const response: IUser[] = await this._userRepository.find<IUser>({
-      subscriptionId: subscriptionId,
-    });
-    return response.length;
   }
 }

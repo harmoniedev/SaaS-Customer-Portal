@@ -1,7 +1,30 @@
 import { IUser } from "../../interfaces";
 
+export class AddUserView {
+  license: string;
+  role: string;
+  email: string;
+  name: string;
+
+  constructor(license: string, role: string, email: string, name: string) {
+    this.license = license;
+    this.role = role;
+    this.email = email;
+    this.name = name;
+  }
+
+  toDataBaseModel(): IUser {
+    return {
+      role: this.role,
+      license: this.license,
+      upn: this.email,
+      name: this.name,
+    };
+  }
+}
+
 export class ViewUser {
-  lastActiveDate: string;
+  lastActiveDate?: string;
   license: string;
   role: string;
   email: string;

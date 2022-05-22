@@ -7,4 +7,7 @@ export interface ISubscriptionService {
     access_token: string
   ): Promise<void>;
   removeSubscription(subscription: ISubscription): Promise<void>;
+  getValidSubscriptions(tenantId: string): Promise<ISubscription[]>;
+  getAssignedLicenseCount(subscriptionId: string): Promise<number>;
+  getValidSubscription(tenantId: string): Promise<ISubscription>;
 }

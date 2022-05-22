@@ -1,7 +1,6 @@
 import { Logger } from "@azure/functions";
 import { IConfig } from "../entities";
-import { IUser } from "../entities/interfaces";
-import { EditUser, ViewUser } from "../entities/uiModels/user";
+import { EditUser, ViewUser, AddUserView } from "../entities/uiModels/user";
 import { IUserService, UserService } from "../services";
 export class UserController {
   private readonly _userService: IUserService;
@@ -12,7 +11,8 @@ export class UserController {
     this._configuration = configuration;
     this._userService = new UserService(this._configuration, this._logger);
   }
-  async createUser(tenantId: string, userId: string): Promise<boolean> {
+  async createUser(tenantId: string, userToAdd: AddUserView): Promise<boolean> {
+    this._userService.createUser(tenantId, userToAdd);
     return true;
   }
   async editUser(

@@ -1,23 +1,21 @@
 import { Logger } from "@azure/functions";
 import {
-  IOrganization,
   IUser,
   EditUser,
   IConfig,
   ViewUser,
+  AddUserView,
+  ISubscription,
 } from "../../entities";
-import {
-  BaseRepository,
-  OrganizationRepositoryFactory,
-  UserRepositoryFactory,
-} from "../../repositories";
-import { IUserService } from "../interfaces";
+import { BaseRepository, UserRepositoryFactory } from "../../repositories";
+import { defaultLicense } from "../../utils";
+import { ISubscriptionService, IUserService } from "../interfaces";
+import { SubscriptionService } from "./SubscriptionService";
 
 export class UserService implements IUserService {
+  private readonly _subscriptionService: ISubscriptionService;
   private readonly _userRepository: BaseRepository<IUser>;
   private readonly _userFactory = new UserRepositoryFactory();
-  private readonly _organizationFactory = new OrganizationRepositoryFactory();
-  private readonly _organizationRepository: BaseRepository<IOrganization>;
   private readonly _configuration: IConfig;
   private readonly _logger: Logger;
   constructor(configuration: IConfig, log: Logger) {
@@ -26,9 +24,72 @@ export class UserService implements IUserService {
     this._userRepository = this._userFactory.initRepository(
       this._configuration.dbType
     );
-    this._organizationRepository = this._organizationFactory.initRepository(
-      this._configuration.dbType
+    this._subscriptionService = new SubscriptionService(
+      this._configuration,
+      this._logger
     );
+  }
+  async createUser(
+    tenantId: string,
+    userPayload: AddUserView
+  ): Promise<boolean> {
+    const logMessage = `for tenantId ${tenantId}, payload ${JSON.stringify(
+      userPayload
+    )}`;
+    const { email, license } = userPayload;
+    this._logger.info(`[UserService - createUser] start ${logMessage}`);
+    try {
+      const isUserExists = await this._userRepository.findOne<IUser>({
+        tenantId,
+        upn: email,
+      });
+      if (isUserExists) {
+        this._logger.error(
+          `[UserService - createUser] error ${logMessage}, error: user already exists`
+        );
+        throw new Error("user already exists");
+      }
+      const userToSave: IUser = userPayload.toDataBaseModel();
+      if (license !== defaultLicense) {
+        await this.addSubscription(tenantId, userToSave);
+      }
+    } catch (error) {
+      this._logger.error(`[UserService - createUser] error ${logMessage}`);
+      throw error;
+    }
+    this._logger.info(`[UserService - createUser] finish ${logMessage}`);
+    return true;
+  }
+
+  private async addSubscription(tenantId: string, userToSave: IUser) {
+    const logMessage = `for tenantId ${tenantId}`;
+    try {
+      this._logger.info(
+        `[UserService - addSubscription] start ${logMessage}, userToSave pre save data: ${JSON.stringify(
+          userToSave
+        )}`
+      );
+      const validSubscription =
+        await this._subscriptionService.getValidSubscription(tenantId);
+      if (validSubscription) {
+        userToSave.subscriptionId = validSubscription.id;
+        userToSave.license = validSubscription.planId;
+        this._logger.info(
+          `[UserService - addSubscription] found valid subscription for ${logMessage}, userToSave post save data: ${JSON.stringify(
+            userToSave
+          )}, ${JSON.stringify(validSubscription)}`
+        );
+        await this._userRepository.create(userToSave);
+      }
+    } catch (error: any) {
+      this._logger.error(
+        `[UserService - addSubscription] error ${logMessage},, userToSave data: ${JSON.stringify(
+          userToSave
+        )}, error: ${error.message}`
+      );
+      throw error;
+    }
+    this._logger.info(`[UserService - addSubscription] finish ${logMessage}`);
   }
 
   async editUser(
@@ -48,7 +109,7 @@ export class UserService implements IUserService {
   }
 
   async deleteUser(tenantId: string, userId: string): Promise<boolean> {
-    const userToEdit: IUser = { license: "FREE", role: "" };
+    const userToEdit: IUser = { license: defaultLicense, role: "" };
     return !!(await this._userRepository.findOneAndUpdate(
       { tenantId, userId },
       userToEdit

@@ -16,12 +16,16 @@ import {
   OrganizationRepositoryFactory,
   UserRepositoryFactory,
 } from "../../repositories";
-import { HttpProvider, AuthenticationProvider } from "../../utils";
+import {
+  HttpProvider,
+  AuthenticationProvider,
+  defaultLicense,
+} from "../../utils";
 import { ISubscriptionService } from "../interfaces";
 const defaultUserSubscription: IUser = {
   role: Role.Member,
   subscriptionId: "",
-  license: "Free",
+  license: defaultLicense,
 };
 export class SubscriptionService implements ISubscriptionService {
   private readonly _userRepository: BaseRepository<IUser>;
@@ -43,6 +47,52 @@ export class SubscriptionService implements ISubscriptionService {
       this._config.dbType
     );
     this.initStaticMembers();
+  }
+
+  async getValidSubscription(tenantId: string): Promise<ISubscription> {
+    let validSubscription: ISubscription;
+    const logMessage = `tenantId ${tenantId}, dateTime ${new Date().toISOString()}`;
+    this._logger.info(
+      `[SubscriptionService - getValidSubscription] start for ${logMessage}`
+    );
+    const validSubscriptions = await this.getValidSubscriptions(tenantId);
+    for (let index = 0; index < validSubscriptions.length; index++) {
+      const subscription: ISubscription = validSubscriptions[index];
+      const assignedLicensesCount = await this.getAssignedLicenseCount(
+        subscription.id
+      );
+      if (assignedLicensesCount < subscription.quantity) {
+        this._logger.info(
+          `[SubscriptionService - getValidSubscription] found subscription for ${logMessage}, subscriptionId ${subscription.id}`
+        );
+        validSubscription = subscription;
+        break;
+      }
+    }
+    this._logger.info(
+      `[SubscriptionService - getValidSubscription] finish for ${logMessage}`
+    );
+    return validSubscription;
+  }
+
+  async getAssignedLicenseCount(subscriptionId: string): Promise<number> {
+    const response: IUser[] = await this._userRepository.find<IUser>({
+      subscriptionId: subscriptionId,
+    });
+    return response.length;
+  }
+  async getValidSubscriptions(tenantId: string): Promise<ISubscription[]> {
+    const organization =
+      await this._organizationRepository.findOne<IOrganization>({
+        tenantId,
+      });
+    const validSubscription =
+      organization?.subscriptions?.filter(
+        (subscription: ISubscription) =>
+          subscription.saasSubscriptionStatus ===
+          SaasSubscriptionStatus.Subscribed
+      ) || [];
+    return validSubscription;
   }
 
   private initStaticMembers() {
@@ -363,7 +413,7 @@ export class SubscriptionService implements ISubscriptionService {
       const userData: IUser = {
         ...userQuery,
         role: isSubscribe ? Role.Admin : Role.Member,
-        license: "FREE",
+        license: defaultLicense,
       };
       const owner: IUser = await this._userRepository.findOneAndUpdate(
         userQuery,
