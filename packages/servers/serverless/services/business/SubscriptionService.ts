@@ -298,26 +298,21 @@ export class SubscriptionService implements ISubscriptionService {
     isPurchaserIsBeneficiary: boolean,
     subscription: ISubscription
   ) {
-    return isPurchaserIsBeneficiary
-      ? [
-          {
-            userId: subscription?.purchaser.objectId,
-            tenantId: subscription?.purchaser.tenantId,
-            upn: subscription?.purchaser.emailId,
-          },
-        ]
-      : [
-          {
-            userId: subscription?.purchaser.objectId,
-            tenantId: subscription?.purchaser.tenantId,
-            upn: subscription?.purchaser.emailId,
-          },
-          {
-            tenantId: subscription?.beneficiary.tenantId,
-            userId: subscription?.beneficiary?.objectId,
-            upn: subscription?.beneficiary?.emailId,
-          },
-        ];
+    const query = [
+      {
+        userId: subscription?.purchaser.objectId,
+        tenantId: subscription?.purchaser.tenantId,
+        upn: subscription?.purchaser.emailId,
+      },
+    ];
+    if (!isPurchaserIsBeneficiary) {
+      query.push({
+        tenantId: subscription?.beneficiary.tenantId,
+        userId: subscription?.beneficiary?.objectId,
+        upn: subscription?.beneficiary?.emailId,
+      });
+    }
+    return query;
   }
 
   private async findOwnerOrCreateUser(
@@ -332,8 +327,7 @@ export class SubscriptionService implements ISubscriptionService {
       const userData: IUser = {
         ...userQuery,
         role: isSubscribe ? Role.Admin : Role.Member,
-        license: isSubscribe ? subscription.planId : "",
-        subscriptionId: isSubscribe ? subscription.id : "",
+        license: "FREE",
       };
       const owner: IUser = await this._userRepository.findOneAndUpdate(
         userQuery,
