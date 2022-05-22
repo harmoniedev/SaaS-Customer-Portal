@@ -14,9 +14,9 @@ const httpTrigger: AzureFunction = async function (
     }, Date ${new Date().toISOString()}`
   );
   const subscriptionController = new SubscriptionController(appConfig, log);
-  // we need to create a page that calls that api and returns response to user!
-  if (req?.query?.token) {
-    await subscriptionController.resolveSubscription(req.query.token);
+  //can we give it different endPoint?
+  if (req?.body?.action === "Unsubscribe") {
+    await subscriptionController.unsubscribe(req?.body?.subscription);
   }
   log.info(
     `[purchase-subscription] func finish, Date ${new Date().toISOString()}`
