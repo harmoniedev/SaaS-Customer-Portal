@@ -29,6 +29,7 @@ export class SubscriptionController {
       this._logger.error(
         `[SubscriptionController - resolveSubscription] error ${error.message}`
       );
+      throw error;
     }
   }
   async unsubscribe(subscription: ISubscription): Promise<void> {
