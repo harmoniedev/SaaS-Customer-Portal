@@ -1,4 +1,4 @@
-import { DbTypes } from "../types";
+import { DbTypes } from "../enums";
 
 export interface IConfig {
   subscriptionBaseUrl: string;

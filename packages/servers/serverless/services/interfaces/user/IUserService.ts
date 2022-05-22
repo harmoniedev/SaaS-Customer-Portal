@@ -7,5 +7,5 @@ export interface IUserService {
     userPayload: EditUser
   ): Promise<boolean>;
   deleteUser(tenantId: string, userId: string): Promise<boolean>;
-  getAllUsers(tenantId: string): Promise<IUser[]>;
+  getAllUsers(tenantId: string, orderBy: string): Promise<IUser[]>;
 }

@@ -18,7 +18,10 @@ export abstract class BaseRepository<T>
   delete(id: string): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
-  find<TResults>(query: any): Promise<TResults[]> {
+  find<TResults>(
+    query: any,
+    sort?: { [key: string]: any }
+  ): Promise<TResults[]> {
     throw new Error("Method not implemented.");
   }
   findOne<TResults>(query: any): Promise<TResults> {

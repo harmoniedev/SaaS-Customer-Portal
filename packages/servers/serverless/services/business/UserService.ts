@@ -46,8 +46,13 @@ export class UserService implements IUserService {
     ));
   }
 
-  async getAllUsers(tenantId: string): Promise<IUser[]> {
-    const response: IUser[] = await this._userRepository.find({ tenantId });
+  async getAllUsers(tenantId: string, orderBy: string): Promise<IUser[]> {
+    const sortQuery =
+      orderBy === "lastActive" ? { lastActive: -1 } : { name: -1 };
+    const response: IUser[] = await this._userRepository.find(
+      { tenantId },
+      sortQuery
+    );
     return response;
   }
 }

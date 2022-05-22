@@ -32,7 +32,14 @@ export class MongooseRepository<T> extends BaseRepository<T> {
     return await this._model.findByIdAndDelete(id);
   }
 
-  async find<TResults>(query: any): Promise<TResults[]> {
+  async find<TResults>(
+    query: any,
+    sortQuery?: { [key: string]: any }
+  ): Promise<TResults[]> {
+    if (sortQuery) {
+      const t = (await this._model.find(query).sort(sortQuery)) as any;
+      return t;
+    }
     return await this._model.find(query);
   }
 

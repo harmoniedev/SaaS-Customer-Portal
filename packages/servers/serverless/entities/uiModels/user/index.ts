@@ -1,5 +1,22 @@
 import { IUser } from "../../interfaces";
 
+export class ViewUser {
+  lastActiveDate: string;
+  license: string;
+  role: string;
+  email: string;
+  name: string;
+  id: string;
+  constructor(user: IUser) {
+    this.email = user?.upn;
+    this.id = user._id;
+    this.lastActiveDate = user?.lastUsage?.toISOString();
+    this.license = user?.license;
+    this.name = user?.name;
+    this.role = user?.role;
+  }
+}
+
 export class EditUser {
   license: string;
   role: string;

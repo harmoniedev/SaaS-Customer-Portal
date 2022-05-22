@@ -1,7 +1,7 @@
 import { Logger } from "@azure/functions";
 import { IConfig } from "../entities";
 import { IUser } from "../entities/interfaces";
-import { EditUser } from "../entities/uiModels/user";
+import { EditUser, ViewUser } from "../entities/uiModels/user";
 import { IUserService, UserService } from "../services";
 export class UserController {
   private readonly _userService: IUserService;
@@ -31,7 +31,24 @@ export class UserController {
     return true;
   }
 
-  async getAllUsers(tenantId: string): Promise<IUser[]> {
-    return await this._userService.getAllUsers(tenantId);
+  async getAllUsers(
+    tenantId: string,
+    orderBy: string = "name"
+  ): Promise<ViewUser[]> {
+    const logMessage = ` for tenantId ${tenantId}, orderBy ${orderBy} dateTime ${new Date().toISOString()}`;
+    try {
+      this._logger.info(`[UserController - getAllUsers] start ${logMessage}`);
+      const users: IUser[] = await this._userService.getAllUsers(
+        tenantId,
+        orderBy
+      );
+      this._logger.info(`[UserController - getAllUsers] finish ${logMessage}`);
+      return users.map((user: IUser) => new ViewUser(user));
+    } catch (error: any) {
+      this._logger.error(
+        `[UserController - getAllUsers] error ${logMessage}, error: ${error.message}`
+      );
+      throw error;
+    }
   }
 }
