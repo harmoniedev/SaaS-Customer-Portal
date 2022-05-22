@@ -9,7 +9,6 @@ const httpTrigger: AzureFunction = async function (
   const { log } = context;
   const { appConfig } = await InitializedApp.initializedApp();
   const subscriptionController = new SubscriptionController(appConfig, log);
-  //can we give it different endPoint?
   if (req?.body?.action === "Unsubscribe") {
     await subscriptionController.unsubscribe(req?.body?.subscription);
   }
