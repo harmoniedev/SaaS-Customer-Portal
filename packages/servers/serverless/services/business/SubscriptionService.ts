@@ -9,6 +9,7 @@ import {
   ActivateSubscription,
   SaasSubscriptionStatus,
   AddSubscription,
+  ISubscriptionOwner,
 } from "../../entities";
 import {
   BaseRepository,
@@ -17,7 +18,11 @@ import {
 } from "../../repositories";
 import { HttpProvider, AuthenticationProvider } from "../../utils";
 import { ISubscriptionService } from "../interfaces";
-
+const defaultUserSubscription: IUser = {
+  role: Role.Member,
+  subscriptionId: "",
+  license: "Free",
+};
 export class SubscriptionService implements ISubscriptionService {
   private readonly _userRepository: BaseRepository<IUser>;
   private readonly _userFactory = new UserRepositoryFactory();
@@ -60,19 +65,30 @@ export class SubscriptionService implements ISubscriptionService {
   }
 
   async removeSubscription(subscription: ISubscription): Promise<void> {
-    const { id, quantity, purchaser, offerId } = subscription;
+    const { id, quantity, purchaser, offerId, beneficiary } = subscription;
     const { tenantId } = purchaser;
     const logMessage = `subscriptionId ${id}, tenantId ${
       purchaser.tenantId
     } offerId ${offerId} quantity ${quantity}, userId ${
       purchaser.objectId
     }, dateTime ${new Date().toISOString()}`;
-    this._logger(
+    this._logger.info(
       `[SubscriptionService - removeSubscription] start for ${logMessage}`
     );
-    await this.removeAllSubscriptionUsers(tenantId, id);
+    const subscriptionOwners = [];
+    const purchaserUser = await this._userRepository.findOne({
+      userId: subscription.purchaser.objectId,
+    });
+    subscriptionOwners.push(purchaserUser);
+    if (this.isPurchaserIsBeneficiary(purchaser, beneficiary)) {
+      const beneficiaryUser = await this._userRepository.findOne({
+        userId: subscription.beneficiary.objectId,
+      });
+      subscriptionOwners.push(beneficiaryUser);
+    }
+    await this.removeAllSubscriptionUsers(tenantId, id, subscriptionOwners);
     await this.updateSubscriptionStatus(tenantId, subscription);
-    this._logger(
+    this._logger.info(
       `[SubscriptionService - removeSubscription] finish for ${logMessage}`
     );
   }
@@ -84,7 +100,7 @@ export class SubscriptionService implements ISubscriptionService {
     const logMessage = `tenantId ${tenantId}, subscriptionId ${
       subscription.id
     }, dateTime ${new Date().toISOString()}`;
-    this._logger(
+    this._logger.info(
       `[SubscriptionService - removeSubscription] start for ${logMessage}`
     );
     try {
@@ -107,28 +123,26 @@ export class SubscriptionService implements ISubscriptionService {
       throw error;
     }
 
-    this._logger(
+    this._logger.info(
       `[SubscriptionService - removeSubscription] finish for ${logMessage}`
     );
   }
 
   private async removeAllSubscriptionUsers(
     tenantId: string,
-    subscriptionId: string
+    subscriptionId: string,
+    subscriptionOwners: IUser[] = []
   ) {
     const logMessage = `for tenant Id ${tenantId}, subscriptionId ${subscriptionId}, dateTime ${new Date().toISOString()}`;
     this._logger.info(
       `[SubscriptionService - removeAllSubscriptionUsers] start for ${logMessage}`
     );
-    const users = await this._userRepository.find<IUser>({
+    const dbUsers = await this._userRepository.find<IUser>({
       tenantId,
       subscriptionId,
     });
-    const defaultUserSubscription: IUser = {
-      role: Role.Member,
-      subscriptionId: "",
-      license: "Free",
-    };
+
+    const users: IUser[] = [...subscriptionOwners, ...dbUsers];
     try {
       for (let index = 0; index < users.length; index++) {
         const user = users[index];
@@ -284,14 +298,23 @@ export class SubscriptionService implements ISubscriptionService {
 
   private async getOrCreateSubscriptionOwners(subscription: ISubscription) {
     //if purchaser is the same as the beneficiary we will return only one user
-    const isPurchaserIsBeneficiary =
-      subscription?.purchaser.objectId === subscription?.beneficiary?.objectId;
+    const isPurchaserIsBeneficiary = this.isPurchaserIsBeneficiary(
+      subscription.purchaser,
+      subscription.beneficiary
+    );
 
     const usersQueries = this.prepareFindOwnerQuery(
       isPurchaserIsBeneficiary,
       subscription
     );
     return await this.findOwnerOrCreateUser(usersQueries, subscription);
+  }
+
+  private isPurchaserIsBeneficiary(
+    purchaser: ISubscriptionOwner,
+    beneficiary: ISubscriptionOwner
+  ) {
+    return purchaser.objectId === beneficiary?.objectId;
   }
 
   private prepareFindOwnerQuery(

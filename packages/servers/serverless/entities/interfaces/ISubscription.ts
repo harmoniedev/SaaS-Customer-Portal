@@ -4,18 +4,8 @@ export interface ISubscription {
   offerId: string;
   name: string;
   saasSubscriptionStatus: string;
-  beneficiary: {
-    emailId: string;
-    objectId: string;
-    tenantId: string;
-    pid: string;
-  };
-  purchaser: {
-    emailId: string;
-    objectId: string;
-    tenantId: string;
-    pid: string;
-  };
+  beneficiary: ISubscriptionOwner;
+  purchaser: ISubscriptionOwner;
   planId: string;
   term: {
     termUnit: string;
@@ -30,4 +20,11 @@ export interface ISubscription {
   lastModified: Date;
   quantity: number;
   sessionMode: string;
+}
+
+export interface ISubscriptionOwner {
+  emailId: string;
+  objectId: string;
+  tenantId: string;
+  pid: string;
 }
