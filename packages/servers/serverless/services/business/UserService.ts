@@ -86,7 +86,6 @@ export class UserService implements IUserService {
       );
       throw error;
     }
-    this._logger.info(`[UserService - addSubscription] finish ${logMessage}`);
   }
 
   async editUser(
@@ -94,14 +93,24 @@ export class UserService implements IUserService {
     userId: string,
     userPayload: EditUser
   ): Promise<boolean> {
+    const callerName = `[UserService -  editUser]`;
+    const logMessage = ` for tenantId ${tenantId}, user id ${userId}, userPayload ${JSON.stringify(
+      userPayload
+    )}`;
+    this._logger.info(`${callerName} start ${logMessage}`);
     const userToEdit: IUser = userPayload.toDataBaseModel() as any;
-    //need to check if that user have subscription if not we need to add one
-
-    // do we need to update subscription
+    if (userPayload.license !== defaultLicense) {
+      const validSubscription = await this.addSubscription(tenantId);
+      if (validSubscription) {
+        userToEdit.subscriptionId = validSubscription.id;
+        userToEdit.license = validSubscription.planId;
+      }
+    }
     const updateResult: IUser = await this._userRepository.findOneAndUpdate(
-      { tenantId, userId },
+      { tenantId, _id: userId },
       userToEdit
     );
+    this._logger.info(`${callerName} finish ${logMessage}`);
     return !!updateResult;
   }
 

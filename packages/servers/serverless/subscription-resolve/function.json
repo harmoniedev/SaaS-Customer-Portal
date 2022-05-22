@@ -16,5 +16,5 @@
       "name": "res"
     }
   ],
-  "scriptFile": "../dist/purchase-subscription/index.js"
+  "scriptFile": "../dist/subscription-resolve/index.js"
 }

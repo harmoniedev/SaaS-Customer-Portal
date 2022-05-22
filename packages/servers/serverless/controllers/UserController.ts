@@ -1,5 +1,5 @@
 import { Logger } from "@azure/functions";
-import { IConfig } from "../entities";
+import { IConfig, IUser } from "../entities";
 import { EditUser, ViewUser, AddUserView } from "../entities/uiModels/user";
 import { IUserService, UserService } from "../services";
 export class UserController {
@@ -13,10 +13,10 @@ export class UserController {
   }
   async createUser(tenantId: string, userToAdd: AddUserView): Promise<boolean> {
     const logMessage = ` for tenantId ${tenantId}, dateTime ${new Date().toISOString()}`;
-    let user;
+    let isCreated: boolean;
     this._logger.info(`[UserController - createUser] start ${logMessage}`);
     try {
-      user = await this._userService.createUser(
+      isCreated = await this._userService.createUser(
         tenantId,
         new AddUserView(
           userToAdd.license,
@@ -33,19 +33,25 @@ export class UserController {
       throw error;
     }
     this._logger.info(`[UserController - createUser] finish ${logMessage}`);
-    return !!user;
+    return !!isCreated;
   }
   async editUser(
     tenantId: string,
     userId: string,
     userPayload: EditUser
   ): Promise<boolean> {
-    const user = await this._userService.editUser(
+    const isCreated: boolean = await this._userService.editUser(
       tenantId,
       userId,
-      userPayload
+      new AddUserView(
+        userPayload.license,
+        userPayload.role,
+        userPayload.email,
+        userPayload.name,
+        tenantId
+      )
     );
-    if (user) return true;
+    return isCreated;
   }
   async deleteUser(tenantId: string, userId: string): Promise<boolean> {
     return true;
