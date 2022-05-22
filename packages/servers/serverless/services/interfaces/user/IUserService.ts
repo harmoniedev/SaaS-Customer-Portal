@@ -7,6 +7,9 @@ export interface IUserService {
     userPayload: EditUser
   ): Promise<boolean>;
   createUser(tenantId: string, userPayload: AddUserView): Promise<boolean>;
-  deleteUser(tenantId: string, userId: string): Promise<boolean>;
+  deleteSubscriptionFromUser(
+    tenantId: string,
+    userId: string
+  ): Promise<boolean>;
   getAllUsers(tenantId: string, orderBy: string): Promise<ViewUser[]>;
 }

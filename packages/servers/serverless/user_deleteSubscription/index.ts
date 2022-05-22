@@ -17,13 +17,11 @@ const httpTrigger: AzureFunction = async function (
   let response = {};
   if (req?.query?.tenantId && req?.query?.userId) {
     try {
-      response = await userController.editUser(
+      response = await userController.deleteSubscriptionFromUser(
         req.query.tenantId,
-        req.query.userId,
-        req.body
+        req.query.userId
       );
     } catch (error: any) {
-      context.log.error(`[user_editUser] error: ${error.message}`);
       const errorMessage: ErrorResponse = {
         error: "Something want wrong please try again later",
       };

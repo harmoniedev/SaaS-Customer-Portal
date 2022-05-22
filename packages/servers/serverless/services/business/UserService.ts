@@ -114,7 +114,10 @@ export class UserService implements IUserService {
     return !!updateResult;
   }
 
-  async deleteUser(tenantId: string, userId: string): Promise<boolean> {
+  async deleteSubscriptionFromUser(
+    tenantId: string,
+    userId: string
+  ): Promise<boolean> {
     const userToEdit: IUser = { license: defaultLicense, role: "" };
     return !!(await this._userRepository.findOneAndUpdate(
       { tenantId, userId },
