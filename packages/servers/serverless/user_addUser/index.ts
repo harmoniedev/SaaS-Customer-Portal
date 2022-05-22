@@ -17,10 +17,7 @@ const httpTrigger: AzureFunction = async function (
   let response = {};
   if (req?.query?.tenantId) {
     try {
-      response = await userController.getAllUsers(
-        req.query.tenantId,
-        req.query.orderby
-      );
+      response = await userController.createUser(req.query.tenantId, req.body);
     } catch (error: any) {
       const errorMessage: ErrorResponse = {
         error: "Something want wrong please try again later",

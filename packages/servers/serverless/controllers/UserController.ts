@@ -12,8 +12,28 @@ export class UserController {
     this._userService = new UserService(this._configuration, this._logger);
   }
   async createUser(tenantId: string, userToAdd: AddUserView): Promise<boolean> {
-    this._userService.createUser(tenantId, userToAdd);
-    return true;
+    const logMessage = ` for tenantId ${tenantId}, dateTime ${new Date().toISOString()}`;
+    let user;
+    this._logger.info(`[UserController - createUser] start ${logMessage}`);
+    try {
+      user = await this._userService.createUser(
+        tenantId,
+        new AddUserView(
+          userToAdd.license,
+          userToAdd.role,
+          userToAdd.email,
+          userToAdd.name,
+          tenantId
+        )
+      );
+    } catch (error: any) {
+      this._logger.error(
+        `[UserController - createUser] error ${logMessage}, error: ${error.message}`
+      );
+      throw error;
+    }
+    this._logger.info(`[UserController - createUser] finish ${logMessage}`);
+    return !!user;
   }
   async editUser(
     tenantId: string,

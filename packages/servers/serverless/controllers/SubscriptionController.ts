@@ -45,6 +45,7 @@ export class SubscriptionController {
       this._logger.error(
         `[SubscriptionController - unsubscribe] error ${error.message}`
       );
+      throw error;
     }
   }
 }

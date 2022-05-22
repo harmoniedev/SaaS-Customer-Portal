@@ -51,8 +51,13 @@ export class UserService implements IUserService {
       }
       const userToSave: IUser = userPayload.toDataBaseModel();
       if (license !== defaultLicense) {
-        await this.addSubscription(tenantId, userToSave);
+        const validSubscription = await this.addSubscription(tenantId);
+        if (validSubscription) {
+          userToSave.subscriptionId = validSubscription.id;
+          userToSave.license = validSubscription.planId;
+        }
       }
+      await this._userRepository.create(userToSave);
     } catch (error) {
       this._logger.error(`[UserService - createUser] error ${logMessage}`);
       throw error;
@@ -61,31 +66,23 @@ export class UserService implements IUserService {
     return true;
   }
 
-  private async addSubscription(tenantId: string, userToSave: IUser) {
+  private async addSubscription(tenantId: string): Promise<ISubscription> {
     const logMessage = `for tenantId ${tenantId}`;
     try {
-      this._logger.info(
-        `[UserService - addSubscription] start ${logMessage}, userToSave pre save data: ${JSON.stringify(
-          userToSave
-        )}`
-      );
+      this._logger.info(`[UserService - addSubscription] start ${logMessage}`);
       const validSubscription =
         await this._subscriptionService.getValidSubscription(tenantId);
       if (validSubscription) {
-        userToSave.subscriptionId = validSubscription.id;
-        userToSave.license = validSubscription.planId;
         this._logger.info(
-          `[UserService - addSubscription] found valid subscription for ${logMessage}, userToSave post save data: ${JSON.stringify(
-            userToSave
-          )}, ${JSON.stringify(validSubscription)}`
+          `[UserService - addSubscription] found valid subscription for ${logMessage}, ${JSON.stringify(
+            validSubscription
+          )}`
         );
-        await this._userRepository.create(userToSave);
+        return validSubscription;
       }
     } catch (error: any) {
       this._logger.error(
-        `[UserService - addSubscription] error ${logMessage},, userToSave data: ${JSON.stringify(
-          userToSave
-        )}, error: ${error.message}`
+        `[UserService - addSubscription] error ${logMessage}, error: ${error.message}`
       );
       throw error;
     }

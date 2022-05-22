@@ -5,12 +5,20 @@ export class AddUserView {
   role: string;
   email: string;
   name: string;
+  tenantId: string;
 
-  constructor(license: string, role: string, email: string, name: string) {
+  constructor(
+    license: string,
+    role: string,
+    email: string,
+    name: string,
+    tenantId: string
+  ) {
     this.license = license;
     this.role = role;
     this.email = email;
     this.name = name;
+    this.tenantId = tenantId;
   }
 
   toDataBaseModel(): IUser {
@@ -19,6 +27,7 @@ export class AddUserView {
       license: this.license,
       upn: this.email,
       name: this.name,
+      tenantId: this.tenantId,
     };
   }
 }

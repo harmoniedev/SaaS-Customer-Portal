@@ -25,6 +25,7 @@ export class OrganizationController {
       this._logger.info(
         `[OrganizationController - getLicense ] error for tenantId ${tenantId}, dateTime: ${new Date().toISOString()}`
       );
+      throw error;
     }
     this._logger.info(
       `[OrganizationController - getLicense ] finished for tenantId ${tenantId}, dateTime: ${new Date().toISOString()}`
