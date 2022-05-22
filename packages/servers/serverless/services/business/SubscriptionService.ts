@@ -75,19 +75,18 @@ export class SubscriptionService implements ISubscriptionService {
     this._logger.info(
       `[SubscriptionService - removeSubscription] start for ${logMessage}`
     );
-    const subscriptionOwners = [];
-    const purchaserUser = await this._userRepository.findOne({
-      userId: subscription.purchaser.objectId,
-    });
-    subscriptionOwners.push(purchaserUser);
-    if (this.isPurchaserIsBeneficiary(purchaser, beneficiary)) {
-      const beneficiaryUser = await this._userRepository.findOne({
-        userId: subscription.beneficiary.objectId,
-      });
-      subscriptionOwners.push(beneficiaryUser);
-    }
-    await this.removeAllSubscriptionUsers(tenantId, id, subscriptionOwners);
-    await this.updateSubscriptionStatus(tenantId, subscription);
+    const updateOwnersPromise =
+      this.createOrUpdateSubscriptionOwners(subscription);
+    const updateUsersPromise = this.removeAllSubscriptionUsers(tenantId, id);
+    const updateSubscriptionPromise = this.updateSubscriptionStatus(
+      tenantId,
+      subscription
+    );
+    await Promise.all([
+      updateOwnersPromise,
+      updateUsersPromise,
+      updateSubscriptionPromise,
+    ]);
     this._logger.info(
       `[SubscriptionService - removeSubscription] finish for ${logMessage}`
     );
@@ -130,20 +129,18 @@ export class SubscriptionService implements ISubscriptionService {
 
   private async removeAllSubscriptionUsers(
     tenantId: string,
-    subscriptionId: string,
-    subscriptionOwners: IUser[] = []
+    subscriptionId: string
   ) {
     const logMessage = `for tenant Id ${tenantId}, subscriptionId ${subscriptionId}, dateTime ${new Date().toISOString()}`;
     this._logger.info(
       `[SubscriptionService - removeAllSubscriptionUsers] start for ${logMessage}`
     );
-    const dbUsers = await this._userRepository.find<IUser>({
-      tenantId,
-      subscriptionId,
-    });
 
-    const users: IUser[] = [...subscriptionOwners, ...dbUsers];
     try {
+      const users: IUser[] = await this._userRepository.find<IUser>({
+        tenantId,
+        subscriptionId,
+      });
       for (let index = 0; index < users.length; index++) {
         const user = users[index];
         await this._userRepository.findOneAndUpdate(
@@ -198,7 +195,7 @@ export class SubscriptionService implements ISubscriptionService {
             organization,
             subscriptionRes.subscription
           );
-          await this.getOrCreateSubscriptionOwners(
+          await this.createOrUpdateSubscriptionOwners(
             subscriptionRes.subscription
           );
         }
@@ -296,18 +293,34 @@ export class SubscriptionService implements ISubscriptionService {
     );
   }
 
-  private async getOrCreateSubscriptionOwners(subscription: ISubscription) {
-    //if purchaser is the same as the beneficiary we will return only one user
-    const isPurchaserIsBeneficiary = this.isPurchaserIsBeneficiary(
-      subscription.purchaser,
-      subscription.beneficiary
+  private async createOrUpdateSubscriptionOwners(subscription: ISubscription) {
+    const { purchaser, beneficiary, id } = subscription;
+    let users: IUser[];
+    const logMessage = `subscriptionId ${id} tenantId ${purchaser.tenantId}, purchaser emailId ${purchaser.emailId} beneficiary emailId ${beneficiary.emailId}`;
+    this._logger.info(
+      `[createOrUpdateSubscriptionOwners] start for  ${logMessage}`
     );
+    try {
+      const isPurchaserIsBeneficiary = this.isPurchaserIsBeneficiary(
+        purchaser,
+        beneficiary
+      );
 
-    const usersQueries = this.prepareFindOwnerQuery(
-      isPurchaserIsBeneficiary,
-      subscription
+      const usersQueries = this.prepareFindOwnerQuery(
+        isPurchaserIsBeneficiary,
+        subscription
+      );
+      users = await this.findOwnerOrCreateUser(usersQueries, subscription);
+    } catch (error: any) {
+      this._logger.error(
+        `[createOrUpdateSubscriptionOwners] error for ${logMessage}, error message ${error.message}`
+      );
+      throw error;
+    }
+    this._logger.info(
+      `[createOrUpdateSubscriptionOwners] finish for  ${logMessage}`
     );
-    return await this.findOwnerOrCreateUser(usersQueries, subscription);
+    return users;
   }
 
   private isPurchaserIsBeneficiary(
