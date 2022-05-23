@@ -9,18 +9,16 @@ import {
 } from "../../entities";
 import { BaseRepository, UserRepositoryFactory } from "../../repositories";
 import { defaultLicense } from "../../utils";
+import { BaseService } from "../base/BaseService";
 import { ISubscriptionService, IUserService } from "../interfaces";
 import { SubscriptionService } from "./SubscriptionService";
 
-export class UserService implements IUserService {
+export class UserService extends BaseService implements IUserService {
   private readonly _subscriptionService: ISubscriptionService;
   private readonly _userRepository: BaseRepository<IUser>;
   private readonly _userFactory = new UserRepositoryFactory();
-  private readonly _configuration: IConfig;
-  private readonly _logger: Logger;
   constructor(configuration: IConfig, log: Logger) {
-    this._logger = log;
-    this._configuration = configuration;
+    super(configuration, log);
     this._userRepository = this._userFactory.initRepository(
       this._configuration.dbType
     );

@@ -22,26 +22,27 @@ import {
   defaultLicense,
   defaultUserSubscription,
 } from "../../utils";
+import { BaseService } from "../base/BaseService";
 import { ISubscriptionService } from "../interfaces";
 
-export class SubscriptionService implements ISubscriptionService {
+export class SubscriptionService
+  extends BaseService
+  implements ISubscriptionService
+{
   private readonly _userRepository: BaseRepository<IUser>;
   private readonly _userFactory = new UserRepositoryFactory();
   private readonly _organizationFactory = new OrganizationRepositoryFactory();
   private readonly _organizationRepository: BaseRepository<IOrganization>;
   private static _httpService: HttpProvider = new HttpProvider();
   private static _authenticationService: AuthenticationProvider;
-  private readonly _config: IConfig;
-  private readonly _logger: Logger;
 
   constructor(config: IConfig, log: Logger) {
-    this._config = config;
-    this._logger = log;
+    super(config, log);
     this._userRepository = this._userFactory.initRepository(
-      this._config.dbType
+      this._configuration.dbType
     );
     this._organizationRepository = this._organizationFactory.initRepository(
-      this._config.dbType
+      this._configuration.dbType
     );
     this.initStaticMembers();
   }
@@ -106,7 +107,7 @@ export class SubscriptionService implements ISubscriptionService {
   private initAuthProvider() {
     if (!SubscriptionService._authenticationService) {
       SubscriptionService._authenticationService = new AuthenticationProvider(
-        this._config
+        this._configuration
       );
     }
   }
@@ -429,9 +430,9 @@ export class SubscriptionService implements ISubscriptionService {
     );
     let subscription: AddSubscription;
     const resolveUrl =
-      this._config.subscriptionBaseUrl +
-      this._config.resolveSubscriptionEndPoint +
-      this._config.fulfillmentApiVersion;
+      this._configuration.subscriptionBaseUrl +
+      this._configuration.resolveSubscriptionEndPoint +
+      this._configuration.fulfillmentApiVersion;
     try {
       subscription =
         await SubscriptionService._httpService.post<AddSubscription>(
@@ -464,9 +465,9 @@ export class SubscriptionService implements ISubscriptionService {
     confirmationPayload: ActivateSubscription
   ): Promise<void> {
     const activateUrl: string =
-      this._config.subscriptionBaseUrl +
-      this._config.activateSubscriptionEndPoint +
-      this._config.fulfillmentApiVersion;
+      this._configuration.subscriptionBaseUrl +
+      this._configuration.activateSubscriptionEndPoint +
+      this._configuration.fulfillmentApiVersion;
     const body = JSON.stringify(confirmationPayload);
     const response = await SubscriptionService._httpService.post<{
       Message: string;

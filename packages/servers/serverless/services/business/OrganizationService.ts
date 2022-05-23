@@ -1,16 +1,17 @@
 import { Logger } from "@azure/functions";
 import { IConfig, ISubscription, OrgLicensesDetails } from "../../entities";
+import { BaseService } from "../base/BaseService";
 import { IOrganizationService, ISubscriptionService } from "../interfaces";
 import { SubscriptionService } from "./SubscriptionService";
 
-export class OrganizationService implements IOrganizationService {
+export class OrganizationService
+  extends BaseService
+  implements IOrganizationService
+{
   private readonly _subscriptionService: ISubscriptionService;
-  private readonly _configuration: IConfig;
-  private readonly _logger: Logger;
 
   constructor(configuration: IConfig, log: Logger) {
-    this._logger = log;
-    this._configuration = configuration;
+    super(configuration, log);
     this._subscriptionService = new SubscriptionService(
       this._configuration,
       this._logger
