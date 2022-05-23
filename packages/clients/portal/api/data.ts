@@ -66,7 +66,7 @@ class Data extends API {
     token,
   }: BasicReqType & SortFilterType) {
     return this.request(
-      `/users?tid=${tid}&orderedby=${orderedby}&query=${query}&direction=${direction}&page=${page}&perPage=${perPage}`,
+      `/users?tid=${tid}&orderby=${orderedby}&query=${query}&direction=${direction}&page=${page}&perPage=${perPage}`,
       { token },
     );
   }

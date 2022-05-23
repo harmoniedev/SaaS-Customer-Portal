@@ -15,10 +15,10 @@ const httpTrigger: AzureFunction = async function (
   const { appConfig } = await InitializedApp.initializedApp();
   const userController = new UserController(appConfig, log);
   let response = {};
-  if (req?.query?.tenantId) {
+  if (req?.query?.tid) {
     try {
       response = await userController.getAllUsers(
-        req.query.tenantId,
+        req.query.tid,
         req.query.orderby
       );
     } catch (error: any) {

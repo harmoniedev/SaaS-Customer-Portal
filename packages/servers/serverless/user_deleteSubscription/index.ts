@@ -15,10 +15,10 @@ const httpTrigger: AzureFunction = async function (
   const { appConfig } = await InitializedApp.initializedApp();
   const userController = new UserController(appConfig, log);
   let response = {};
-  if (req?.query?.tenantId && req?.query?.userId) {
+  if (req?.query?.tid && req?.query?.userId) {
     try {
       response = await userController.deleteSubscriptionFromUser(
-        req.query.tenantId,
+        req.query.tid,
         req.query.userId
       );
     } catch (error: any) {
@@ -32,12 +32,12 @@ const httpTrigger: AzureFunction = async function (
       return;
     }
   } else {
-    const tenantId = req?.query?.tenantId;
+    const tid = req?.query?.tid;
     const userId = req?.query?.userId;
     const errorMessage: ErrorResponse = {
-      error: `Missing following query parameters ${
-        tenantId ? "" : "tenantId"
-      }, ${userId ? "" : "userId"}`,
+      error: `Missing following query parameters ${tid ? "" : "tid"}, ${
+        userId ? "" : "userId"
+      }`,
     };
     context.res = {
       status: 404,

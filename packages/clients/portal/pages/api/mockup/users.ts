@@ -89,9 +89,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
       res.status(200).send(JSON.stringify({ status: 200 }));
   } else if (req.method === 'POST') {
     const payload = req.body;
-    const { name, email, role, license, department } = payload;
+    const { name, email, role, license } = payload;
 
-    if (!name || !email || !role || !license || !department)
+    if (!name || !email || !role || !license)
       res.status(404).send(
         JSON.stringify({
           status: 404,

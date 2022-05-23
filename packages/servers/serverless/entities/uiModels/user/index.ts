@@ -38,17 +38,17 @@ export class ViewUser {
   role: string;
   email: string;
   name: string;
-  id: string;
+  _id: string;
   constructor(user: IUser) {
     this.email = user?.upn;
-    this.id = user._id;
+    this._id = user._id;
     this.lastActiveDate = user?.lastUsage?.toISOString();
     this.license = user?.license;
-    this.name = user?.name;
+    this.name = user?.name || " ";
     this.role = user?.role;
+    this.lastActiveDate = user?.lastUsage?.toISOString() ?? "Never";
   }
 }
-
 export class EditUser {
   license: string;
   role: string;
@@ -70,4 +70,8 @@ export class EditUser {
       name: this.name,
     };
   }
+}
+
+export class MutateUserResponse {
+  isSuccess: boolean;
 }

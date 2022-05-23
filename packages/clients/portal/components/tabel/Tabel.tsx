@@ -87,7 +87,7 @@ export const Tabel = () => {
       },
     ]);
 
-    setUsersList(response.users);
+    setUsersList(response.data);
     setState('success');
   };
 

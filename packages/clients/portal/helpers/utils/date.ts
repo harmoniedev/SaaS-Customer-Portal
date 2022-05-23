@@ -7,14 +7,18 @@ export const formatDate = (
   format?: Intl.DateTimeFormatOptions,
   locale?: string,
 ) => {
-  const date = new Date(datetime);
-  if (!isValidDate(date)) return null;
-  return date.toLocaleDateString(
-    locale || 'en-US',
-    format || {
-      day: 'numeric',
-      month: 'numeric',
-      year: 'numeric',
-    },
-  );
+  try {
+    const date = new Date(datetime);
+    if (!isValidDate(date)) return null;
+    return date.toLocaleDateString(
+      locale || 'en-US',
+      format || {
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric',
+      },
+    );
+  } catch (error: any) {
+    return null;
+  }
 };

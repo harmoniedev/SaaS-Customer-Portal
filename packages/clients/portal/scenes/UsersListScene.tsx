@@ -28,7 +28,6 @@ export const UsersListScene = ({
 }: UsersListSceneProps) => {
   const [isOpen, setIsOpen] = useState([]);
   const [showMenu, setShowMenu] = useState<boolean>(false);
-
   const handelOpenItem = (e) => {
     const { id } = e.currentTarget;
     const { type } = e.target;
@@ -42,8 +41,8 @@ export const UsersListScene = ({
     setIsOpen([...isOpen, id]);
   };
 
-  const trElement = (items) =>
-    items.map(({ department, email, role, name, lastActiveDate, _id }, i) => {
+  const trElement = (items: any[]) =>
+    items.map(({ license, email, role, name, lastActiveDate, _id }, i) => {
       return (
         <tr
           key={i}
@@ -77,8 +76,8 @@ export const UsersListScene = ({
               </div>
             </div>
           </th>
-          <td className="text-indigo-300">{department}</td>
-          <td className="text-indigo-300">{formatDate(lastActiveDate)}</td>
+          <td className="text-indigo-300">{license}</td>
+          <td className="text-indigo-300">{formatDate(lastActiveDate) || 'N/A'}</td>
           <td className="text-indigo-300 cursor-pointer md:w-24 lg:w-28">
             {showMenu && activeUser === _id ? (
               <div className="flex justify-around ">
@@ -108,7 +107,8 @@ export const UsersListScene = ({
     });
 
   const trMobileElment = (items) =>
-    items.map(({ department, email, role, name, lastActiveDate, _id }, i) => {
+    items?.map(({ license, email, role, name, lastActiveDate, _id }, i) => {
+      debugger;
       return (
         <div key={i} className="border-b">
           <div
@@ -152,15 +152,13 @@ export const UsersListScene = ({
           {isOpen.includes(_id) && (
             <div className="px-12 flex flex-col gap-2">
               <div className="flex justify-between">
-                <p className="text-indigo-300 font-normal">Department:</p>
-                <p className="text-indigo-500 font-medium text-right">
-                  {department}
-                </p>
+                <p className="text-indigo-300 font-normal">License:</p>
+                <p className="text-indigo-500 font-medium text-right">{license}</p>
               </div>
               <div className="flex justify-between">
                 <p className="text-indigo-300 font-normal">Last Active:</p>
                 <p className="text-indigo-500 font-medium text-right">
-                  {formatDate(lastActiveDate)}
+                  {formatDate(lastActiveDate) || 'N/A'}
                 </p>
               </div>
               <div className="flex justify-between">
@@ -191,7 +189,7 @@ export const UsersListScene = ({
           )}
         </div>
       );
-    });
+    }) || [];
   return isMobile ? trMobileElment(items) : trElement(items);
 };
 

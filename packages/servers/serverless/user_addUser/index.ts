@@ -15,9 +15,9 @@ const httpTrigger: AzureFunction = async function (
   const { appConfig } = await InitializedApp.initializedApp();
   const userController = new UserController(appConfig, log);
   let response = {};
-  if (req?.query?.tenantId) {
+  if (req?.query?.tid) {
     try {
-      response = await userController.createUser(req.query.tenantId, req.body);
+      response = await userController.createUser(req.query.tid, req.body);
     } catch (error: any) {
       const errorMessage: ErrorResponse = {
         error: "Something want wrong please try again later",
@@ -30,7 +30,7 @@ const httpTrigger: AzureFunction = async function (
     }
   } else {
     const errorMessage: ErrorResponse = {
-      error: "Missing tenantId query parameter",
+      error: "Missing tid query parameter",
     };
     context.res = {
       status: 404,

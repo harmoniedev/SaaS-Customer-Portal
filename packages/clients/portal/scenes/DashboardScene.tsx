@@ -30,10 +30,8 @@ export const DashboardScene = () => {
           token,
         });
 
-        setAssignedLicensesCount(
-          response.organizationData[0].assigned_licenses_count,
-        );
-        setLicenseCount(response.organizationData[0].license_count);
+        setAssignedLicensesCount(response.data.assigned_licenses_count);
+        setLicenseCount(response.data.license_count);
         setState('success');
       };
 

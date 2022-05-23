@@ -11,9 +11,9 @@ const httpTrigger: AzureFunction = async function (
   const { appConfig } = await InitializedApp.initializedApp();
   const organizationController = new OrganizationController(appConfig, log);
   let response = {};
-  if (req?.query?.tenantId) {
+  if (req?.query?.tid) {
     try {
-      response = await organizationController.getLicense(req.query.tenantId);
+      response = await organizationController.getLicense(req.query.tid);
     } catch (error: any) {
       const errorMessage: ErrorResponse = {
         error: "Something want wrong please try again later",

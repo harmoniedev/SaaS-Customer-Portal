@@ -13,11 +13,15 @@ export class MongooseRepository<T> extends BaseRepository<T> {
     query: any,
     item: TResults
   ): Promise<TResults> {
-    return await this._model.findOneAndUpdate(query, item, {
-      upsert: true,
-      new: true,
-      setDefaultsOnInsert: true,
-    });
+    return await this._model.findOneAndUpdate(
+      query,
+      { $set: item },
+      {
+        upsert: true,
+        new: true,
+        setDefaultsOnInsert: true,
+      }
+    );
   }
   async create<TResults>(item: TResults): Promise<boolean> {
     const result: any = await this._model.create(item);

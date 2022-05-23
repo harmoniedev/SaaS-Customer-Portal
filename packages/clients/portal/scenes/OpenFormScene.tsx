@@ -36,12 +36,11 @@ export const OpenFormScene = ({
   const storadgeKey = `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---`;
   const token = JSON.parse(sessionStorage.getItem(storadgeKey)).secret;
 
-  const addUser = async ({ name, email, role, department }) => {
+  const addUser = async ({ name, email, role }) => {
     const response = await dataAPI.addUser({
       tid: accounts[0]?.tenantId,
       token,
       body: {
-        department,
         license: 'FREE',
         role,
         email,
@@ -55,7 +54,7 @@ export const OpenFormScene = ({
     }
   };
 
-  const editUser = async ({ name, email, role, id, department }) => {
+  const editUser = async ({ name, email, role, id, license }) => {
     const response = await dataAPI.editUser({
       tid: accounts[0]?.tenantId,
       token,
@@ -64,9 +63,10 @@ export const OpenFormScene = ({
         name,
         email,
         role,
-        department,
+        license,
       },
     });
+    debugger;
     if (response.status === 200) {
       setIsModuleOpen(false);
       getUsersData();

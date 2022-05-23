@@ -1,5 +1,5 @@
 import { Logger } from "@azure/functions";
-import { IConfig, IUser } from "../entities";
+import { IConfig, MutateUserResponse } from "../entities";
 import { EditUser, ViewUser, AddUserView } from "../entities/uiModels/user";
 import { IUserService, UserService } from "../services";
 import { BaseController } from "./base/BaseController";
@@ -9,7 +9,10 @@ export class UserController extends BaseController {
     super(configuration, log);
     this._userService = new UserService(this._configuration, this._logger);
   }
-  async createUser(tenantId: string, userToAdd: AddUserView): Promise<boolean> {
+  async createUser(
+    tenantId: string,
+    userToAdd: AddUserView
+  ): Promise<MutateUserResponse> {
     const logMessage = ` for tenantId ${tenantId}, dateTime ${new Date().toISOString()}`;
     let isCreated: boolean;
     this._logger.info(`[UserController - createUser] start ${logMessage}`);
@@ -31,13 +34,13 @@ export class UserController extends BaseController {
       throw error;
     }
     this._logger.info(`[UserController - createUser] finish ${logMessage}`);
-    return !!isCreated;
+    return { isSuccess: isCreated } as MutateUserResponse;
   }
   async editUser(
     tenantId: string,
     userId: string,
     userPayload: EditUser
-  ): Promise<boolean> {
+  ): Promise<MutateUserResponse> {
     let isCreated: boolean;
     const logMessage = `tenantId ${tenantId}, userId ${userId} dateTime ${new Date().toISOString()}, payload ${JSON.stringify(
       userPayload
@@ -62,12 +65,12 @@ export class UserController extends BaseController {
       throw error;
     }
     this._logger.info(`[UserController - editUser] finish ${logMessage} `);
-    return isCreated;
+    return { isSuccess: isCreated } as MutateUserResponse;
   }
   async deleteSubscriptionFromUser(
     tenantId: string,
     userId: string
-  ): Promise<boolean> {
+  ): Promise<MutateUserResponse> {
     const logMessage = `tenantId ${tenantId}, userId ${userId} dateTime ${new Date().toISOString()}`;
     this._logger.info(
       `[UserController - deleteSubscriptionFromUser] start ${logMessage}`
@@ -87,7 +90,7 @@ export class UserController extends BaseController {
     this._logger.info(
       `[UserController - deleteSubscriptionFromUser] finish ${logMessage}`
     );
-    return isDeleted;
+    return { isSuccess: isDeleted } as MutateUserResponse;
   }
 
   async getAllUsers(

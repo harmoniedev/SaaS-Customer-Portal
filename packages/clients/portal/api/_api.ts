@@ -36,7 +36,7 @@ class API {
 
       const data = await response.json();
 
-      return { status: response.status, ...data };
+      return { status: response.status, data };
     } catch (error) {
       console.log(error.message);
       return error;

@@ -37,16 +37,13 @@ export class UserService extends BaseService implements IUserService {
     const { email, license } = userPayload;
     this._logger.info(`[UserService - createUser] start ${logMessage}`);
     try {
-      const isUserExists = await this._userRepository.findOne<IUser>({
-        tenantId,
-        upn: email,
-      });
-      if (isUserExists) {
-        this._logger.error(
-          `[UserService - createUser] error ${logMessage}, error: user already exists`
-        );
-        throw new Error("user already exists");
-      }
+      await this.isUserExists(
+        {
+          tenantId,
+          upn: email,
+        },
+        logMessage
+      );
       const userToSave: IUser = userPayload.toDataBaseModel();
       if (license !== defaultLicense) {
         const validSubscription = await this.addSubscription(tenantId);
@@ -62,6 +59,19 @@ export class UserService extends BaseService implements IUserService {
     }
     this._logger.info(`[UserService - createUser] finish ${logMessage}`);
     return true;
+  }
+
+  private async isUserExists(
+    query: { [key: string]: any },
+    logMessage: string
+  ) {
+    const isUserExists = await this._userRepository.findOne<IUser>(query);
+    if (isUserExists) {
+      this._logger.error(
+        `[UserService - createUser] error ${logMessage}, error: user already exists`
+      );
+      throw new Error("user already exists");
+    }
   }
 
   private async addSubscription(tenantId: string): Promise<ISubscription> {
@@ -95,6 +105,14 @@ export class UserService extends BaseService implements IUserService {
     const logMessage = ` for tenantId ${tenantId}, user id ${userId}, userPayload ${JSON.stringify(
       userPayload
     )}`;
+    await this.isUserExists(
+      {
+        tenantId,
+        upn: userPayload.email,
+        _id: { $ne: userId },
+      },
+      logMessage
+    );
     this._logger.info(`${callerName} start ${logMessage}`);
     const userToEdit: IUser = userPayload.toDataBaseModel() as any;
     if (userPayload.license !== defaultLicense) {
@@ -118,7 +136,7 @@ export class UserService extends BaseService implements IUserService {
   ): Promise<boolean> {
     const userToEdit: IUser = { license: defaultLicense, role: "" };
     return !!(await this._userRepository.findOneAndUpdate(
-      { tenantId, userId },
+      { tenantId, _id: userId },
       userToEdit
     ));
   }
