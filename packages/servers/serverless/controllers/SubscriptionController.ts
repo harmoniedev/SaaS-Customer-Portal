@@ -1,14 +1,12 @@
 import { Logger } from "@azure/functions";
 import { IConfig, ISubscription } from "../entities";
 import { ISubscriptionService, SubscriptionService } from "../services";
+import { BaseController } from "./base/BaseController";
 
-export class SubscriptionController {
+export class SubscriptionController extends BaseController {
   private _subscriptionService: ISubscriptionService;
-  private _configuration: IConfig;
-  private _logger: Logger;
   constructor(configuration: IConfig, log: Logger) {
-    this._logger = log;
-    this._configuration = configuration;
+    super(configuration, log);
     this._subscriptionService = new SubscriptionService(
       this._configuration,
       this._logger

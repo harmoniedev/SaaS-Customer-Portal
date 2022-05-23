@@ -1,14 +1,12 @@
 import { Logger } from "@azure/functions";
 import { IConfig, OrgLicensesDetails } from "../entities";
 import { IOrganizationService, OrganizationService } from "../services";
+import { BaseController } from "./base/BaseController";
 
-export class OrganizationController {
+export class OrganizationController extends BaseController {
   private readonly _organizationService: IOrganizationService;
-  private readonly _configuration: IConfig;
-  private _logger: Logger;
   constructor(configuration: IConfig, log: Logger) {
-    this._logger = log;
-    this._configuration = configuration;
+    super(configuration, log);
     this._organizationService = new OrganizationService(
       this._configuration,
       this._logger

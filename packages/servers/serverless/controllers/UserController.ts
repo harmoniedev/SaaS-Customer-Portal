@@ -2,13 +2,11 @@ import { Logger } from "@azure/functions";
 import { IConfig, IUser } from "../entities";
 import { EditUser, ViewUser, AddUserView } from "../entities/uiModels/user";
 import { IUserService, UserService } from "../services";
-export class UserController {
+import { BaseController } from "./base/BaseController";
+export class UserController extends BaseController {
   private readonly _userService: IUserService;
-  private readonly _configuration: IConfig;
-  private _logger: Logger;
   constructor(configuration: IConfig, log: Logger) {
-    this._logger = log;
-    this._configuration = configuration;
+    super(configuration, log);
     this._userService = new UserService(this._configuration, this._logger);
   }
   async createUser(tenantId: string, userToAdd: AddUserView): Promise<boolean> {
