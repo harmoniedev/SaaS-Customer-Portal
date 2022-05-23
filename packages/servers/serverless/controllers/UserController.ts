@@ -1,5 +1,5 @@
 import { Logger } from "@azure/functions";
-import { IConfig, MutateUserResponse } from "../entities";
+import { IConfig, MutateUserResponse, SortQuery } from "../entities";
 import { EditUser, ViewUser, AddUserView } from "../entities/uiModels/user";
 import { IUserService, UserService } from "../services";
 import { BaseController } from "./base/BaseController";
@@ -95,14 +95,18 @@ export class UserController extends BaseController {
 
   async getAllUsers(
     tenantId: string,
-    orderBy: string = "name"
+    orderBy: string = "name",
+    direction: string = "asc"
   ): Promise<ViewUser[]> {
     const logMessage = ` for tenantId ${tenantId}, orderBy ${orderBy} dateTime ${new Date().toISOString()}`;
     try {
       this._logger.info(`[UserController - getAllUsers] start ${logMessage}`);
       const users: ViewUser[] = await this._userService.getAllUsers(
         tenantId,
-        orderBy
+        new SortQuery(
+          direction,
+          orderBy === "lastActiveDate" ? "lastUsage" : "name"
+        )
       );
       this._logger.info(`[UserController - getAllUsers] finish ${logMessage}`);
       return users;

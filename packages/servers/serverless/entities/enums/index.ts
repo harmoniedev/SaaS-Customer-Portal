@@ -13,3 +13,7 @@ export enum SaasSubscriptionStatus {
   Suspended = "Suspended",
   Unsubscribed = "Unsubscribed",
 }
+export enum SortDirection {
+  ASC = -1,
+  DESC = 1,
+}

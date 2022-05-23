@@ -6,6 +6,7 @@ import {
   ViewUser,
   AddUserView,
   ISubscription,
+  SortQuery,
 } from "../../entities";
 import { BaseRepository, UserRepositoryFactory } from "../../repositories";
 import { defaultLicense } from "../../utils";
@@ -141,16 +142,20 @@ export class UserService extends BaseService implements IUserService {
     ));
   }
 
-  async getAllUsers(tenantId: string, orderBy: string): Promise<ViewUser[]> {
-    const sortQuery =
-      orderBy === "lastActive" ? { lastActive: -1 } : { name: -1 };
+  async getAllUsers(
+    tenantId: string,
+    sortQuery: SortQuery
+  ): Promise<ViewUser[]> {
     const logMessage = `for tenantId ${tenantId}, sortQuery ${JSON.stringify(
       sortQuery
     )} dateTime ${new Date().toISOString()}`;
     let users: IUser[];
     this._logger.info(`[UserService - getAllUsers] start ${logMessage}`);
     try {
-      users = await this._userRepository.find({ tenantId }, sortQuery);
+      users = await this._userRepository.find(
+        { tenantId },
+        sortQuery.createQuery()
+      );
     } catch (error: any) {
       this._logger.error(
         `[UserService - getAllUsers] ${logMessage},error ${error.message}`

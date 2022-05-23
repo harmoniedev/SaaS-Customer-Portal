@@ -19,7 +19,8 @@ const httpTrigger: AzureFunction = async function (
     try {
       response = await userController.getAllUsers(
         req.query.tid,
-        req.query.orderby
+        req.query.orderby,
+        req.query.direction
       );
     } catch (error: any) {
       const errorMessage: ErrorResponse = {
