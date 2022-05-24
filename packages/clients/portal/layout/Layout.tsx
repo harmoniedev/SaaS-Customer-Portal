@@ -38,7 +38,7 @@ export const Layout = ({ children }: CardProps) => {
   if (!isAuthenticated) return null;
 
   const renderMenuList = (items) =>
-    items.map(({ title, icon, id }, i) => (
+    items?.map(({ title, icon, id }, i) => (
       <button
         key={i}
         onClick={() => router.push(`/portal/${id}`)}

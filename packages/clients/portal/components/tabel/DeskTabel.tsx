@@ -73,7 +73,7 @@ export const DeskTabel = ({
                   />
                 </div>
               </th>
-              {tableHeaders.map(({ id, name }) => (
+              {tableHeaders?.map(({ id, name }) => (
                 <th
                   key={id}
                   scope="col"
@@ -100,7 +100,7 @@ export const DeskTabel = ({
           </thead>
           <tbody>{children}</tbody>
         </table>
-        {items.length > 0 && pagesInfo[0].maxPage > 0 && (
+        {items??.length > 0 && pagesInfo[0]?.maxPage > 0 && (
           <div className="py-3 px-6 bg-white shadow-md border-b">
             <div className="flex justify-between items-center">
               <p>
@@ -108,7 +108,7 @@ export const DeskTabel = ({
                 {getLastShowedResultNumber()} of {pagesInfo[0].total} results
               </p>
               <div className="flex gap-3">
-                {checkedList.length > 0 && (
+                {checkedList?.length > 0 && (
                   <Button
                     theme="white"
                     as="button"

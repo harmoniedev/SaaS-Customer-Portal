@@ -42,7 +42,7 @@ export const UsersListScene = ({
   };
 
   const trElement = (items: any[]) =>
-    items.map(({ license, email, role, name, lastActiveDate, _id }, i) => {
+    items?.map(({ license, email, role, name, lastActiveDate, _id }, i) => {
       return (
         <tr
           key={i}
@@ -108,7 +108,6 @@ export const UsersListScene = ({
 
   const trMobileElment = (items) =>
     items?.map(({ license, email, role, name, lastActiveDate, _id }, i) => {
-      debugger;
       return (
         <div key={i} className="border-b">
           <div

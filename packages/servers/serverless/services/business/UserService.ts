@@ -163,6 +163,6 @@ export class UserService extends BaseService implements IUserService {
       throw error;
     }
     this._logger.info(`[UserService - getAllUsers] finish ${logMessage}`);
-    return users.map((user: IUser) => new ViewUser(user));
+    return users?.map((user: IUser) => new ViewUser(user)) || [];
   }
 }

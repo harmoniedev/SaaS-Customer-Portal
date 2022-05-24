@@ -14,7 +14,7 @@ export type AccordionProps = {
 };
 
 export const Accordion = ({ items }: AccordionProps) => {
-  if (!Boolean(items?.length)) return;
+  if (!Boolean(items??.length)) return;
 
   return (
     <div className="filter drop-shadow-lg radix-accordion border border-gray-200">

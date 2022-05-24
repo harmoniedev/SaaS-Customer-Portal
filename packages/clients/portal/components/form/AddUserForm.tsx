@@ -38,7 +38,7 @@ export const AddUserForm = ({ onSubmit }) => {
 
         const form: HTMLFormElement = e.currentTarget;
 
-        if (errors.length) return;
+        if (errors??.length) return;
         if (!form.Role.value || form.Role.value === 'Role') {
           return setErrors([{ message: 'Select from Role list' }]);
         }
@@ -47,8 +47,8 @@ export const AddUserForm = ({ onSubmit }) => {
         }
 
         if (
-          !form.FirstName.value.trim().length ||
-          !form.LastName.value.trim().length
+          !form?.FirstName?.value?.trim()??.length ||
+          !form?.LastName?.value?.trim()??.length
         ) {
           return setErrors([
             {
@@ -105,7 +105,7 @@ export const AddUserForm = ({ onSubmit }) => {
               onChange={() => setErrors([])}
             >
               <option>Role</option>
-              {roleList.map((role, i) => (
+              {roleList?.map((role, i) => (
                 <option key={i} value={role}>
                   {role}
                 </option>
@@ -120,12 +120,12 @@ export const AddUserForm = ({ onSubmit }) => {
               onChange={() => setErrors([])}
             >
               <option>Department</option>
-              {departmentList.map((dept, i) => (
+              {departmentList?.map((dept, i) => (
                 <option key={i}>{dept}</option>
               ))}
             </select>
           </div>
-          {!!errors.length && (
+          {!!errors??.length && (
             <div className="absolute -bottom-6 md:-bottom-8 inset-x-0">
               <p className="text-red-400 text-md text-center lg:col-span-2">
                 {errors[0].message}
