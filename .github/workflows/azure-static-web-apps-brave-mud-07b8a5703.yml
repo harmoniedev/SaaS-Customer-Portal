@@ -14,6 +14,13 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
+    env:
+      CLIENT_ID: 7585f6f7-19a7-48b4-b22f-8b13d220f644
+      APP_TENANT_ID: 03122737-f0d8-4f00-ae32-5ff087a3db8f
+      LOGIN_REDIRECT_URI: https://brave-mud-07b8a5703.1.azurestaticapps.net/portal/dashboard
+      LOGOUT_REDIRECT_URI: https://brave-mud-07b8a5703.1.azurestaticapps.net
+      NODE_ENV: development
+      API_URL: https://brave-mud-07b8a5703.1.azurestaticapps.net/api
     steps:
       - uses: actions/checkout@v2
         with:
