@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    loader: 'imgix',
+    path: '',
+  },
   env: {
     CLIENT_ID: process.env.CLIENT_ID,
     APP_TENANT_ID: process.env.APP_TENANT_ID,
