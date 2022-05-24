@@ -8,7 +8,7 @@ export class AuthenticationProvider {
   constructor(config: IConfig) {
     this._config = config;
   }
-  async getAppAuthenticationToken(): Promise<IAuthenticateResponse> {
+  async acquireAppAuthenticationToken(): Promise<IAuthenticateResponse> {
     let authResponse: IAuthenticateResponse;
     try {
       authResponse =

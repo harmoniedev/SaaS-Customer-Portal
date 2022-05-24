@@ -217,7 +217,7 @@ export class SubscriptionService
     let subscriptionRes: AddSubscription;
     try {
       const { access_token }: IAuthenticateResponse =
-        await SubscriptionService._authenticationService.getAppAuthenticationToken();
+        await SubscriptionService._authenticationService.acquireAppAuthenticationToken();
       if (access_token) {
         subscriptionRes = await this.getSubscriptionDetails(
           access_token,
