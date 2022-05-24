@@ -100,7 +100,7 @@ export const DeskTabel = ({
           </thead>
           <tbody>{children}</tbody>
         </table>
-        {items??.length > 0 && pagesInfo[0]?.maxPage > 0 && (
+        {items?.length > 0 && pagesInfo[0]?.maxPage > 0 && (
           <div className="py-3 px-6 bg-white shadow-md border-b">
             <div className="flex justify-between items-center">
               <p>

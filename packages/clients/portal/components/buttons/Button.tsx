@@ -248,7 +248,7 @@ const ButtonInner = ({
   };
 
   // icon only button
-  if (!label?.trim()??.length) {
+  if (!label?.trim()?.length) {
     return (
       <Element
         {...props}
