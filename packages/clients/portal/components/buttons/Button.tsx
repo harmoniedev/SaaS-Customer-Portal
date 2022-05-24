@@ -299,8 +299,8 @@ const ButtonInner = ({
                 <ButtonIcon wordAfter={labelWords[0]} />
               )}
               {iconPosition === 'before'
-                ? labelWords.slice(1).join(' ')
-                : labelWords.slice(0, -1).join(' ')}
+                ? labelWords?.slice(1)?.join(' ')
+                : labelWords?.slice(0, -1)?.join(' ')}
               {ButtonIcon && iconPosition === 'after' && (
                 <ButtonIcon wordBefore={labelWords[labelWords?.length - 1]} />
               )}
