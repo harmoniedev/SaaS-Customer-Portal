@@ -1,4 +1,4 @@
-import { DbTypes } from "../../entities";
+import { DbTypes } from "../../../entities";
 import MongoStorage from "../mongoDb";
 
 export class DataAccessFactory {

@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { IOrganization } from "../../../entities";
+import { IOrganization } from "../../../../entities";
 const subscriptions = {
   id: String,
   publisherId: String,

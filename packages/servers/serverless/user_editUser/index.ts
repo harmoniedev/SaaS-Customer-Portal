@@ -5,14 +5,14 @@ import {
   UserController,
 } from "../controllers";
 import { ErrorResponse } from "../entities";
-import { InitializedApp } from "../utils";
+import { AppLoader } from "../utils";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
   const { log } = context;
-  const { appConfig } = await InitializedApp.initializedApp();
+  const { appConfig } = await AppLoader.initApp();
   const userController = new UserController(appConfig, log);
   let response = {};
   if (req?.query?.tid && req?.query?.userId) {

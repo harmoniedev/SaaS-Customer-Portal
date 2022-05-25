@@ -1,4 +1,4 @@
-import { OrganizationModel } from "../../dataAccess/mongoDb/schema";
+import { OrganizationModel } from "../dataAccess/mongoDb/schema";
 import { IOrganization } from "../../entities/interfaces";
 import { MongooseRepository } from "./base";
 
