@@ -1,5 +1,5 @@
 import { DbTypes, IUser } from "../../entities";
-import { BaseRepository } from "../base";
+import { BaseRepository } from "../baseRepository";
 import UserRepository from "../mongooseRepositories/UserRepository";
 
 export class UserRepositoryFactory {

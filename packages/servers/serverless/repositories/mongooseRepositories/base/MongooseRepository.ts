@@ -1,6 +1,6 @@
 import { IWriteRepository, IReadRepository } from "../../interfaces";
 import { Model } from "mongoose";
-import { BaseRepository } from "../../base/BaseRepository";
+import { BaseRepository } from "../../baseRepository/BaseRepository";
 
 export class MongooseRepository<T> extends BaseRepository<T> {
   private _model: Model<T>;
