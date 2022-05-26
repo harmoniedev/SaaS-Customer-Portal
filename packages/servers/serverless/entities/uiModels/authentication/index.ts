@@ -55,3 +55,6 @@ export class OpenIdKey {
   e: string;
   x5c: string[];
 }
+export class OpenIdKeys {
+  keys: OpenIdKey[];
+}
