@@ -16,6 +16,7 @@ export default function Page() {
 
   useEffect(() => {
     if (isAuthenticated && inProgress === 'none') {
+      debugger;
       router.push('/portal/dashboard');
     }
   });

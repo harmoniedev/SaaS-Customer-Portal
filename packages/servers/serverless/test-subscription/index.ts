@@ -1,6 +1,6 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { SubscriptionController } from "../controllers";
-import { AppLoader } from "../utils";
+import { AppLoader, AuthenticationProvider } from "../utils";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
@@ -8,6 +8,9 @@ const httpTrigger: AzureFunction = async function (
 ): Promise<void> {
   const { log } = context;
   const { appConfig } = await AppLoader.initApp();
+  const authenticationProvider = new AuthenticationProvider(appConfig);
+  const headers = req.headers;
+  authenticationProvider.validateRequest("req.headers");
   const subscriptionController = new SubscriptionController(appConfig, log);
   if (req?.body?.action === "Unsubscribe") {
     await subscriptionController.unsubscribe(req?.body?.subscription);

@@ -5,7 +5,7 @@ import {
   UserController,
 } from "../controllers";
 import { ErrorResponse } from "../entities";
-import { AppLoader } from "../utils";
+import { AppLoader, AuthenticationProvider } from "../utils";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
@@ -13,6 +13,9 @@ const httpTrigger: AzureFunction = async function (
 ): Promise<void> {
   const { log } = context;
   const { appConfig } = await AppLoader.initApp();
+  const authenticationProvider = new AuthenticationProvider(appConfig);
+  const token = req?.headers?.authorization || "";
+  await authenticationProvider.validateRequest(token?.replace("Bearer ", ""));
   const userController = new UserController(appConfig, log);
   let response = {};
   if (req?.query?.tid) {
