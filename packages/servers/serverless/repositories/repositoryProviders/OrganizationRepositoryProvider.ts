@@ -1,8 +1,8 @@
 import { DbTypes, IOrganization } from "../../entities";
 import { BaseRepository } from "../baseRepository";
-import { OrganizationRepository } from "../mongooseRepositories";
+import { OrganizationRepository } from "../mongoRepositories";
 
-export class OrganizationRepositoryFactory {
+export class OrganizationRepositoryProvider {
   private _organizationRepository: BaseRepository<IOrganization>;
   private _dbType: DbTypes;
   private createRepository(dbType: DbTypes) {

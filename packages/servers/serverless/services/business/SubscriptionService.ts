@@ -13,8 +13,8 @@ import {
 } from "../../entities";
 import {
   BaseRepository,
-  OrganizationRepositoryFactory,
-  UserRepositoryFactory,
+  OrganizationRepositoryProvider,
+  UserRepositoryProvider,
 } from "../../repositories";
 import {
   HttpProvider,
@@ -30,8 +30,8 @@ export class SubscriptionService
   implements ISubscriptionService
 {
   private readonly _userRepository: BaseRepository<IUser>;
-  private readonly _userFactory = new UserRepositoryFactory();
-  private readonly _organizationFactory = new OrganizationRepositoryFactory();
+  private readonly _userFactory = new UserRepositoryProvider();
+  private readonly _organizationFactory = new OrganizationRepositoryProvider();
   private readonly _organizationRepository: BaseRepository<IOrganization>;
   private static _httpService: HttpProvider = new HttpProvider();
   private static _authenticationService: AuthenticationProvider;

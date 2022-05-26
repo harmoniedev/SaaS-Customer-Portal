@@ -1,8 +1,8 @@
 import { DbTypes, IUser } from "../../entities";
 import { BaseRepository } from "../baseRepository";
-import UserRepository from "../mongooseRepositories/UserRepository";
+import UserRepository from "../mongoRepositories/UserRepository";
 
-export class UserRepositoryFactory {
+export class UserRepositoryProvider {
   private _userRepository: BaseRepository<IUser>;
   private _dbType: DbTypes;
   private createRepository(dbType: DbTypes) {
