@@ -12,7 +12,13 @@ const httpTrigger: AzureFunction = async function (
   req: HttpRequest
 ): Promise<void> {
   const { log } = context;
-  const { appConfig } = await AppLoader.initApp();
+  const { appConfig, isValidRequest } = await AppLoader.initApp(req);
+  if (!isValidRequest) {
+    context.res = {
+      status: 500,
+      body: "user not authenticate",
+    };
+  }
   const userController = new UserController(appConfig, log);
   let response = {};
   if (req?.query?.tid && req?.query?.userId) {

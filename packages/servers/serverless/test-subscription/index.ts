@@ -7,10 +7,13 @@ const httpTrigger: AzureFunction = async function (
   req: HttpRequest
 ): Promise<void> {
   const { log } = context;
-  const { appConfig } = await AppLoader.initApp();
-  const authenticationProvider = new AuthenticationProvider(appConfig);
-  const headers = req.headers;
-  authenticationProvider.validateRequest("req.headers");
+  const { appConfig, isValidRequest } = await AppLoader.initApp(req);
+  if (!isValidRequest) {
+    context.res = {
+      status: 500,
+      body: "user not authenticate",
+    };
+  }
   const subscriptionController = new SubscriptionController(appConfig, log);
   if (req?.body?.action === "Unsubscribe") {
     await subscriptionController.unsubscribe(req?.body?.subscription);

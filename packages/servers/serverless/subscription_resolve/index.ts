@@ -7,7 +7,13 @@ const httpTrigger: AzureFunction = async function (
   req: HttpRequest
 ): Promise<void> {
   const { log } = context;
-  const { appConfig } = await AppLoader.initApp();
+  const { appConfig, isValidRequest } = await AppLoader.initApp(req);
+  if (!isValidRequest) {
+    context.res = {
+      status: 500,
+      body: "user not authenticate",
+    };
+  }
   log.info(
     `[purchase-subscription] func start with dbType: ${
       appConfig.dbType

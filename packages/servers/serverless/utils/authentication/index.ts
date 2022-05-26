@@ -4,41 +4,47 @@ import {
   OpenIdConfig,
   OpenIdKey,
   OpenIdKeys,
-  Token,
   TokenHeader,
 } from "../../entities";
 import { HttpProvider } from "../httpProvider";
-import { decode, verify } from "jsonwebtoken";
+import { verify } from "jsonwebtoken";
+import { HttpRequestHeaders } from "@azure/functions";
 export class AuthenticationProvider {
   private static readonly _httpService: HttpProvider = new HttpProvider();
   private readonly _config: IConfig;
   constructor(config: IConfig) {
     this._config = config;
   }
-  async validateRequest(token: string): Promise<boolean> {
-    if (!token) {
+  static async validateRequest(headers: HttpRequestHeaders): Promise<boolean> {
+    const tokenReqHeader = headers?.authorization || "";
+    if (!tokenReqHeader) {
       throw new Error("No token provided");
     }
-    const tokenHeader: TokenHeader = this.extractTokenHeader(token);
-    const { jwks_uri }: { jwks_uri: string } = await this.getJwksUri();
+    const token: string = tokenReqHeader?.replace("Bearer ", "");
+    const tokenHeader: TokenHeader =
+      AuthenticationProvider.extractTokenHeader(token);
+    const { jwks_uri }: { jwks_uri: string } =
+      await AuthenticationProvider.getJwksUri();
     if (jwks_uri) {
-      const { keys }: { keys: OpenIdKey[] } = await this.getAzureJwtKeys(
-        jwks_uri
-      );
+      const { keys }: { keys: OpenIdKey[] } =
+        await AuthenticationProvider.getAzureJwtKeys(jwks_uri);
       if (keys?.length) {
-        const matchKey: OpenIdKey = this.getMatchKey(keys, tokenHeader);
-        return this.validateToken(matchKey.x5c[0], token);
+        const matchKey: OpenIdKey = AuthenticationProvider.getMatchKey(
+          keys,
+          tokenHeader
+        );
+        return AuthenticationProvider.validateToken(matchKey.x5c[0], token);
       }
     }
   }
-  private getMatchKey(keys: any, tokenHeader: TokenHeader): OpenIdKey {
+  private static getMatchKey(keys: any, tokenHeader: TokenHeader): OpenIdKey {
     return keys.find(
       (key: OpenIdKey) =>
         key.kid === tokenHeader?.kid && key.x5t === tokenHeader?.kid
     );
   }
 
-  validateToken(publicKey: string, token: string): boolean {
+  private static validateToken(publicKey: string, token: string): boolean {
     const key: string = `-----BEGIN CERTIFICATE-----\n${publicKey}\n-----END CERTIFICATE-----`;
     try {
       return !!verify(token, key);
@@ -47,13 +53,13 @@ export class AuthenticationProvider {
     }
   }
 
-  private async getAzureJwtKeys(jwksUri: string): Promise<OpenIdKeys> {
+  private static async getAzureJwtKeys(jwksUri: string): Promise<OpenIdKeys> {
     const openIdKeys: OpenIdKeys =
       await AuthenticationProvider._httpService.get<OpenIdKeys>(jwksUri);
     return openIdKeys;
   }
 
-  private extractTokenHeader(token: string) {
+  private static extractTokenHeader(token: string) {
     const tokenHeaderBase64 = token.split(".")[0];
     var buf = Buffer.from(tokenHeaderBase64, "base64");
     const tokenHeaderString = buf.toString("ascii");
@@ -88,7 +94,7 @@ export class AuthenticationProvider {
     }
     return authResponse;
   }
-  async getJwksUri(): Promise<{ jwks_uri: string }> {
+  private static async getJwksUri(): Promise<{ jwks_uri: string }> {
     return await AuthenticationProvider._httpService.get<OpenIdConfig>(
       "https://login.microsoftonline.com/common/.well-known/openid-configuration"
     );
