@@ -6,7 +6,8 @@ export class HttpProvider {
     init?: RequestInit
   ): Promise<TResponse> {
     const response = await fetch(url, init);
-    let res;
+    let res: TResponse;
+    console.log({ status: response.status });
     const bodyAsText = await response.text();
     if (bodyAsText) {
       try {

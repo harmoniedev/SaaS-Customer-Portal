@@ -13,7 +13,7 @@ export class AddSubscription {
   quantity: number; // number of purchased seats, might be empty if the plan is not per seat
   subscription: ISubscription;
 }
-export class DeleteSubscription {
+export class EditSubscriptionRequest {
   id: string;
   activityId: string;
   publisherId: string;

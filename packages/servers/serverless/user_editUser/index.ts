@@ -1,9 +1,5 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
-import {
-  OrganizationController,
-  SubscriptionController,
-  UserController,
-} from "../controllers";
+import { UserController } from "../controllers";
 import { ErrorResponse } from "../entities";
 import { AppLoader } from "../utils";
 
@@ -12,12 +8,16 @@ const httpTrigger: AzureFunction = async function (
   req: HttpRequest
 ): Promise<void> {
   const { log } = context;
-  const { appConfig, isValidRequest } = await AppLoader.initApp(req);
-  if (!isValidRequest) {
+  const { appConfig, reqValidationResults } = await AppLoader.initApp(
+    req,
+    true
+  );
+  if (reqValidationResults.status !== 200) {
     context.res = {
-      status: 500,
-      body: "user not authenticate",
+      status: reqValidationResults.status,
+      body: reqValidationResults.message,
     };
+    return;
   }
   const userController = new UserController(appConfig, log);
   let response = {};

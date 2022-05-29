@@ -1,4 +1,5 @@
 import {
+  AuthenticationResult,
   IAuthenticateResponse,
   IConfig,
   OpenIdConfig,
@@ -15,10 +16,16 @@ export class AuthenticationProvider {
   constructor(config: IConfig) {
     this._config = config;
   }
-  static async validateRequest(headers: HttpRequestHeaders): Promise<boolean> {
+  static async validateRequest(
+    headers: HttpRequestHeaders
+  ): Promise<AuthenticationResult> {
     const tokenReqHeader = headers?.authorization || "";
     if (!tokenReqHeader) {
-      throw new Error("No token provided");
+      return {
+        status: 401,
+        isAuthenticate: false,
+        message: "User need to authenticate",
+      } as AuthenticationResult;
     }
     const token: string = tokenReqHeader?.replace("Bearer ", "");
     const tokenHeader: TokenHeader =
@@ -33,7 +40,22 @@ export class AuthenticationProvider {
           keys,
           tokenHeader
         );
-        return AuthenticationProvider.validateToken(matchKey.x5c[0], token);
+        const isTokenValid = AuthenticationProvider.validateToken(
+          matchKey.x5c[0],
+          token
+        );
+        if (!isTokenValid) {
+          return {
+            status: 403,
+            isAuthenticate: false,
+            message: "User need to authenticate",
+          } as AuthenticationResult;
+        }
+        return {
+          status: 200,
+          isAuthenticate: true,
+          message: "Success",
+        } as AuthenticationResult;
       }
     }
   }

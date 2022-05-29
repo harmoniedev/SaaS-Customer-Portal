@@ -10,6 +10,8 @@ import {
   SaasSubscriptionStatus,
   AddSubscription,
   ISubscriptionOwner,
+  UpdateSubscriptionAction,
+  EditSubscriptionRequest,
 } from "../../entities";
 import {
   BaseRepository,
@@ -112,8 +114,165 @@ export class SubscriptionService
     }
   }
 
-  async removeSubscription(subscription: ISubscription): Promise<void> {
-    const { id, quantity, purchaser, offerId, beneficiary } = subscription;
+  async updateSubscriptionState(
+    action: UpdateSubscriptionAction,
+    editSubscription: EditSubscriptionRequest
+  ): Promise<void> {
+    await this["subscription" + action](editSubscription);
+    // switch (action) {
+    //   case UpdateSubscriptionAction.Unsubscribe:
+    //     await this.subscriptionUnsubscribe(editSubscription.subscription);
+    //     break;
+    //   case UpdateSubscriptionAction.ChangeQuantity:
+    //     await this.subscriptionChangeQuantity(editSubscription);
+    //     break;
+    //   case UpdateSubscriptionAction.ChangePlan:
+    //     await this.subscriptionChangePlan(editSubscription);
+    //     break;
+    //   case UpdateSubscriptionAction.Suspend:
+    //     await this.subscriptionSuspend(editSubscription);
+    //     break;
+    //   case UpdateSubscriptionAction.Reinstate:
+    //     await this.subscriptionReinstate(editSubscription);
+    //     break;
+    // }
+  }
+
+  async subscriptionReinstate(
+    editSubscription: EditSubscriptionRequest
+  ): Promise<void> {
+    const { subscription } = editSubscription;
+    const { id, purchaser } = subscription;
+    const { tenantId } = purchaser;
+    const logMessage = `subscriptionId ${id} tenantId ${tenantId} change status to ${SaasSubscriptionStatus.Suspended}`;
+    this._logger.info(
+      `[SubscriptionService - reinstateSubscription] start at ${new Date().toISOString()} for ${logMessage}`
+    );
+    try {
+      this.updateSubscriptionStatus(
+        tenantId,
+        subscription,
+        SaasSubscriptionStatus.Subscribed
+      );
+    } catch (error: any) {
+      this._logger.info(
+        `[SubscriptionService - reinstateSubscription] error at ${new Date().toISOString()} for ${logMessage}, error ${
+          error.message
+        }`
+      );
+    }
+    this._logger.info(
+      `[SubscriptionService - reinstateSubscription] finish at ${new Date().toISOString()} for ${logMessage}`
+    );
+  }
+
+  async subscriptionSuspend(
+    editSubscription: EditSubscriptionRequest
+  ): Promise<void> {
+    const { subscription } = editSubscription;
+    const { id, purchaser } = subscription;
+    const { tenantId } = purchaser;
+    const logMessage = `subscriptionId ${id} tenantId ${tenantId} change status to ${SaasSubscriptionStatus.Suspended}`;
+    this._logger.info(
+      `[SubscriptionService - suspendSubscription] start at ${new Date().toISOString()} for ${logMessage}`
+    );
+    try {
+      this.updateSubscriptionStatus(
+        tenantId,
+        subscription,
+        SaasSubscriptionStatus.Suspended
+      );
+    } catch (error: any) {
+      this._logger.info(
+        `[SubscriptionService - suspendSubscription] error at ${new Date().toISOString()} for ${logMessage}, error ${
+          error.message
+        }`
+      );
+    }
+    this._logger.info(
+      `[SubscriptionService - suspendSubscription] finish at ${new Date().toISOString()} for ${logMessage}`
+    );
+  }
+
+  async subscriptionChangePlan(
+    editSubscription: EditSubscriptionRequest
+  ): Promise<void> {
+    const { subscriptionId, planId, subscription } = editSubscription;
+    const logMessage = `subscriptionId ${subscriptionId}, from planId ${subscription?.planId} to planId ${planId}, tenantId ${subscription?.purchaser?.tenantId}`;
+    this._logger.info(
+      `[SubscriptionService - changeSubscriptionPlan] start at ${new Date().toISOString()} for ${logMessage}`
+    );
+    const newSubscription: ISubscription = {
+      ...subscription,
+      planId,
+    };
+    try {
+      await this.updateSubscription(newSubscription);
+    } catch (error) {
+      this._logger.info(
+        `[SubscriptionService - changeSubscriptionPlan] error at ${new Date().toISOString()} for ${logMessage}, error ${
+          error.message
+        }`
+      );
+    }
+    this._logger.info(
+      `[SubscriptionService - changeSubscriptionPlan] finish at ${new Date().toISOString()} for ${logMessage}`
+    );
+  }
+
+  async subscriptionChangeQuantity(
+    editSubscription: EditSubscriptionRequest
+  ): Promise<void> {
+    const { subscriptionId, quantity, subscription } = editSubscription;
+    const logMessage = `subscriptionId ${subscriptionId}, from quantity ${subscription?.quantity} to quantity ${quantity}, tenantId ${subscription?.purchaser?.tenantId}`;
+    this._logger.info(
+      `[SubscriptionService - changeSubscriptionQuantity] start at ${new Date().toISOString()} for ${logMessage}`
+    );
+    const newSubscription: ISubscription = {
+      ...subscription,
+      quantity: quantity,
+    };
+    await this.updateSubscription(newSubscription);
+    this._logger.info(
+      `[SubscriptionService - changeSubscriptionQuantity] finish at ${new Date().toISOString()} for ${logMessage}`
+    );
+  }
+
+  private async updateSubscription(newSubscription: ISubscription) {
+    const { id } = newSubscription;
+    const logMessage = `subscriptionId ${id}, tenantId ${newSubscription?.purchaser?.tenantId}`;
+    this._logger.info(
+      `[SubscriptionService - changeSubscriptionQuantity] start at ${new Date().toISOString()} for ${logMessage}`
+    );
+    try {
+      const organization: IOrganization =
+        await this.getOrganizationWithFilteredUpdatedSubscription(
+          newSubscription
+        );
+      if (organization) {
+        await this.updateOrganizationSubscriptions(
+          organization,
+          newSubscription
+        );
+      }
+    } catch (error: any) {
+      this._logger.error(
+        `[SubscriptionService - changeSubscriptionQuantity] error at ${new Date().toISOString()} for ${logMessage}, error ${
+          error.message
+        }`
+      );
+      throw error;
+    }
+    this._logger.info(
+      `[SubscriptionService - changeSubscriptionQuantity] finish at ${new Date().toISOString()} for ${logMessage}`
+    );
+  }
+
+  async subscriptionUnsubscribe(
+    editSubscription: EditSubscriptionRequest
+  ): Promise<void> {
+    const { subscription } = editSubscription;
+    const { id, quantity, purchaser, offerId } = subscription;
     const { tenantId } = purchaser;
     const logMessage = `subscriptionId ${id}, tenantId ${
       purchaser.tenantId
@@ -128,7 +287,8 @@ export class SubscriptionService
     const updateUsersPromise = this.removeAllSubscriptionUsers(tenantId, id);
     const updateSubscriptionPromise = this.updateSubscriptionStatus(
       tenantId,
-      subscription
+      subscription,
+      SaasSubscriptionStatus.Unsubscribed
     );
     await Promise.all([
       updateOwnersPromise,
@@ -142,7 +302,8 @@ export class SubscriptionService
 
   private async updateSubscriptionStatus(
     tenantId: string,
-    subscription: ISubscription
+    subscription: ISubscription,
+    newStatus: SaasSubscriptionStatus
   ) {
     const logMessage = `tenantId ${tenantId}, subscriptionId ${
       subscription.id
@@ -157,8 +318,7 @@ export class SubscriptionService
         organization,
         subscription
       );
-      dbSubscription.saasSubscriptionStatus =
-        SaasSubscriptionStatus.Unsubscribed;
+      dbSubscription.saasSubscriptionStatus = newStatus;
       organization.subscriptions = organization.subscriptions.filter(
         (s: ISubscription) => s.id !== dbSubscription.id
       );
@@ -229,16 +389,9 @@ export class SubscriptionService
         );
         if (subscriptionRes?.subscription) {
           const organization: IOrganization =
-            await this.getOrCreateOrganization(subscriptionRes.subscription);
-          const dbSubscription = this.getOrganizationSubscription(
-            organization,
-            subscriptionRes.subscription
-          );
-          if (dbSubscription) {
-            organization.subscriptions = organization.subscriptions.filter(
-              (s: ISubscription) => s.id !== dbSubscription.id
+            await this.getOrganizationWithFilteredUpdatedSubscription(
+              subscriptionRes.subscription
             );
-          }
           await this.updateOrganizationSubscriptions(
             organization,
             subscriptionRes.subscription
@@ -260,6 +413,24 @@ export class SubscriptionService
       `[resolveSubscription] finished ${new Date().toISOString()}`
     );
     return subscriptionRes?.subscription;
+  }
+
+  private async getOrganizationWithFilteredUpdatedSubscription(
+    subscription: ISubscription
+  ) {
+    const organization: IOrganization = await this.getOrCreateOrganization(
+      subscription
+    );
+    const dbSubscription = this.getOrganizationSubscription(
+      organization,
+      subscription
+    );
+    if (dbSubscription) {
+      organization.subscriptions = organization.subscriptions.filter(
+        (s: ISubscription) => s.id !== dbSubscription.id
+      );
+    }
+    return organization;
   }
 
   async activateSubscription(

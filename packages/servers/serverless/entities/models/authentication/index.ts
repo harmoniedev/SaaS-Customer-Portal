@@ -58,3 +58,8 @@ export class OpenIdKey {
 export class OpenIdKeys {
   keys: OpenIdKey[];
 }
+export class AuthenticationResult {
+  isAuthenticate: boolean;
+  status: number;
+  message: string;
+}

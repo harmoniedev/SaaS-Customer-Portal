@@ -12,12 +12,16 @@ const httpTrigger: AzureFunction = async function (
   req: HttpRequest
 ): Promise<void> {
   const { log } = context;
-  const { appConfig, isValidRequest } = await AppLoader.initApp(req);
-  if (!isValidRequest) {
+  const { appConfig, reqValidationResults } = await AppLoader.initApp(
+    req,
+    true
+  );
+  if (reqValidationResults.status !== 200) {
     context.res = {
-      status: 500,
-      body: "user not authenticate",
+      status: reqValidationResults.status,
+      body: reqValidationResults.message,
     };
+    return;
   }
   const userController = new UserController(appConfig, log);
   let response = {};
