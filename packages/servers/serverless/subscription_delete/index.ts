@@ -15,10 +15,19 @@ const httpTrigger: AzureFunction = async function (
     }, Date ${new Date().toISOString()}`
   );
   const subscriptionController = new SubscriptionController(appConfig, log);
-  await subscriptionController.updateSubscriptionState(
-    req?.body?.action,
-    req?.body
-  );
+  try {
+    await subscriptionController.updateSubscriptionState(
+      req?.body?.action,
+      req?.body
+    );
+  } catch (error: any) {
+    log.error(
+      `[purchase-subscription] func error, Date ${new Date().toISOString()}, error ${
+        error.message
+      }`
+    );
+    throw error;
+  }
   log.info(
     `[purchase-subscription] func finish, Date ${new Date().toISOString()}`
   );
