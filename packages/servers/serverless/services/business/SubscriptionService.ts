@@ -294,14 +294,10 @@ export class SubscriptionService
     this._logger.info(
       `[SubscriptionService - removeSubscription] start for ${logMessage}`
     );
-    const updateOwnersPromise = await this.createOrUpdateSubscriptionOwners(
-      subscription
-    );
-    const updateUsersPromise = await this.removeAllSubscriptionUsers(
-      tenantId,
-      id
-    );
-    const updateSubscriptionPromise = await this.updateSubscriptionStatus(
+
+    await this.createOrUpdateSubscriptionOwners(subscription);
+    await this.removeAllSubscriptionUsers(tenantId, id);
+    await this.updateSubscriptionStatus(
       tenantId,
       subscription,
       SaasSubscriptionStatus.Unsubscribed
