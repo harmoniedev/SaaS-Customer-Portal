@@ -160,6 +160,7 @@ export class SubscriptionService
           error.message
         }`
       );
+      throw error;
     }
     this._logger.info(
       `[SubscriptionService - reinstateSubscription] finish at ${new Date().toISOString()} for ${logMessage}`
@@ -188,6 +189,7 @@ export class SubscriptionService
           error.message
         }`
       );
+      throw error;
     }
     this._logger.info(
       `[SubscriptionService - suspendSubscription] finish at ${new Date().toISOString()} for ${logMessage}`
@@ -209,11 +211,12 @@ export class SubscriptionService
     try {
       await this.updateSubscription(newSubscription);
     } catch (error) {
-      this._logger.info(
+      this._logger.error(
         `[SubscriptionService - changeSubscriptionPlan] error at ${new Date().toISOString()} for ${logMessage}, error ${
           error.message
         }`
       );
+      throw error;
     }
     this._logger.info(
       `[SubscriptionService - changeSubscriptionPlan] finish at ${new Date().toISOString()} for ${logMessage}`
