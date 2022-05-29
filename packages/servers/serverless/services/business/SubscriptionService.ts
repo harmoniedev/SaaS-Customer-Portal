@@ -19,12 +19,12 @@ import {
   UserRepositoryProvider,
 } from "../../repositories";
 import {
-  HttpProvider,
   AuthenticationProvider,
   defaultLicense,
   defaultUserSubscription,
 } from "../../utils";
 import { BaseService } from "../base/BaseService";
+import { SubscriptionApiHelper } from "../helpers";
 import { ISubscriptionService } from "../interfaces";
 
 export class SubscriptionService
@@ -35,7 +35,7 @@ export class SubscriptionService
   private readonly _userFactory = new UserRepositoryProvider();
   private readonly _organizationFactory = new OrganizationRepositoryProvider();
   private readonly _organizationRepository: BaseRepository<IOrganization>;
-  private static _httpService: HttpProvider = new HttpProvider();
+  private readonly _subscriptionApiHelper: SubscriptionApiHelper;
   private static _authenticationService: AuthenticationProvider;
 
   constructor(config: IConfig, log: Logger) {
@@ -46,7 +46,23 @@ export class SubscriptionService
     this._organizationRepository = this._organizationFactory.initRepository(
       this._configuration.dbType
     );
+    this._subscriptionApiHelper = new SubscriptionApiHelper(
+      this._configuration,
+      this._logger
+    );
     this.initStaticMembers();
+  }
+
+  private initAuthProvider() {
+    if (!SubscriptionService._authenticationService) {
+      SubscriptionService._authenticationService = new AuthenticationProvider(
+        this._configuration
+      );
+    }
+  }
+
+  private initStaticMembers() {
+    this.initAuthProvider();
   }
 
   async getValidSubscription(tenantId: string): Promise<ISubscription> {
@@ -81,6 +97,7 @@ export class SubscriptionService
     });
     return response.length;
   }
+
   async getValidSubscriptions(tenantId: string): Promise<ISubscription[]> {
     const organization =
       await this._organizationRepository.findOne<IOrganization>({
@@ -95,47 +112,11 @@ export class SubscriptionService
     return validSubscription;
   }
 
-  private initStaticMembers() {
-    this.initHttpProvider();
-    this.initAuthProvider();
-  }
-
-  private initHttpProvider() {
-    if (!SubscriptionService._httpService) {
-      SubscriptionService._httpService = new HttpProvider();
-    }
-  }
-
-  private initAuthProvider() {
-    if (!SubscriptionService._authenticationService) {
-      SubscriptionService._authenticationService = new AuthenticationProvider(
-        this._configuration
-      );
-    }
-  }
-
   async updateSubscriptionState(
     action: UpdateSubscriptionAction,
     editSubscription: EditSubscriptionRequest
   ): Promise<void> {
     await this["subscription" + action](editSubscription);
-    // switch (action) {
-    //   case UpdateSubscriptionAction.Unsubscribe:
-    //     await this.subscriptionUnsubscribe(editSubscription.subscription);
-    //     break;
-    //   case UpdateSubscriptionAction.ChangeQuantity:
-    //     await this.subscriptionChangeQuantity(editSubscription);
-    //     break;
-    //   case UpdateSubscriptionAction.ChangePlan:
-    //     await this.subscriptionChangePlan(editSubscription);
-    //     break;
-    //   case UpdateSubscriptionAction.Suspend:
-    //     await this.subscriptionSuspend(editSubscription);
-    //     break;
-    //   case UpdateSubscriptionAction.Reinstate:
-    //     await this.subscriptionReinstate(editSubscription);
-    //     break;
-    // }
   }
 
   async subscriptionReinstate(
@@ -235,10 +216,38 @@ export class SubscriptionService
       ...subscription,
       quantity: quantity,
     };
-    await this.updateSubscription(newSubscription);
+    let isValid = true;
+    if (quantity < subscription.quantity) {
+      isValid = await this.verifyIfCanUpdateSubscription(
+        subscription.id,
+        quantity
+      );
+    }
+    if (!isValid) {
+      // if smaller then quantity ok else call microsoft api with failed status.
+      const updateResponse = { status: "Failure" };
+      await this._subscriptionApiHelper.notifyOperationState(
+        subscription,
+        editSubscription,
+        updateResponse
+      );
+    } else {
+      await this.updateSubscription(newSubscription);
+    }
+
     this._logger.info(
       `[SubscriptionService - changeSubscriptionQuantity] finish at ${new Date().toISOString()} for ${logMessage}`
     );
+  }
+
+  private async verifyIfCanUpdateSubscription(
+    subscriptionId: string,
+    quantity: number
+  ) {
+    const assignedLicensesCount = await this.getAssignedLicenseCount(
+      subscriptionId
+    );
+    return assignedLicensesCount < quantity;
   }
 
   private async updateSubscription(newSubscription: ISubscription) {
@@ -285,19 +294,18 @@ export class SubscriptionService
     this._logger.info(
       `[SubscriptionService - removeSubscription] start for ${logMessage}`
     );
-    const updateOwnersPromise =
-      this.createOrUpdateSubscriptionOwners(subscription);
-    const updateUsersPromise = this.removeAllSubscriptionUsers(tenantId, id);
-    const updateSubscriptionPromise = this.updateSubscriptionStatus(
+    const updateOwnersPromise = await this.createOrUpdateSubscriptionOwners(
+      subscription
+    );
+    const updateUsersPromise = await this.removeAllSubscriptionUsers(
+      tenantId,
+      id
+    );
+    const updateSubscriptionPromise = await this.updateSubscriptionStatus(
       tenantId,
       subscription,
       SaasSubscriptionStatus.Unsubscribed
     );
-    await Promise.all([
-      updateOwnersPromise,
-      updateUsersPromise,
-      updateSubscriptionPromise,
-    ]);
     this._logger.info(
       `[SubscriptionService - removeSubscription] finish for ${logMessage}`
     );
@@ -382,10 +390,11 @@ export class SubscriptionService
       const { access_token }: IAuthenticateResponse =
         await SubscriptionService._authenticationService.acquireAppAuthenticationToken();
       if (access_token) {
-        subscriptionRes = await this.getSubscriptionDetails(
-          access_token,
-          token
-        );
+        subscriptionRes =
+          await this._subscriptionApiHelper.getSubscriptionDetails(
+            access_token,
+            token
+          );
         await this.activateSubscription(
           subscriptionRes.subscription,
           access_token
@@ -448,7 +457,7 @@ export class SubscriptionService
         planId: subscriptionRes.planId,
         quantity: subscriptionRes.quantity,
       };
-      await this.callActivateSubscriptionApi(
+      await this._subscriptionApiHelper.callActivateSubscriptionApi(
         subscriptionRes.id,
         access_token,
         activatePayload
@@ -596,66 +605,5 @@ export class SubscriptionService
       }
     }
     return owners;
-  }
-
-  private async getSubscriptionDetails(access_token: string, token: string) {
-    this._logger.info(
-      `[getSubscriptionDetails] started dateTime:${new Date().toISOString()}`
-    );
-    let subscription: AddSubscription;
-    const resolveUrl =
-      this._configuration.subscriptionBaseUrl +
-      this._configuration.resolveSubscriptionEndPoint +
-      this._configuration.fulfillmentApiVersion;
-    try {
-      subscription =
-        await SubscriptionService._httpService.post<AddSubscription>(
-          resolveUrl,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${access_token}`,
-              "x-ms-marketplace-token": token,
-            },
-          }
-        );
-    } catch (error: any) {
-      this._logger.error(
-        `[getSubscriptionDetails] error ${
-          error.message
-        } dateTime: ${new Date().toISOString()}`
-      );
-      throw error;
-    }
-    this._logger.info(
-      `[getSubscriptionDetails] finished dateTime:${new Date().toISOString()}`
-    );
-    return subscription;
-  }
-
-  async callActivateSubscriptionApi(
-    subscriptionId: string,
-    access_token: string,
-    confirmationPayload: ActivateSubscription
-  ): Promise<void> {
-    const activateUrl: string =
-      this._configuration.subscriptionBaseUrl +
-      this._configuration.activateSubscriptionEndPoint +
-      this._configuration.fulfillmentApiVersion;
-    const body = JSON.stringify(confirmationPayload);
-    const response = await SubscriptionService._httpService.post<{
-      Message: string;
-    }>(activateUrl.replace("*{subscriptionId}*", subscriptionId), {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${access_token}`,
-      },
-      body,
-    });
-    if (response?.Message) {
-      const errorMessage = `[callActivateSubscriptionApi] error for subscriptionId ${subscriptionId} body ${body}, api message ${response.Message}`;
-      this._logger.error(errorMessage);
-      throw new Error(errorMessage);
-    }
   }
 }

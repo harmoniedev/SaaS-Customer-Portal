@@ -26,7 +26,6 @@ const httpTrigger: AzureFunction = async function (
         error.message
       }`
     );
-    throw error;
   }
   log.info(
     `[purchase-subscription] func finish, Date ${new Date().toISOString()}`

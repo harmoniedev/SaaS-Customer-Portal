@@ -28,6 +28,15 @@ export class HttpProvider {
       ...(init || {}),
     });
   }
+  async patch<TResponse>(
+    url: RequestInfo,
+    init?: RequestInit
+  ): Promise<TResponse> {
+    return await this.callApi<TResponse>(url, {
+      method: "PATCH",
+      ...(init || {}),
+    });
+  }
 
   async put<TResponse>(
     url: RequestInfo,
