@@ -11,10 +11,11 @@ import { NavMemo as Nav } from './Nav/Nav';
 import { BREAKPOINTS, useBreakpoint } from '../hooks/useBreakpoint';
 
 export type CardProps = {
+  isNavigation?: boolean;
   children: React.ReactElement | React.ReactNode;
 };
 
-export const Layout = ({ children }: CardProps) => {
+export const Layout = ({ isNavigation = true, children }: CardProps) => {
   const router = useRouter();
   const { inProgress } = useMsal();
   const { screenWidth } = useBreakpoint();
@@ -55,15 +56,28 @@ export const Layout = ({ children }: CardProps) => {
 
   return (
     <div className="lg:h-screen overflow-hidden grid grid-rows-[62px_1fr] lg:grid-rows-[92px_1fr]">
-      <Nav />
-      <div className="grid grid-cols-1 overflow-y-scroll lg:overflow-hidden lg:grid-cols-[22.229vw_1fr]">
-        {!isMobile && (
-          <div className="bg-gray-50 lg:pt-4">{renderMenuList(menuItems)}</div>
-        )}
-        <div className="h-[94vh] py-8 px-4 lg:pl-20 lg:pr-14 lg:pt-10 overflow-auto lg:h-[91vh] lg:pb-0 text-indigo-500">
-          {children}
-        </div>
-      </div>
+      {
+        isNavigation ? (
+          <>
+            <Nav />
+            <div className="grid grid-cols-1 overflow-y-scroll lg:overflow-hidden lg:grid-cols-[22.229vw_1fr]">
+              {!isMobile && (
+                <div className="bg-gray-50 lg:pt-4">{renderMenuList(menuItems)}</div>
+              )}
+              <div className="h-[94vh] py-8 px-4 lg:pl-20 lg:pr-14 lg:pt-10 overflow-auto lg:h-[91vh] lg:pb-0 text-indigo-500">
+                {children}
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <Nav />
+            <div className="h-[94vh] overflow-auto text-indigo-500">
+              {children}
+            </div> 
+          </>
+        )
+      }
     </div>
   );
 };
