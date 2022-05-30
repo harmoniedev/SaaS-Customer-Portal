@@ -11,3 +11,6 @@ export const slugify = (str) => {
 
 export const truncate = (str, maxLength) =>
   str.length <= maxLength ? str : `${str.slice(0, maxLength)}…`;
+
+export const formatNumberWithCommas = (x) =>
+  x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');

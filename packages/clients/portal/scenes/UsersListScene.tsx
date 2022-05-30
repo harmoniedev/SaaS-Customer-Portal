@@ -47,7 +47,7 @@ export const UsersListScene = ({
       return (
         <tr
           key={i}
-          className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-600"
+          className="bg-white border-bhover:bg-blue-50"
           onMouseOver={() => {
             setActiveUser(_id);
             setShowMenu(true);
@@ -61,7 +61,7 @@ export const UsersListScene = ({
               <input
                 id={_id}
                 type="checkbox"
-                className="w-6 h-6 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                className="w-6 h-6 text-indigo-300 bg-gray-100 border-gray-300 rounded focus:ring-indigo-300 focus:ring-2"
                 onChange={handelCheckbox}
                 checked={checkedList.includes(_id)}
               />
@@ -123,7 +123,7 @@ export const UsersListScene = ({
               <input
                 type="checkbox"
                 id={_id}
-                className="w-6 h-6 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                className="w-6 h-6 text-indigo-300 bg-gray-100 border-gray-300 rounded focus:ring-indigo-300 focus:ring-2"
                 onChange={handelCheckbox}
                 checked={checkedList.includes(_id)}
               />

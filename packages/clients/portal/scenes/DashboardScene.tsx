@@ -8,18 +8,22 @@ import { TabelMemo as Tabel } from '../components/tabel/Tabel';
 import { Icon } from '../components/icons/Icon';
 import { Spinner } from '../components/loaders/Spinner';
 import { StaticState } from '../types';
+import { BREAKPOINTS, useBreakpoint } from '../hooks/useBreakpoint';
 
 import DataAPI from '../api/data';
+import { Button } from '../components/buttons/Button';
 
 const dataAPI = new DataAPI();
 
 export const DashboardScene = () => {
   const { accounts } = useMsal();
+  const { screenWidth } = useBreakpoint();
   const [licenseCount, setLicenseCount] = useState<number>(0);
   const [assignedLicensesCount, setAssignedLicensesCount] = useState<number>(0);
   const [state, setState] = useState<StaticState>('idle');
   const storadgeKey = `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---`;
   const token = JSON.parse(sessionStorage.getItem(storadgeKey)).secret;
+  const isMobile = screenWidth < BREAKPOINTS.md;
 
   useEffect(() => {
     try {
@@ -29,7 +33,7 @@ export const DashboardScene = () => {
           tid: accounts[0]?.tenantId,
           token,
         });
-
+        if (!response.organizationData.length) return setState('success');
         setAssignedLicensesCount(
           response.organizationData[0].assigned_licenses_count,
         );
@@ -48,13 +52,22 @@ export const DashboardScene = () => {
     <div>
       {state === 'success' && (
         <div>
-          <Title size="lg" className="">
-            Dashboard
-          </Title>
+          <div className="flex justify-between">
+            <Title size="lg" className="">
+              Users and licenses
+            </Title>
+            <Button
+              as="button"
+              label={isMobile ? 'Import' : 'Import users'}
+              size="md"
+              icon="ArrowCircleDownIcon"
+              iconPosition="before"
+            />
+          </div>
           <div className="mt-8">
             <div className="mb-10">
               <Title size="xs" className="mb-5">
-                Subscription
+                Licenses
               </Title>
               <Paper>
                 <div className="p-6 lg:p-8 flex gap-6 flex-col">

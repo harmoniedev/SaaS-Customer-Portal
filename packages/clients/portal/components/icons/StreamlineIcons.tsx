@@ -5,3 +5,4 @@ export { default as UserCircleRed } from '../../public/icons/streamline/user-cir
 export { default as X } from '../../public/icons/streamline/X.svg';
 export { default as CommonFileSearch } from '../../public/icons/streamline/common-file-search.svg';
 export { default as UserPlus } from '../../public/icons/streamline/user-plus.svg';
+export { default as Subtract } from '../../public/icons/streamline/subtract.svg';
