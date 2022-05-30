@@ -1,13 +1,22 @@
 import { IWriteRepository, IReadRepository } from "../../interfaces";
 import { Model } from "mongoose";
 import { BaseRepository } from "../../baseRepository/BaseRepository";
+import { DataAccessFactory } from "../../dataAccess/DataAccessProvider/DataAccessProvider";
+import { appConfig } from "../../../utils";
 
 export class MongooseRepository<T> extends BaseRepository<T> {
   private _model: Model<T>;
 
   constructor(schemaModel: Model<T>) {
     super();
+    MongooseRepository.initDb();
     this._model = schemaModel;
+  }
+  static async initDb() {
+    await DataAccessFactory.initDataAccess(
+      appConfig.dbType,
+      process.env.DB_CONNECTION_STRING
+    );
   }
   async findOneAndUpdate<TResults>(
     query: any,
