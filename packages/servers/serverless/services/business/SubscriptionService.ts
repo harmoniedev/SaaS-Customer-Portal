@@ -32,20 +32,17 @@ export class SubscriptionService
   implements ISubscriptionService
 {
   private readonly _userRepository: BaseRepository<IUser>;
-  private readonly _userFactory = new UserRepositoryProvider();
-  private readonly _organizationFactory = new OrganizationRepositoryProvider();
   private readonly _organizationRepository: BaseRepository<IOrganization>;
   private readonly _subscriptionApiHelper: SubscriptionApiHelper;
   private static _authenticationService: AuthenticationProvider;
 
   constructor(config: IConfig, log: Logger) {
     super(config, log);
-    this._userRepository = this._userFactory.initRepository(
+    this._userRepository = UserRepositoryProvider.initRepository(
       this._configuration.dbType
     );
-    this._organizationRepository = this._organizationFactory.initRepository(
-      this._configuration.dbType
-    );
+    this._organizationRepository =
+      OrganizationRepositoryProvider.initRepository(this._configuration.dbType);
     this._subscriptionApiHelper = new SubscriptionApiHelper(
       this._configuration,
       this._logger

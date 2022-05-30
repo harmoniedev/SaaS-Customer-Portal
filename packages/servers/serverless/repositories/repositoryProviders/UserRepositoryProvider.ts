@@ -3,9 +3,9 @@ import { BaseRepository } from "../baseRepository";
 import UserRepository from "../mongoRepositories/UserRepository";
 
 export class UserRepositoryProvider {
-  private _userRepository: BaseRepository<IUser>;
-  private _dbType: DbTypes;
-  private createRepository(dbType: DbTypes) {
+  private static _userRepository: BaseRepository<IUser>;
+  private static _dbType: DbTypes;
+  private static createRepository(dbType: DbTypes) {
     switch (dbType) {
       case DbTypes.mongoose:
         return (this._userRepository = new UserRepository());
@@ -13,11 +13,11 @@ export class UserRepositoryProvider {
         return new UserRepository();
     }
   }
-  initRepository(dbType: DbTypes) {
+  static initRepository(dbType: DbTypes) {
     if (this._dbType === dbType && this._userRepository) {
       return this._userRepository;
     }
-    this._dbType === dbType;
+    this._dbType = dbType;
     return this.createRepository(dbType);
   }
 }

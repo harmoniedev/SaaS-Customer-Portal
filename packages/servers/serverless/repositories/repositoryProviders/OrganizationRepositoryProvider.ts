@@ -3,22 +3,22 @@ import { BaseRepository } from "../baseRepository";
 import { OrganizationRepository } from "../mongoRepositories";
 
 export class OrganizationRepositoryProvider {
-  private _organizationRepository: BaseRepository<IOrganization>;
-  private _dbType: DbTypes;
-  private createRepository(dbType: DbTypes) {
+  private static _organizationRepository: BaseRepository<IOrganization>;
+  private static _dbType: DbTypes;
+  private static createRepository(dbType: DbTypes) {
     switch (dbType) {
       case DbTypes.mongoose:
-        return new OrganizationRepository();
+        return (this._organizationRepository = new OrganizationRepository());
       default:
         return new OrganizationRepository();
     }
   }
 
-  initRepository(dbType: DbTypes) {
+  static initRepository(dbType: DbTypes) {
     if (this._dbType === dbType && this._organizationRepository) {
       return this._organizationRepository;
     }
-    this._dbType === dbType;
+    this._dbType = dbType;
     return this.createRepository(dbType);
   }
 }

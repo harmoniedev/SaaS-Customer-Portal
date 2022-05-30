@@ -17,10 +17,9 @@ import { SubscriptionService } from "./SubscriptionService";
 export class UserService extends BaseService implements IUserService {
   private readonly _subscriptionService: ISubscriptionService;
   private readonly _userRepository: BaseRepository<IUser>;
-  private readonly _userFactory = new UserRepositoryProvider();
   constructor(configuration: IConfig, log: Logger) {
     super(configuration, log);
-    this._userRepository = this._userFactory.initRepository(
+    this._userRepository = UserRepositoryProvider.initRepository(
       this._configuration.dbType
     );
     this._subscriptionService = new SubscriptionService(
