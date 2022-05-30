@@ -1,9 +1,9 @@
-export function shuffle(arr) {
+export function shuffle(arr = []) {
   const newArr = [...arr];
   return newArr
-    .map((value) => ({ value, sort: Math.random() }))
-    .sort((a, b) => a.sort - b.sort)
-    .map(({ value }) => value);
+    ?.map((value) => ({ value, sort: Math.random() }))
+    ?.sort((a, b) => a.sort - b.sort)
+    ?.map(({ value }) => value);
 }
 
 export function firstOf(val: string[] | string) {

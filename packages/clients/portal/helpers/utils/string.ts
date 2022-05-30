@@ -10,4 +10,4 @@ export const slugify = (str) => {
 };
 
 export const truncate = (str, maxLength) =>
-  str.length <= maxLength ? str : `${str.slice(0, maxLength)}…`;
+  str?.length <= maxLength ? str : `${str?.slice(0, maxLength)}…`;

@@ -123,9 +123,9 @@ export const Tabel = () => {
   };
 
   useEffect(() => {
-    if (!checkedUsersList.length) return setIsCheckAll(false);
+    if (!checkedUsersList?.length) return setIsCheckAll(false);
     setIsCheckAll(usersList.every(({ _id }) => checkedUsersList.includes(_id)));
-  }, [checkedUsersList, checkedUsersList.length, usersList]);
+  }, [checkedUsersList, checkedUsersList?.length, usersList]);
 
   const incrementPage = () => {
     const page =
@@ -140,7 +140,10 @@ export const Tabel = () => {
 
   const handleSelectAll = (e) => {
     setIsCheckAll(!isCheckAll);
-    setCheckedUsersList([...checkedUsersList, ...usersList.map((item) => item._id)]);
+    setCheckedUsersList([
+      ...checkedUsersList,
+      ...usersList?.map((item) => item._id),
+    ]);
     if (isCheckAll) {
       setCheckedUsersList([]);
     }
@@ -250,13 +253,13 @@ export const Tabel = () => {
           </div>
         )}
 
-        {usersList.length === 0 && inputValue !== '' && state !== 'loading' && (
+        {usersList?.length === 0 && inputValue !== '' && state !== 'loading' && (
           <div className="flex gap-4 flex-col min-h-max py-10 items-center justify-center text-indigo-500">
             <Icon name="CommonFileSearch" className="w-10 h-10" />
             <p className="font-bold">No results matching your criteria.</p>
           </div>
         )}
-        {usersList.length === 0 && inputValue === '' && state !== 'loading' && (
+        {usersList?.length === 0 && inputValue === '' && state !== 'loading' && (
           <div className="flex gap-4 flex-col min-h-max py-10 items-center justify-center text-indigo-500">
             <Icon name="UserPlus" className="w-10 h-10" />
             <p className="font-bold">Need to add first user.</p>

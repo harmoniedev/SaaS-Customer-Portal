@@ -69,7 +69,7 @@ export class SubscriptionService
       `[SubscriptionService - getValidSubscription] start for ${logMessage}`
     );
     const validSubscriptions = await this.getValidSubscriptions(tenantId);
-    for (let index = 0; index < validSubscriptions.length; index++) {
+    for (let index = 0; index < validSubscriptions?.length; index++) {
       const subscription: ISubscription = validSubscriptions[index];
       const assignedLicensesCount = await this.getAssignedLicenseCount(
         subscription.id
@@ -353,7 +353,7 @@ export class SubscriptionService
         tenantId,
         subscriptionId,
       });
-      for (let index = 0; index < users.length; index++) {
+      for (let index = 0; index < users?.length; index++) {
         const user = users[index];
         await this._userRepository.findOneAndUpdate(
           { _id: user._id },
@@ -582,7 +582,7 @@ export class SubscriptionService
     const isSubscribe =
       subscription.saasSubscriptionStatus === SaasSubscriptionStatus.Subscribed;
     const owners: IUser[] = [];
-    for (let index = 0; index < usersQueries.length; index++) {
+    for (let index = 0; index < usersQueries?.length; index++) {
       const userQuery = usersQueries[index];
       const userData: IUser = {
         ...userQuery,

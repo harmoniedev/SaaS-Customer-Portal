@@ -33,7 +33,7 @@ export const MobileNav = ({
   const responsiveButtonSize: SizeType = responsiveButtonSizes[breakpoint];
 
   const renderMenuList = (items) =>
-    items.map(({ title, icon, id }, i) => (
+    items?.map(({ title, icon, id }, i) => (
       <button
         key={i}
         onClick={() => router.push(`/portal/${id}`)}

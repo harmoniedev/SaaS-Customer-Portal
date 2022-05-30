@@ -6,9 +6,9 @@ export const checkValidateName = (name) => {
   let nameErrors = [];
   if (name === '') {
     nameErrors = [{ message: 'Please enter your first name' }];
-  } else if (name.length < 2) {
+  } else if (name?.length < 2) {
     nameErrors = [{ message: 'Too short' }];
-  } else if (name.length > 30) {
+  } else if (name?.length > 30) {
     nameErrors = [{ message: 'Too long' }];
   } else if (!validateName(name)) {
     nameErrors = [{ message: 'Enter a valid first name' }];
@@ -23,9 +23,9 @@ export const checkValidateSurname = (surname) => {
   let familyErrors = [];
   if (surname === '') {
     familyErrors = [{ message: 'Please enter your last name' }];
-  } else if (surname.length < 2) {
+  } else if (surname?.length < 2) {
     familyErrors = [{ message: 'Too short' }];
-  } else if (surname.length > 30) {
+  } else if (surname?.length > 30) {
     familyErrors = [{ message: 'Too long' }];
   } else if (!validateName(surname)) {
     familyErrors = [{ message: 'Enter a valid last name' }];

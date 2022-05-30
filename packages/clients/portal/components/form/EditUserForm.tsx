@@ -43,7 +43,7 @@ export const EditUserForm = ({ setIsModuleOpen, user, onSubmit }) => {
       onSubmit={(e) => {
         e.preventDefault();
         const form = e.currentTarget;
-        if (errors.length) return;
+        if (errors?.length) return;
         if (!form.Role.value || form.Role.value === 'Role') {
           return setErrors([{ message: 'Select from Role list' }]);
         }
@@ -52,8 +52,8 @@ export const EditUserForm = ({ setIsModuleOpen, user, onSubmit }) => {
         }
 
         if (
-          !form.FirstName.value.trim().length ||
-          !form.LastName.value.trim().length
+          !form.FirstName.value.trim()?.length ||
+          !form.LastName.value.trim()?.length
         ) {
           return setErrors([
             {
@@ -118,12 +118,12 @@ export const EditUserForm = ({ setIsModuleOpen, user, onSubmit }) => {
               value={roleUser}
               onChange={({ target }) => {
                 setRoleUser(target.value);
-                if (target.value !== 'Role' || target.value.length !== 0)
+                if (target.value !== 'Role' || target.value?.length !== 0)
                   setErrors([]);
               }}
             >
               <option>Role</option>
-              {roleList.map((role, i) => (
+              {roleList?.map((role, i) => (
                 <option key={i} value={role}>
                   {role}
                 </option>
@@ -138,16 +138,16 @@ export const EditUserForm = ({ setIsModuleOpen, user, onSubmit }) => {
               className="border bg-white border-indigo-50 placeholder-indigo-300 md:text-base w-full"
               onChange={({ target }) => {
                 setDepartUser(target.value);
-                if (target.value !== 'Department' || target.value.length !== 0)
+                if (target.value !== 'Department' || target.value?.length !== 0)
                   setErrors([]);
               }}
             >
               <option>Department</option>
-              {departmentList.map((dept, i) => (
+              {departmentList?.map((dept, i) => (
                 <option key={i}>{dept}</option>
               ))}
             </select>
-            {!!errors.length && (
+            {!!errors?.length && (
               <div className="absolute -bottom-6 md:-bottom-8 inset-x-0">
                 <p className="text-red-400 text-md text-center lg:col-span-2">
                   {errors[0].message}

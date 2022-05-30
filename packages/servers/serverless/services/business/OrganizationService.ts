@@ -48,7 +48,7 @@ export class OrganizationService
   ): Promise<OrgLicensesDetails> {
     let licenseCount = 0;
     let assignedLicensesCount = 0;
-    for (let index = 0; index < subscriptions.length; index++) {
+    for (let index = 0; index < subscriptions?.length; index++) {
       const subscription = subscriptions[index];
       licenseCount += subscription.quantity;
       assignedLicensesCount +=

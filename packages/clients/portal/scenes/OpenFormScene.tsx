@@ -66,7 +66,6 @@ export const OpenFormScene = ({
         license,
       },
     });
-    debugger;
     if (response.status === 200) {
       setIsModuleOpen(false);
       getUsersData();

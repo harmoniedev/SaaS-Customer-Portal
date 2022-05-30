@@ -14,7 +14,7 @@ export const DeleteUsersForm = ({
       className="inline-block lg:w-[45vw]"
       onSubmit={(e) => {
         e.preventDefault();
-        checkedList.map((id) => onSubmit({ id }));
+        checkedList?.map((id) => onSubmit({ id }));
       }}
     >
       <div className="shadow-xl bg-white border border-black border-opacity-5 text-center px-8 py-4 lg:px-16 lg:py-10">
@@ -25,7 +25,7 @@ export const DeleteUsersForm = ({
           </p>
         ) : (
           <p className="my-10 text-left font-normal leading-8">
-            Permanenly delete {checkedList.length} users? This can’t undo this.
+            Permanenly delete {checkedList?.length} users? This can’t undo this.
           </p>
         )}
 

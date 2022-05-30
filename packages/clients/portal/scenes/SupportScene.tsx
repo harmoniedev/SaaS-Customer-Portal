@@ -39,7 +39,7 @@ export const SupportScene = () => {
             <ul
               className={cx('grid gap-3.5 sm:gap-8', 'grid-cols-1 md:grid-cols-3')}
             >
-              {listCardItems.map(({ title, label, image, href }, i) => (
+              {listCardItems?.map(({ title, label, image, href }, i) => (
                 <ArticleCard
                   key={i}
                   label={label}

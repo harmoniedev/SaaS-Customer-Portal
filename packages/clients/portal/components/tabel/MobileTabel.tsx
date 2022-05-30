@@ -48,7 +48,7 @@ export const MobileTabel = ({
                   onChange={handleSelectAll}
                   checked={isCheckAll}
                 />
-                {checkedList.length > 0 && (
+                {checkedList?.length > 0 && (
                   <div
                     className="p-1 cursor-pointer focus:text-blue-500"
                     onClick={() => {
@@ -63,7 +63,7 @@ export const MobileTabel = ({
             </div>
             <div>{children}</div>
 
-            {items.length > 0 && pagesInfo[0].maxPage > 0 && (
+            {items?.length > 0 && pagesInfo[0].maxPage > 0 && (
               <div className="px-2 py-3">
                 <div className="flex items-center justify-between">
                   <p className="text-indigo-500 font-medium">
