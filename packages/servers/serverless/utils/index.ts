@@ -1,4 +1,4 @@
-export * from "./InitializedApp";
+export * from "./AppLoader";
 export * from "./httpProvider";
 export * from "./configuration";
 export * from "./authentication";

@@ -29,6 +29,7 @@ const dataAPI = new DataAPI();
 
 export const Tabel = () => {
   const { accounts } = useMsal();
+  debugger;
   const { screenWidth } = useBreakpoint();
   const router = useRouter();
 
@@ -55,7 +56,7 @@ export const Tabel = () => {
   const isMobile = screenWidth < BREAKPOINTS.md;
   const storadgeKey = `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---`;
   const token = JSON.parse(sessionStorage.getItem(storadgeKey)).secret;
-
+  debugger;
   const getLastShowedResultNumber = () => {
     let lastNumber = pagesInfo[0].perPage * (pageNumber + 1);
     return lastNumber <= pagesInfo[0].total ? lastNumber : pagesInfo[0].total;

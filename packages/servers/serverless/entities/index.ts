@@ -1,5 +1,5 @@
-export * from "./uiModels";
+export * from "./models";
 export * from "./interfaces";
-export * from "./uiModels";
+export * from "./models";
 export * from "./enums";
 export * from "./sort";

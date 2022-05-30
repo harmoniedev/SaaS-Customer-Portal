@@ -1,4 +1,4 @@
-import { UserModel } from "../../dataAccess/mongoDb/schema";
+import { UserModel } from "../dataAccess/mongoDb/schema";
 import { IUser } from "../../entities/interfaces";
 import { MongooseRepository } from "./base";
 

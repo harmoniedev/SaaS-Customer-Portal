@@ -1,6 +1,6 @@
 import { Logger } from "@azure/functions";
 import { IConfig, MutateUserResponse, SortQuery } from "../entities";
-import { EditUser, ViewUser, AddUserView } from "../entities/uiModels/user";
+import { EditUser, ViewUser, AddUserView } from "../entities/models/user";
 import { IUserService, UserService } from "../services";
 import { BaseController } from "./base/BaseController";
 export class UserController extends BaseController {

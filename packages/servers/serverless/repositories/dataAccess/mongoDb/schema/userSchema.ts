@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { IUser } from "../../../entities";
+import { IUser } from "../../../../entities";
 
 const userSchema = new Schema<IUser>({
   tenantId: String,

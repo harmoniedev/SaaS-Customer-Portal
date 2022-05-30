@@ -1,14 +1,24 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
-import { OrganizationController, SubscriptionController } from "../controllers";
+import { OrganizationController } from "../controllers";
 import { ErrorResponse } from "../entities";
-import { InitializedApp } from "../utils";
+import { AppLoader } from "../utils";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
   const { log } = context;
-  const { appConfig } = await InitializedApp.initializedApp();
+  const { appConfig, reqValidationResults } = await AppLoader.initApp(
+    req,
+    true
+  );
+  if (reqValidationResults.status !== 200) {
+    context.res = {
+      status: reqValidationResults.status,
+      body: reqValidationResults.message,
+    };
+    return;
+  }
   const organizationController = new OrganizationController(appConfig, log);
   let response = {};
   if (req?.query?.tid) {
