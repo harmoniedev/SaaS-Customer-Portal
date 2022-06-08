@@ -77,19 +77,36 @@ export const Tabel = () => {
       direction: sortedFrom,
     });
 
-    if (Math.ceil(response.total / +response.perPage) < +router.query?.page) {
+
+    const perPage = 10;
+
+    if (Math.ceil(response.total / perPage) < +router.query?.page) {
       addParams([
-        { key: 'page', value: Math.ceil(response.total / response.perPage) },
+        { key: 'page', value: Math.ceil(response.total / perPage) },
       ]);
       return;
     }
     setPagesInfo([
       {
-        maxPage: Math.ceil(response.total / response.perPage),
+        maxPage: Math.ceil(response.total / perPage),
         total: response.total,
-        perPage: Number(response.perPage),
+        perPage: perPage,
       },
     ]);
+
+    // if (Math.ceil(response.total / +response.perPage) < +router.query?.page) {
+    //   addParams([
+    //     { key: 'page', value: Math.ceil(response.total / response.perPage) },
+    //   ]);
+    //   return;
+    // }
+    // setPagesInfo([
+    //   {
+    //     maxPage: Math.ceil(response.total / response.perPage),
+    //     total: response.total,
+    //     perPage: Number(response.perPage),
+    //   },
+    // ]);
 
     setUsersList(response.users);
     setState('success');

@@ -14,8 +14,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 
   if (req.method === 'GET') {
     const { orderedby, query, direction, page = 0, perPage = 10 } = req.query;
-    const pageNumber = +page || 0;
-    const perPageNumber = +perPage || 10;
+    // const pageNumber = +page || 0;
+    // const perPageNumber = +perPage || 10;
     const orderedKey = Array.isArray(orderedby) ? orderedby[0] : orderedby;
     const directionValue = direction === 'asc' ? 1 : -1;
     const sort = { [orderedKey]: directionValue };
@@ -48,10 +48,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
         { $sort: { ...sort } },
         {
           $facet: {
-            users: [
-              { $skip: pageNumber * perPageNumber },
-              { $limit: perPageNumber },
-            ],
+            users: [],
+            // users: [
+            //   { $skip: pageNumber * perPageNumber },
+            //   { $limit: perPageNumber },
+            // ],
             pagination: [{ $count: 'total' }],
           },
         },
@@ -62,8 +63,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
       JSON.stringify({
         users: data[0].users,
         total: data[0].pagination[0] ? data[0].pagination[0].total : 0,
-        page,
-        perPage,
+        // page,
+        // perPage,
       }),
     );
   } else if (req.method === 'DELETE') {
