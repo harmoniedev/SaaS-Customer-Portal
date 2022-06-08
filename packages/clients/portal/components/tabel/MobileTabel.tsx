@@ -3,14 +3,12 @@ import React from 'react';
 import { Paper } from '../paper/Paper';
 import { UserType } from '../../types';
 import { Button } from '../buttons/Button';
+import { Checkbox } from '../checkbox/Checkbox';
 
 export type MobileTabelProps = {
   items: UserType[];
-  handleSelectAll: (e: any) => void;
+  handleSelectAllOnPage: (e: any) => void;
   isCheckAll: boolean;
-  checkedList: string[];
-  setIsModuleOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setModalNameOpen: React.Dispatch<React.SetStateAction<string>>;
   pageNumber: number;
   decrementPage: () => void;
   incrementPage: () => void;
@@ -21,11 +19,8 @@ export type MobileTabelProps = {
 
 export const MobileTabel = ({
   items,
-  setIsModuleOpen,
-  setModalNameOpen,
-  handleSelectAll,
+  handleSelectAllOnPage,
   isCheckAll,
-  checkedList,
   pageNumber,
   decrementPage,
   incrementPage,
@@ -39,26 +34,12 @@ export const MobileTabel = ({
         <div className="shadow-md">
           <div className="w-full text-left text-indigo-400">
             <div className="text-xs font-normal text-indigo-400 uppercase bg-gray-200">
-              <div className="flex gap-4 items-center p-2">
-                <input
-                  type="checkbox"
-                  name="selectAll"
-                  id="selectAll"
-                  className="w-6 h-6 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                  onChange={handleSelectAll}
+              <div className="flex items-center p-2">
+                <Checkbox
+                  id={'selectAll'}
+                  handelCheckbox={handleSelectAllOnPage}
                   checked={isCheckAll}
                 />
-                {checkedList.length > 0 && (
-                  <div
-                    className="p-1 cursor-pointer focus:text-blue-500"
-                    onClick={() => {
-                      setModalNameOpen('deleteAll');
-                      setIsModuleOpen(true);
-                    }}
-                  >
-                    <p className="text-indigo-500 font-medium">Delete Users</p>
-                  </div>
-                )}
               </div>
             </div>
             <div>{children}</div>

@@ -6,16 +6,14 @@ import { UserType } from '../../types';
 import { Button } from '../buttons/Button';
 import { ParamsListType } from '../../types';
 import { tableHeaders } from './TabelOptions';
+import { Checkbox } from '../checkbox/Checkbox';
 
 export type DeskTabelProps = {
   sortBy: string;
   setSort: (value: ParamsListType[]) => void;
   items: UserType[];
-  handleSelectAll: (e: any) => void;
+  handleSelectAllOnPage: any;
   isCheckAll: boolean;
-  checkedList: string[];
-  setIsModuleOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setModalNameOpen: React.Dispatch<React.SetStateAction<string>>;
   sortedFrom: string;
   setSortedFrom: (value: string) => void;
   pageNumber: number;
@@ -29,11 +27,8 @@ export type DeskTabelProps = {
 export const DeskTabel = ({
   setSort,
   items,
-  handleSelectAll,
+  handleSelectAllOnPage,
   isCheckAll,
-  checkedList,
-  setIsModuleOpen,
-  setModalNameOpen,
   sortedFrom,
   setSortedFrom,
   pageNumber,
@@ -61,14 +56,11 @@ export const DeskTabel = ({
         <table className="table-auto w-full text-left">
           <thead className="uppercase bg-gray-200">
             <tr>
-              <th scope="col" className="px-5">
+              <th scope="col" className="pl-5">
                 <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    className="w-6 h-6 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                    name="selectAll"
-                    id="selectAll"
-                    onChange={handleSelectAll}
+                  <Checkbox
+                    id={'selectAll'}
+                    handelCheckbox={handleSelectAllOnPage}
                     checked={isCheckAll}
                   />
                 </div>
@@ -108,17 +100,6 @@ export const DeskTabel = ({
                 {getLastShowedResultNumber()} of {pagesInfo[0].total} results
               </p>
               <div className="flex gap-3">
-                {checkedList.length > 0 && (
-                  <Button
-                    theme="white"
-                    as="button"
-                    onClick={() => {
-                      setModalNameOpen('deleteAll');
-                      setIsModuleOpen(true);
-                    }}
-                    label="Delete Users"
-                  />
-                )}
                 <Button
                   theme="white"
                   onClick={decrementPage}

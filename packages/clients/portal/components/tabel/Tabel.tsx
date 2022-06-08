@@ -14,12 +14,14 @@ import { BREAKPOINTS, useBreakpoint } from '../../hooks/useBreakpoint';
 import { DialogMemo as Dialog } from '../../components/dialog/Dialog';
 import { Spinner } from '../loaders/Spinner';
 import { firstOf } from '../../helpers/utils/array';
+import { formatNumberWithCommas } from '../../helpers/utils/string';
 import {
   UserFields,
   StaticState,
   StaticFormName,
   ParamsListType,
 } from '../../types';
+import { Filter } from '../filter/Filter';
 
 import DataAPI from '../../api/data';
 import { useRouter } from 'next/router';
@@ -39,6 +41,8 @@ export const Tabel = () => {
   const [isModuleOpen, setIsModuleOpen] = useState<boolean>(false);
   const [checkedUsersList, setCheckedUsersList] = useState<string[]>([]);
   const [modalNameOpen, setModalNameOpen] = useState<StaticFormName>('add');
+  const [isSelectedAll, setIsSelectedAll] = useState(false);
+  const [isShowMobileSearch, setIsShowMobileSearch] = useState(false);
   const [inputValue, setInputValue] = useState<string>(
     firstOf(router.query?.search) || '',
   );
@@ -73,10 +77,10 @@ export const Tabel = () => {
       direction: sortedFrom,
     });
 
-    const maxPage = Math.ceil(response.total / +response.perPage);
-
-    if (maxPage < +router.query?.page) {
-      addParams([{ key: 'page', value: maxPage }]);
+    if (Math.ceil(response.total / +response.perPage) < +router.query?.page) {
+      addParams([
+        { key: 'page', value: Math.ceil(response.total / response.perPage) },
+      ]);
       return;
     }
     setPagesInfo([
@@ -104,6 +108,14 @@ export const Tabel = () => {
     if (typeof window === undefined || !router.query) return;
     getUsersData();
   }, [pageNumber, sortedFrom, debouncedInputValue, sortBy]);
+
+  useEffect(() => {
+    if (checkedUsersList.length === pagesInfo[0]?.total) {
+      setIsSelectedAll(true);
+    } else {
+      setIsSelectedAll(false);
+    }
+  }, [checkedUsersList.length, pagesInfo]);
 
   const addParams = (list: ParamsListType[] = []) => {
     let newPairs = {};
@@ -137,16 +149,45 @@ export const Tabel = () => {
     addParams([{ key: 'page', value: page + 1 }]);
   };
 
-  const handleSelectAll = (e) => {
-    setIsCheckAll(!isCheckAll);
-    setCheckedUsersList([...checkedUsersList, ...usersList.map((item) => item._id)]);
-    if (isCheckAll) {
+  const handleSelectAll = async (e) => {
+    if (isSelectedAll) {
       setCheckedUsersList([]);
+    } else {
+      const response = await dataAPI.getUsers({
+        tid: accounts[0]?.tenantId,
+        token,
+        query: '',
+        page: 0,
+        perPage: pagesInfo[0].total,
+        orderedby: sortBy,
+        direction: sortedFrom,
+      });
+      setCheckedUsersList([...response.users.map((item) => item._id)]);
+    }
+  };
+
+  const handleSelectAllOnPage = (e) => {
+    setIsCheckAll(!isCheckAll);
+    let newListId;
+
+    if (isCheckAll) {
+      newListId = usersList.map((item) => item._id);
+
+      setCheckedUsersList([
+        ...checkedUsersList.filter((item) => !newListId.includes(item)),
+      ]);
+    } else {
+      newListId = [...usersList.map((item) => item._id)].filter(
+        (item) => !checkedUsersList.includes(item),
+      );
+
+      setCheckedUsersList([...checkedUsersList, ...newListId]);
     }
   };
 
   const handelCheckbox = (e) => {
     const { id, checked } = e.target;
+
     setIsCheckAll(false);
     setCheckedUsersList([...checkedUsersList, id]);
     if (!checked) {
@@ -156,28 +197,92 @@ export const Tabel = () => {
 
   return (
     <div className="pb-20">
-      <div className="flex flex-col lg:flex-row justify-between lg:items-center mb-5">
-        <Title size="xs" className="mb-5">
-          Users
-        </Title>
-        <div className="flex flex-rows gap-3 lg:gap-6 justify-end">
-          <Search
-            inputValue={inputValue}
-            setInputValue={(value) => {
-              addParams([{ key: 'search', value }]);
-            }}
-            isMobile={isMobile}
-          />
-          <Button
-            as="button"
-            label="Add User"
-            onClick={() => {
-              setModalNameOpen('add');
-              setIsModuleOpen(!isModuleOpen);
-            }}
-            size="md"
-            key={'add'}
-          />
+      <div className="flex flex-col justify-between gap-3 mb-3">
+        <div className="flex gap-4 text-indigo-500 mb-4 md:mb-0 items-center">
+          <Title size="xs">Users</Title>
+          {Boolean(checkedUsersList.length) && !isShowMobileSearch && (
+            <div className="py-0.5 px-2 bg-indigo-50">
+              <p>{`${checkedUsersList.length} of ${formatNumberWithCommas(
+                pagesInfo[0].total,
+              )} selected`}</p>
+            </div>
+          )}
+          <div className="ml-auto">
+            {isMobile ? (
+              <div className="flex items-center gap-2">
+                {isShowMobileSearch && (
+                  <Search
+                    inputValue={inputValue}
+                    setInputValue={(value) => {
+                      addParams([{ key: 'search', value }]);
+                    }}
+                  />
+                )}
+                <Button
+                  icon="SearchIcon"
+                  as="button"
+                  size="md"
+                  onClick={() => setIsShowMobileSearch(!isShowMobileSearch)}
+                />
+              </div>
+            ) : (
+              <Search
+                inputValue={inputValue}
+                setInputValue={(value) => {
+                  addParams([{ key: 'search', value }]);
+                }}
+              />
+            )}
+          </div>
+        </div>
+        <div className="flex flex-rows gap-3 lg:gap-6 md:justify-end">
+          <div className="mr-auto">
+            <Button
+              label={isSelectedAll ? 'Deselect All' : 'Select All'}
+              align="center"
+              size="md"
+              onClick={handleSelectAll}
+              theme={isSelectedAll ? 'red' : 'green'}
+            />
+          </div>
+          <Filter isMobile={isMobile} />
+          {Boolean(checkedUsersList.length) ? (
+            <>
+              <Button
+                as="button"
+                label={`${isMobile ? '' : 'Export'}`}
+                size="md"
+                icon="ArrowCircleUpIcon"
+                iconPosition="before"
+                align="center"
+              />
+              <Button
+                as="button"
+                label={`${isMobile ? '' : 'Delete'}`}
+                size="md"
+                icon="TrashIcon"
+                iconPosition="before"
+                theme="red"
+                align="center"
+                onClick={() => {
+                  setModalNameOpen('deleteAll');
+                  setIsModuleOpen(true);
+                }}
+              />
+            </>
+          ) : (
+            <Button
+              as="button"
+              label={`${isMobile ? 'Add' : 'Add User'}`}
+              onClick={() => {
+                setModalNameOpen('add');
+                setIsModuleOpen(!isModuleOpen);
+              }}
+              // icon="UserAddIcon"
+              size="md"
+              key={'add'}
+            />
+          )}
         </div>
       </div>
       <Paper>
@@ -186,16 +291,14 @@ export const Tabel = () => {
             {isMobile ? (
               <MobileTabel
                 items={usersList}
-                setModalNameOpen={setModalNameOpen}
-                setIsModuleOpen={setIsModuleOpen}
-                handleSelectAll={handleSelectAll}
+                handleSelectAllOnPage={handleSelectAllOnPage}
                 getLastShowedResultNumber={getLastShowedResultNumber}
-                checkedList={checkedUsersList}
                 isCheckAll={isCheckAll}
                 pageNumber={pageNumber}
                 decrementPage={decrementPage}
                 incrementPage={incrementPage}
                 pagesInfo={pagesInfo}
+                // setSort={(value) => addParams([{ key: 'sortBy', value }])}
               >
                 <UsersList
                   activeUser={activeUser}
@@ -211,13 +314,10 @@ export const Tabel = () => {
             ) : (
               <DeskTabel
                 setSort={(value) => addParams(value)}
-                setIsModuleOpen={setIsModuleOpen}
                 getLastShowedResultNumber={getLastShowedResultNumber}
-                handleSelectAll={handleSelectAll}
-                checkedList={checkedUsersList}
+                handleSelectAllOnPage={handleSelectAllOnPage}
                 isCheckAll={isCheckAll}
                 items={usersList}
-                setModalNameOpen={setModalNameOpen}
                 setSortedFrom={(value) => addParams([{ key: 'direction', value }])}
                 sortBy={sortBy}
                 sortedFrom={sortedFrom}

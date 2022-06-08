@@ -4,6 +4,7 @@ import { Icon } from '../components/icons/Icon';
 import { formatDate } from '../helpers/utils/date';
 import { truncate } from '../helpers/utils/string';
 import { UserType } from '../types';
+import { Checkbox } from '../components/checkbox/Checkbox';
 
 export type UsersListSceneProps = {
   items: UserType[];
@@ -47,7 +48,7 @@ export const UsersListScene = ({
       return (
         <tr
           key={i}
-          className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-600"
+          className="bg-white border-bhover:bg-blue-50"
           onMouseOver={() => {
             setActiveUser(_id);
             setShowMenu(true);
@@ -58,14 +59,11 @@ export const UsersListScene = ({
         >
           <td className="w-4 p-5">
             <div className="flex items-center">
-              <input
+              <Checkbox
                 id={_id}
-                type="checkbox"
-                className="w-6 h-6 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                onChange={handelCheckbox}
+                handelCheckbox={handelCheckbox}
                 checked={checkedList.includes(_id)}
               />
-              <label className="sr-only">checkbox</label>
             </div>
           </td>
           <th scope="row" className="whitespace-nowrap">
@@ -120,11 +118,9 @@ export const UsersListScene = ({
             }}
           >
             <div>
-              <input
-                type="checkbox"
+              <Checkbox
                 id={_id}
-                className="w-6 h-6 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                onChange={handelCheckbox}
+                handelCheckbox={handelCheckbox}
                 checked={checkedList.includes(_id)}
               />
             </div>
