@@ -7,8 +7,8 @@ import { Button } from '../../components/buttons/Button';
 import { SizeType } from '../../components/buttons/ButtonOptions';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { FullScreenModalMemo as FullScreenModal } from '../../components/modals/FullScreenModal';
-import { menuItems } from '../LayoutOptions';
 import { Icon } from '../../components/icons/Icon';
+import { MenuItem } from '../../types';
 
 const responsiveButtonSizes: { [key: string]: SizeType } = {
   md: 'sm',
@@ -20,12 +20,14 @@ export type MobileNavProps = {
   showUserMenu: boolean;
   onHamburgerClick: (e: any) => void;
   open: boolean;
+  menuItems: MenuItem[]
 };
 
 export const MobileNav = ({
   showUserMenu = true,
   onHamburgerClick,
   open,
+  menuItems
 }: MobileNavProps) => {
   const router = useRouter();
   const { instance, accounts } = useMsal();
@@ -33,17 +35,17 @@ export const MobileNav = ({
   const responsiveButtonSize: SizeType = responsiveButtonSizes[breakpoint];
 
   const renderMenuList = (items) =>
-    items.map(({ title, icon, id }, i) => (
+    items.map(({ label, icon, external }, i) => (
       <button
         key={i}
-        onClick={() => router.push(`/portal/${id}`)}
+        onClick={() => router.push(`/portal${external}`)}
         className={cx('py-4 px-12 text-indigo-500 w-full font-semibold', {
-          ['bg-indigo-50']: `/portal/${id}` === router.pathname,
+          ['bg-indigo-50']: `/portal${external}` === router.pathname,
         })}
       >
         <div className="flex gap-4">
           {icon && <Icon name={icon} className="w-6 h-6 " />}
-          {title}
+          {label}
         </div>
       </button>
     ));

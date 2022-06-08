@@ -6,6 +6,13 @@ export type UserType = {
   department: string;
 };
 
+export type MenuItem = {
+  label: string,
+  external: string,
+  key: string,
+  icon?: any
+}
+
 export type UserFields = {
   _id: string;
   lastActiveDate: string;

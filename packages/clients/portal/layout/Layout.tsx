@@ -88,7 +88,7 @@ export const Layout = ({ children }: CardProps) => {
       {
         isNavigation ? (
           <>
-            <Nav />
+            <Nav menuItems={menuItems} />
             <div className="grid grid-cols-1 overflow-y-scroll lg:overflow-hidden lg:grid-cols-[22.229vw_1fr]">
               {!isMobile && (
                 <div className="bg-gray-50 lg:pt-4">{renderMenuList(menuItems)}</div>
@@ -104,7 +104,7 @@ export const Layout = ({ children }: CardProps) => {
           </>
         ) : (
           <>
-            <Nav />
+            <Nav menuItems={menuItems} />
             <div className="h-[94vh] overflow-auto text-indigo-500">
               {children}
             </div> 
