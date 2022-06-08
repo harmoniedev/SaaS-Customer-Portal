@@ -10,11 +10,13 @@ import LogoImage from '../../public/logo.svg';
 import { DeskNavMemo as DeskNav } from './DeskNav';
 import { MobileNavMemo as MobileNav } from './MobileNav';
 import { TitleMemo as Title } from '../../components/title/Title';
+import { MenuItem } from '../../types';
 
 export type NavProps = {
   showUserMenu?: boolean;
+  menuItems?: MenuItem[]
 };
-export const Nav = ({ showUserMenu = true }: NavProps) => {
+export const Nav = ({ showUserMenu = true, menuItems = [] }: NavProps) => {
   const { screenWidth } = useBreakpoint();
   const [openDesckMenu, setOpenDesckMenu] = useState(false);
   const [mobileNavIsOpen, setMobileNavIsOpen] = useState<boolean>(false);
@@ -43,6 +45,7 @@ export const Nav = ({ showUserMenu = true }: NavProps) => {
         </Title>
         {isMobile ? (
           <MobileNav
+            menuItems={menuItems}
             open={mobileNavIsOpen}
             onHamburgerClick={onHamburgerClick}
             showUserMenu={showUserMenu}

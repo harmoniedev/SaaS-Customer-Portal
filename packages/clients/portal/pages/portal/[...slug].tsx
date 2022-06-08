@@ -3,9 +3,10 @@ import { LayoutMemo as Layout } from '../../layout/Layout';
 import { LandingPageSceneMemo as LandingPageScene } from '../../scenes/LandingPageScene';
 
 function Page({ slug }) {
+  const link = slug.join('/');
   return (
-    <Layout isNavigation={false}>
-      <LandingPageScene slug={slug} />
+    <Layout>
+      <LandingPageScene slug={link} />
     </Layout>
   );
 }
