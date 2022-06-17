@@ -16,20 +16,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
     const { orderedby, query, direction, page = 0, perPage = 10 } = req.query;
     // const pageNumber = +page || 0;
     // const perPageNumber = +perPage || 10;
-    const orderedKey = Array.isArray(orderedby) ? orderedby[0] : orderedby;
-    const directionValue = direction === 'asc' ? 1 : -1;
-    const sort = { [orderedKey]: directionValue };
+    // const orderedKey = Array.isArray(orderedby) ? orderedby[0] : orderedby;
+    // const directionValue = direction === 'asc' ? 1 : -1;
+    // const sort = { [orderedKey]: directionValue };
     const data = await db
       .collection('users')
       .aggregate([
-        {
-          $match: {
-            $or: [
-              { name: { $regex: query, $options: 'i' } },
-              { email: { $regex: query, $options: 'i' } },
-            ],
-          },
-        },
+        // {
+        //   $match: {
+        //     $or: [
+        //       { name: { $regex: query, $options: 'i' } },
+        //       { email: { $regex: query, $options: 'i' } },
+        //     ],
+        //   },
+        // },
         { $match: { tid: tid } },
         {
           $project: {
@@ -45,7 +45,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
             },
           },
         },
-        { $sort: { ...sort } },
+        // { $sort: { ...sort } },
         {
           $facet: {
             users: [],

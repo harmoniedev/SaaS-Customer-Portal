@@ -65,6 +65,8 @@ export const Tabel = () => {
     return lastNumber <= pagesInfo[0].total ? lastNumber : pagesInfo[0].total;
   };
 
+  console.log(usersList)
+
   const getUsersData = async () => {
     setState('loading');
     const response = await dataAPI.getUsers({
