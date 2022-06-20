@@ -1,21 +1,30 @@
 import { useMsal } from '@azure/msal-react';
 import { useIsAuthenticated } from '@azure/msal-react';
+import Cookies from 'js-cookie'
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '../components/buttons/Button';
 import { Title } from '../components/title/Title';
 import { Spinner } from '../components/loaders/Spinner';
 import { Icon } from '../components/icons/Icon';
 import { NavMemo as Nav } from '../layout/Nav/Nav';
+import { InputMemo } from '../components/input/Input';
+import hash from 'object-hash';
 
 export default function Page() {
   const { instance, inProgress } = useMsal();
   const router = useRouter();
   const isAuthenticated = useIsAuthenticated();
+  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const token = Cookies.get('download-token');
+
+  /// errors handling for field and submit button
+
 
   useEffect(() => {
-    if (isAuthenticated && inProgress === 'none') {
+    if (isAuthenticated && inProgress === 'none' || token) {
       router.push('/portal/dashboard');
     }
   });
@@ -26,6 +35,23 @@ export default function Page() {
         <Spinner />
       </div>
     );
+  }
+
+  const onSubmit = async (ev) => {
+    ev.preventDefault();
+    const hashedPassword = hash({ password });
+    const options = {
+      method: 'post',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password: hashedPassword }),
+    };
+    const res = await fetch(`api/salesforce-login`, options);
+    if (res.status === 200) {
+      router.push('/portal/dashboard');
+    }
   }
 
   if (isAuthenticated) return null;
@@ -43,6 +69,46 @@ export default function Page() {
         <Title size="lg" className="text-indigo-500 text-center font-extrabold">
           Sign in to the harmon.ie Customer Portal{' '}
         </Title>
+        <p className='text-indigo-300'>
+          Please enter your email and password
+        </p>
+        <form className='w-full' onSubmit={onSubmit}>
+          <InputMemo
+            className='w-full mb-4 border-indigo-50 placeholder-indigo-200'
+            title="Email"
+            name="email"
+            placeholder="Email"
+            required
+            value={email}
+            setValue={(value) => setEmail(value)}
+            onFocus={(ev) => ev.target.removeAttribute('readOnly')}
+            readOnly={true}
+          />
+          <InputMemo
+            className='w-full border-indigo-50 mb-4 placeholder-indigo-200'
+            title="Password"
+            name="password"
+            type="password"
+            placeholder="Password"
+            required
+            value={password}
+            setValue={(value) => setPassword(value)}
+            onFocus={(ev) => ev.target.removeAttribute('readOnly')}
+            readOnly={true}
+          />
+          <Button
+            label="Sign in"
+            onClick={onSubmit}
+            theme="blue"
+            iconPosition="before"
+            as="button"
+            stretch
+          />
+        </form>
+
+        <div className='w-full h-px bg-indigo-50 my-4 relative'>
+          <span className='text-indigo-300 px-4 bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2'>or</span>
+        </div>
         <Button
           label="Sign in with Microsoft"
           onClick={() => instance.loginRedirect()}

@@ -9,8 +9,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
   if (!req.headers.authorization)
     res.status(403).send(JSON.stringify({ status: 403, message: 'Not Allowed' }));
   const { tid } = req.query;
-  if (!tid)
-    res.status(404).send(JSON.stringify({ status: 404, message: 'Not Found' }));
+  const tenant = tid !== 'undefined' ? tid : process.env.APP_TENANT_ID
+  // if (!tid)
+  //   res.status(404).send(JSON.stringify({ status: 404, message: 'Not Found' }));
 
   if (req.method === 'GET') {
     const { orderedby, query, direction, page = 0, perPage = 10 } = req.query;
@@ -30,7 +31,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
         //     ],
         //   },
         // },
-        { $match: { tid: tid } },
+        { $match: { tid: tenant } },
         {
           $project: {
             name: 1,
@@ -102,7 +103,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 
     const user = {
       ...payload,
-      tid,
+      tid: tenant,
       lastActiveDate: new Date().toISOString(),
     };
 
