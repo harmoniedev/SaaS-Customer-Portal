@@ -12,6 +12,7 @@ import { NavMemo as Nav } from '../layout/Nav/Nav';
 import { InputMemo } from '../components/input/Input';
 import hash from 'object-hash';
 
+
 export default function Page() {
   const { instance, inProgress } = useMsal();
   const router = useRouter();

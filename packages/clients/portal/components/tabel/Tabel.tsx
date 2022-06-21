@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { CSVLink } from "react-csv";
 import { useDebounce } from '../../hooks/useDebounce';
 
 import { DeskTabelMemo as DeskTabel } from './DeskTabel';
@@ -14,8 +15,8 @@ import { DialogMemo as Dialog } from '../../components/dialog/Dialog';
 import { Spinner } from '../loaders/Spinner';
 import { firstOf } from '../../helpers/utils/array';
 import { formatNumberWithCommas } from '../../helpers/utils/string';
+import { fileHeaders } from './TabelOptions';
 import {
-  UserFields,
   StaticState,
   StaticFormName,
   ParamsListType,
@@ -50,8 +51,9 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
     firstOf(router.query?.direction) || 'asc',
   );
 
-  const exportCcv = () => {
-    const usersToExport = listAllUsers
+  const getUsersToExport = () => {
+    console.log('here')
+    return listAllUsers
       .filter(user => checkedUsersList.includes(user.email))
       .map(user => ({
         "Users/Purchased": user.email,
@@ -59,10 +61,10 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
         "Product Name": user.product_name,
         "Build Version": user.build_version,
         "First Access": user.first_date ? new Date(user.first_date * 1000).toLocaleString() : '',
-        "Last Access": user.last_date ? new Date (user.last_date * 1000).toLocaleString() : ''
+        "Last Access": user.last_date ? new Date(user.last_date * 1000).toLocaleString() : ''
       }))
   }
-
+  const usersForExport = useMemo(() => getUsersToExport(), [listAllUsers, checkedUsersList]);
 
   const debouncedInputValue = useDebounce(inputValue, 500);
   const isMobile = screenWidth < BREAKPOINTS.md;
@@ -254,15 +256,23 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
           <Filter isMobile={isMobile} />
           {Boolean(checkedUsersList.length) ? (
             <>
-              <Button
+              {/* <Button
                 as="button"
                 label={`${isMobile ? '' : 'Export'}`}
                 size="md"
                 icon="ArrowCircleUpIcon"
                 iconPosition="before"
                 align="center"
-                onClick={exportCcv}
-              />
+              > */}
+                <CSVLink
+                  headers={fileHeaders}
+                  data={usersForExport}
+                  filename="results.csv"
+                  target="_blank"
+                >
+                  Export
+                </CSVLink>
+              {/* </Button> */}
               <Button
                 as="button"
                 label={`${isMobile ? '' : 'Delete'}`}
