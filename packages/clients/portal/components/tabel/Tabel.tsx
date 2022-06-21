@@ -50,6 +50,20 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
     firstOf(router.query?.direction) || 'asc',
   );
 
+  const exportCcv = () => {
+    const usersToExport = listAllUsers
+      .filter(user => checkedUsersList.includes(user.email))
+      .map(user => ({
+        "Users/Purchased": user.email,
+        "Base Domain": user.publicsuffix,
+        "Product Name": user.product_name,
+        "Build Version": user.build_version,
+        "First Access": user.first_date ? new Date(user.first_date * 1000).toLocaleString() : '',
+        "Last Access": user.last_date ? new Date (user.last_date * 1000).toLocaleString() : ''
+      }))
+  }
+
+
   const debouncedInputValue = useDebounce(inputValue, 500);
   const isMobile = screenWidth < BREAKPOINTS.md;
 
@@ -247,6 +261,7 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
                 icon="ArrowCircleUpIcon"
                 iconPosition="before"
                 align="center"
+                onClick={exportCcv}
               />
               <Button
                 as="button"
@@ -362,7 +377,6 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
           items={usersList}
           modalNameOpen={modalNameOpen}
           setIsModuleOpen={setIsModuleOpen}
-          // getUsersData={getUsersData}
           setUsersList={setUsersList}
           setCheckedUsersList={setCheckedUsersList}
         />

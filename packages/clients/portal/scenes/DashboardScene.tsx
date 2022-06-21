@@ -71,13 +71,6 @@ export const DashboardScene = () => {
             <Title size="lg" className="">
               Users and licenses
             </Title>
-            <Button
-              as="button"
-              label={isMobile ? 'Import' : 'Import users'}
-              size="md"
-              icon="ArrowCircleDownIcon"
-              iconPosition="before"
-            />
           </div>
           <div className="mt-8">
             <div className="mb-10">
