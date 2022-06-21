@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 
 import { Icon } from '../components/icons/Icon';
 import { formatDate } from '../helpers/utils/date';
@@ -44,13 +44,13 @@ export const UsersListScene = ({
   };
 
   const trElement = (items) =>
-    items.map(({ department, email, role, name, lastActiveDate, _id }, i) => {
+    items.map(({ department, email, role, name, build_version, lastActiveDate, _id, last_date, first_date, product_name }, i) => {
       return (
         <tr
           key={i}
           className="bg-white border-bhover:bg-blue-50"
           onMouseOver={() => {
-            setActiveUser(_id);
+            setActiveUser(email);
             setShowMenu(true);
           }}
           onMouseOut={() => {
@@ -69,25 +69,15 @@ export const UsersListScene = ({
           <th scope="row" className="whitespace-nowrap">
             <div className="flex items-center gap-4">
               <Icon name="UserCircleBlue" className="w-10 h-10" />
-              <div>
-                <p>{name}</p>
-                <p className="text-indigo-300 font-normal">{email}</p>
-              </div>
+              <p className="text-indigo-300 font-normal">{email}</p>
             </div>
           </th>
-          <td className="text-indigo-300">{department}</td>
-          <td className="text-indigo-300">{formatDate(lastActiveDate)}</td>
+          <td className="text-indigo-300">{product_name}</td>
+          <td className="text-indigo-300">{truncate(build_version, 20)}</td>
+          <td className="text-indigo-300">{formatDate(+first_date * 1000)}</td>
           <td className="text-indigo-300 cursor-pointer md:w-24 lg:w-28">
-            {showMenu && activeUser === _id ? (
+            {showMenu && activeUser === email ? (
               <div className="flex justify-around ">
-                <div
-                  onClick={() => {
-                    setIsModuleOpen(true);
-                    setModalNameOpen('edit');
-                  }}
-                >
-                  <Icon name="PencilIcon" className="w-6 h-6 text-blue-500" />
-                </div>
                 <div
                   onClick={() => {
                     setIsModuleOpen(true);
@@ -98,7 +88,7 @@ export const UsersListScene = ({
                 </div>
               </div>
             ) : (
-              <p className="pr-4">{truncate(role, 15)}</p>
+              <p className="pr-4">{formatDate(+last_date * 1000)}</p>
             )}
           </td>
         </tr>
@@ -162,7 +152,7 @@ export const UsersListScene = ({
               <div className="flex justify-between">
                 <p className="text-indigo-300 font-normal">Role:</p>
                 <p className="text-indigo-500 font-medium text-right">
-                  {truncate(role, 20)}
+                  {truncate(role || '', 20)}
                 </p>
               </div>
               <div className="flex justify-end gap-2.5 p-1.5 border-t">

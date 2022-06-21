@@ -20,6 +20,7 @@ export type OpenFormSceneProps = {
   setUsersList: any;
   getUsersData: any;
   setCheckedUsersList: any;
+  token?: string;
 };
 export const OpenFormScene = ({
   modalNameOpen,
@@ -31,10 +32,12 @@ export const OpenFormScene = ({
   setUsersList,
   getUsersData,
   setCheckedUsersList,
+  token
 }: OpenFormSceneProps) => {
+  console.log(token)
   const { accounts } = useMsal();
-  const storadgeKey = `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---`;
-  const token = JSON.parse(sessionStorage.getItem(storadgeKey)).secret;
+  // const storadgeKey = `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---`;
+  // const token = JSON.parse(sessionStorage.getItem(storadgeKey)).secret;
 
   const addUser = async ({ name, email, role, department }) => {
     const response = await dataAPI.addUser({

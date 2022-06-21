@@ -9,28 +9,29 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
   if (!req.headers.authorization)
     res.status(403).send(JSON.stringify({ status: 403, message: 'Not Allowed' }));
   const { tid } = req.query;
-  if (!tid)
-    res.status(404).send(JSON.stringify({ status: 404, message: 'Not Found' }));
+  const tenant = tid !== 'undefined' ? tid : process.env.APP_TENANT_ID
+  // if (!tid)
+  //   res.status(404).send(JSON.stringify({ status: 404, message: 'Not Found' }));
 
   if (req.method === 'GET') {
     const { orderedby, query, direction, page = 0, perPage = 10 } = req.query;
     // const pageNumber = +page || 0;
     // const perPageNumber = +perPage || 10;
-    const orderedKey = Array.isArray(orderedby) ? orderedby[0] : orderedby;
-    const directionValue = direction === 'asc' ? 1 : -1;
-    const sort = { [orderedKey]: directionValue };
+    // const orderedKey = Array.isArray(orderedby) ? orderedby[0] : orderedby;
+    // const directionValue = direction === 'asc' ? 1 : -1;
+    // const sort = { [orderedKey]: directionValue };
     const data = await db
       .collection('users')
       .aggregate([
-        {
-          $match: {
-            $or: [
-              { name: { $regex: query, $options: 'i' } },
-              { email: { $regex: query, $options: 'i' } },
-            ],
-          },
-        },
-        { $match: { tid: tid } },
+        // {
+        //   $match: {
+        //     $or: [
+        //       { name: { $regex: query, $options: 'i' } },
+        //       { email: { $regex: query, $options: 'i' } },
+        //     ],
+        //   },
+        // },
+        { $match: { tid: tenant } },
         {
           $project: {
             name: 1,
@@ -45,7 +46,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
             },
           },
         },
-        { $sort: { ...sort } },
+        // { $sort: { ...sort } },
         {
           $facet: {
             users: [],
@@ -102,7 +103,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 
     const user = {
       ...payload,
-      tid,
+      tid: tenant,
       lastActiveDate: new Date().toISOString(),
     };
 

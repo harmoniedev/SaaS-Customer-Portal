@@ -2,7 +2,7 @@ import { UserType } from '../types';
 import API from './_api';
 
 export type BasicReqType = {
-  tid: string;
+  tid?: string;
   userId?: string;
   token: string;
 };

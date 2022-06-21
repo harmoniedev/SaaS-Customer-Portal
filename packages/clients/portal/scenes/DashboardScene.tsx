@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useMsal } from '@azure/msal-react';
+import Cookies from 'js-cookie';
 
 import { TitleMemo as Title } from '../components/title/Title';
 import { PaperMemo as Paper } from '../components/paper/Paper';
@@ -21,8 +22,8 @@ export const DashboardScene = () => {
   const [licenseCount, setLicenseCount] = useState<number>(0);
   const [assignedLicensesCount, setAssignedLicensesCount] = useState<number>(0);
   const [state, setState] = useState<StaticState>('idle');
-  const storadgeKey = `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---`;
-  const token = JSON.parse(sessionStorage.getItem(storadgeKey)).secret;
+  const storadgeKey = accounts[0] ? `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---` : null;
+  const token = accounts[0] ? JSON.parse(sessionStorage.getItem(storadgeKey)).secret : null;
   const isMobile = screenWidth < BREAKPOINTS.md;
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export const DashboardScene = () => {
       const getOrganizationData = async () => {
         const response = await dataAPI.getLicenses({
           tid: accounts[0]?.tenantId,
-          token,
+          token: token || Cookies.get('download-token'),
         });
         if (!response.organizationData.length) return setState('success');
         setAssignedLicensesCount(
@@ -98,7 +99,7 @@ export const DashboardScene = () => {
                 </div>
               </Paper>
             </div>
-            <Tabel />
+            <Tabel token={token || Cookies.get('download-token')}/>
           </div>
         </div>
       )}

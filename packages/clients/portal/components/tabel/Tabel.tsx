@@ -29,7 +29,7 @@ import { Paper } from '../paper/Paper';
 
 const dataAPI = new DataAPI();
 
-export const Tabel = () => {
+export const Tabel = ({ token }) => {
   const { accounts } = useMsal();
   const { screenWidth } = useBreakpoint();
   const router = useRouter();
@@ -57,58 +57,65 @@ export const Tabel = () => {
 
   const debouncedInputValue = useDebounce(inputValue, 500);
   const isMobile = screenWidth < BREAKPOINTS.md;
-  const storadgeKey = `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---`;
-  const token = JSON.parse(sessionStorage.getItem(storadgeKey)).secret;
+  // const storadgeKey = `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---`;
+  // const token = JSON.parse(sessionStorage.getItem(storadgeKey)).secret;
 
   const getLastShowedResultNumber = () => {
     let lastNumber = pagesInfo[0].perPage * (pageNumber + 1);
     return lastNumber <= pagesInfo[0].total ? lastNumber : pagesInfo[0].total;
   };
 
+
   const getUsersData = async () => {
     setState('loading');
-    const response = await dataAPI.getUsers({
-      tid: accounts[0]?.tenantId,
-      token,
-      query: debouncedInputValue,
-      page: pageNumber,
-      perPage: 10,
-      orderedby: sortBy,
-      direction: sortedFrom,
-    });
+    // const response = await dataAPI.getUsers({
+    //   tid: accounts[0]?.tenantId,
+    //   token,
+    //   query: debouncedInputValue,
+    //   page: pageNumber,
+    //   perPage: 10,
+    //   orderedby: sortBy,
+    //   direction: sortedFrom,
+    // });
 
 
+    ///here need pass token in future
+    const response = await fetch('https://status-manager.harmon.ie/domain_data/harmon.ie', {
+      headers: {
+        authorization: 'Bearer eyJhbGciOiJFUzUxMiIsImp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtNTIxIiwieCI6IkFZeWFIeUZGejBjYmhkVDZHbHpjazNTVkYwLXpVM1AzdGNkM3RGdnFMUUF0eHZBWGU0eGlGWUVvbTFyWGNDQkZLLTdNUlJ6ZERlYkJ3QXNzMHVzZmg4SHEiLCJ5IjoiQVk0N1F6OWVGNWpSNXVqRU94YXUzcnFzR2dtSUcyZ0d2eHR1OU1uSl9uLWxxSzNlU2lGclNsdTJMVUR6bjVhOGpRVU8wQ2pyb3lQYVJNTW9QdUlzS3ZfNyJ9fQ.eyJleHAiOjE2NTU4MjA5OTMsImh0dHA6Ly9saWNlbnNlLW1hbmFnZXIuaGFybW9uLmllL2FsbC9yZWFkP2RvbWFpbnM9aGFybW9uLmllIjp0cnVlLCJwcm92aWRlciI6InplbmRlc2siLCJ1aWQiOiIzOTIyNzEyNTA2NzEiLCJ1c2VybmFtZSI6InZhZGltIChtYWluc29mdCkifQ.AbOYcOmvTl0Y__KrvmzNMBVCNx7uz2zqaQkDx2KHgwOugzyS0eHd-CiWOsRiWtnrvx1Vm0AtkZLFFxLRcMELHAAlACzDXUm5K6kBo5XwkSChDx14UO54L1qcvPRiwL3o2uEW03Yszh7jtopT08q1AFruscZeaE2oWy0e4hMRNjoyhKz5'
+      }
+    })
+    const text = await response.text()
+    const el = text.split(']]}')[0]
+    const jsonRespBody = JSON.parse(el + ']]}')
+
+    const { rows, columns, count } = jsonRespBody;
+    const users = rows.map(item => {
+      const user = {};
+      item.forEach((value, index) => {
+        if (/[a-z]/gim.test(columns[index])) {
+          user[columns[index]] = value
+        }
+      });
+      return user;
+    }).filter(item => item.build_version || item.product_name)
     const perPage = 10;
 
-    if (Math.ceil(response.total / perPage) < +router.query?.page) {
+    if (Math.ceil(count[""] / perPage) < +router.query?.page) {
       addParams([
-        { key: 'page', value: Math.ceil(response.total / perPage) },
+        { key: 'page', value: Math.ceil(count[""] / perPage) },
       ]);
       return;
     }
     setPagesInfo([
       {
-        maxPage: Math.ceil(response.total / perPage),
-        total: response.total,
+        maxPage: Math.ceil(count[""] / perPage),
+        total: count[""],
         perPage: perPage,
       },
     ]);
 
-    // if (Math.ceil(response.total / +response.perPage) < +router.query?.page) {
-    //   addParams([
-    //     { key: 'page', value: Math.ceil(response.total / response.perPage) },
-    //   ]);
-    //   return;
-    // }
-    // setPagesInfo([
-    //   {
-    //     maxPage: Math.ceil(response.total / response.perPage),
-    //     total: response.total,
-    //     perPage: Number(response.perPage),
-    //   },
-    // ]);
-
-    setUsersList(response.users);
+    setUsersList(users);
     setState('success');
   };
 
@@ -381,6 +388,7 @@ export const Tabel = () => {
       </Paper>
       <Dialog mode="form" onOpenChange={setIsModuleOpen} open={isModuleOpen}>
         <OpenForm
+          token={token}
           activeUser={activeUser}
           checkedUsersList={checkedUsersList}
           isCheckAll={isCheckAll}

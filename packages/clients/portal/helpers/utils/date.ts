@@ -3,7 +3,7 @@ export const isValidDate = (date) => {
 };
 
 export const formatDate = (
-  datetime: string,
+  datetime: string | number,
   format?: Intl.DateTimeFormatOptions,
   locale?: string,
 ) => {
