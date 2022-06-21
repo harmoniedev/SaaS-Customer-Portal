@@ -43,6 +43,7 @@ const getContact = async email => {
   });
 
   const res = await response.json();
+  console.log(res, 1111)
   if (Array.isArray(res)) {
     // eslint-disable-next-line no-restricted-syntax
     for (const contact of res) {
