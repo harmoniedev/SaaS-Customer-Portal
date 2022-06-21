@@ -44,90 +44,74 @@ export const UsersList = ({
   };
 
   const trElement = (items) =>
-    items.map(
-      (
-        {
-          department,
-          email,
-          role,
-          name,
-          build_version,
-          lastActiveDate,
-          _id,
-          last_date,
-          first_date,
-          product_name,
-        },
-        i,
-      ) => {
-        return (
-          <tr
-            key={i}
-            className="bg-white border-bhover:bg-blue-50"
-            onMouseOver={() => {
-              setActiveUser(email);
-              setShowMenu(true);
-            }}
-            onMouseOut={() => {
-              setShowMenu(false);
-            }}
-          >
-            <td className="w-4 p-5">
-              <div className="flex items-center">
-                <Checkbox
-                  id={_id}
-                  handelCheckbox={handelCheckbox}
-                  checked={checkedList.includes(_id)}
-                />
-              </div>
-            </td>
-            <th scope="row" className="whitespace-nowrap">
-              <div className="flex items-center gap-4">
-                <Icon name="UserCircleBlue" className="w-10 h-10" />
-                <p className="text-indigo-300 font-normal">{email}</p>
-              </div>
-            </th>
-            <td className="text-indigo-300">{product_name}</td>
-            <td className="text-indigo-300">{truncate(build_version, 20)}</td>
-            <td className="text-indigo-300">{formatDate(+first_date * 1000)}</td>
-            <td className="text-indigo-300 cursor-pointer md:w-24 lg:w-28">
-              {showMenu && activeUser === email ? (
-                <div className="flex justify-around ">
-                  <div
-                    onClick={() => {
-                      setIsModuleOpen(true);
-                      setModalNameOpen('delete');
-                    }}
-                  >
-                    <Icon name="TrashIcon" className="w-6 h-6 text-blue-500" />
-                  </div>
+    items.map(({ email, build_version, last_date, first_date, product_name }, i) => {
+      return (
+        <tr
+          key={i}
+          className="bg-white border-bhover:bg-blue-50"
+          onMouseOver={() => {
+            setActiveUser(email);
+            setShowMenu(true);
+          }}
+          onMouseOut={() => {
+            setShowMenu(false);
+          }}
+        >
+          <td className="w-4 p-5">
+            <div className="flex items-center">
+              <Checkbox
+                id={email}
+                handelCheckbox={handelCheckbox}
+                checked={checkedList.includes(email)}
+              />
+            </div>
+          </td>
+          <th scope="row" className="whitespace-nowrap">
+            <div className="flex items-center gap-4">
+              <Icon name="UserCircleBlue" className="w-10 h-10" />
+              <p className="text-indigo-300 font-normal">{email}</p>
+            </div>
+          </th>
+          <td className="text-indigo-300">{product_name}</td>
+          <td className="text-indigo-300">{truncate(build_version, 20)}</td>
+          <td className="text-indigo-300">{formatDate(first_date)}</td>
+          <td className="text-indigo-300 cursor-pointer md:w-24 lg:w-28">
+            {showMenu && activeUser === email ? (
+              <div className="flex justify-around ">
+                <div
+                  onClick={() => {
+                    setIsModuleOpen(true);
+                    setModalNameOpen('delete');
+                  }}
+                >
+                  <Icon name="TrashIcon" className="w-6 h-6 text-blue-500" />
                 </div>
-              ) : (
-                <p className="pr-4">{formatDate(+last_date * 1000)}</p>
-              )}
-            </td>
-          </tr>
-        );
-      },
-    );
+              </div>
+            ) : (
+              <p className="pr-4">{formatDate(last_date)}</p>
+            )}
+          </td>
+        </tr>
+      );
+    });
 
   const trMobileElment = (items) =>
-    items.map(({ department, email, role, name, lastActiveDate, _id }, i) => {
+    items.map(({ department, email, role, name, lastActiveDate }, i) => {
       return (
         <div key={i} className="border-b">
           <div
-            id={_id}
+            id={email}
             className="w-full bg-white flex gap-2.5 content-center items-center px-2"
             onClick={(e) => {
-              setActiveUser(_id);
+              setActiveUser(email);
               handelOpenItem(e);
             }}
           >
             <div>
               <Checkbox
-                id={_id}
+                id={email}
                 handelCheckbox={handelCheckbox}
-                checked={checkedList.includes(_id)}
+                checked={checkedList.includes(email)}
               />
             </div>
             <div className="py-2 flex flex-col items-center gap-4 w-full max-w-full overflow-hidden">
@@ -143,7 +127,7 @@ export const UsersList = ({
             </div>
 
             <div className="ml-auto">
-              {isOpen.includes(_id) ? (
+              {isOpen.includes(email) ? (
                 <Icon name="ChevronUpIcon" className="w-6 h-6" />
               ) : (
                 <Icon name="ChevronDownIcon" className="w-6 h-6" />
@@ -151,7 +135,7 @@ export const UsersList = ({
             </div>
           </div>
 
-          {isOpen.includes(_id) && (
+          {isOpen.includes(email) && (
             <div className="px-12 flex flex-col gap-2">
               <div className="flex justify-between">
                 <p className="text-indigo-300 font-normal">Department:</p>

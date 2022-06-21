@@ -62,7 +62,7 @@ export const DashboardScene = () => {
   useEffect(() => {
     getData();
   }, []);
-  console.log(listAllUsers);
+
   return (
     <div>
       {state === 'success' && (

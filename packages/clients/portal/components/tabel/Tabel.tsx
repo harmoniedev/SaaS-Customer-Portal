@@ -44,7 +44,7 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
   const [pageNumber, setPageNumber] = useState<number>(+router.query?.page - 1 || 0);
   const [pagesInfo, setPagesInfo] = useState([]);
   const [sortBy, setSortBy] = useState<string>(
-    firstOf(router.query?.sortBy) || 'name',
+    firstOf(router.query?.sortBy) || 'email',
   );
   const [sortedFrom, setSortedFrom] = useState<string>(
     firstOf(router.query?.direction) || 'asc',
@@ -64,7 +64,7 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
     const sortDirection = firstOf(router.query?.direction) || 'asc';
     setSortedFrom(sortDirection);
     setInputValue(firstOf(router.query?.search) || '');
-    setSortBy(firstOf(router.query?.sortBy) || 'name');
+    setSortBy(firstOf(router.query?.sortBy) || 'email');
   }, [router.query]);
 
   useEffect(() => {
@@ -136,7 +136,7 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
 
   useEffect(() => {
     if (!checkedUsersList.length) return setIsCheckAll(false);
-    setIsCheckAll(usersList.every(({ _id }) => checkedUsersList.includes(_id)));
+    setIsCheckAll(usersList.every(({ email }) => checkedUsersList.includes(email)));
   }, [checkedUsersList, checkedUsersList.length, usersList]);
 
   const incrementPage = () => {
@@ -154,7 +154,7 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
     if (isSelectedAll) {
       setCheckedUsersList([]);
     } else {
-      setCheckedUsersList([...listAllUsers.map((item) => item._id)]);
+      setCheckedUsersList([...listAllUsers.map((item) => item.email)]);
     }
   };
 
@@ -163,13 +163,13 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
     let newListId;
 
     if (isCheckAll) {
-      newListId = usersList.map((item) => item._id);
+      newListId = usersList.map((item) => item.email);
 
       setCheckedUsersList([
         ...checkedUsersList.filter((item) => !newListId.includes(item)),
       ]);
     } else {
-      newListId = [...usersList.map((item) => item._id)].filter(
+      newListId = [...usersList.map((item) => item.email)].filter(
         (item) => !checkedUsersList.includes(item),
       );
 

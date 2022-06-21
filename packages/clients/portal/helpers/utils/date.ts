@@ -7,7 +7,7 @@ export const formatDate = (
   format?: Intl.DateTimeFormatOptions,
   locale?: string,
 ) => {
-  const date = new Date(datetime);
+  const date = new Date(+datetime * 1000);
   if (!isValidDate(date)) return null;
   return date.toLocaleDateString(
     locale || 'en-US',
