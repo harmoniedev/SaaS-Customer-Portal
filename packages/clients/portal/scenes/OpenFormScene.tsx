@@ -18,7 +18,6 @@ export type OpenFormSceneProps = {
   checkedUsersList: string[];
   isCheckAll: boolean;
   setUsersList: any;
-  getUsersData: any;
   setCheckedUsersList: any;
   token?: string;
 };
@@ -30,51 +29,11 @@ export const OpenFormScene = ({
   checkedUsersList,
   isCheckAll,
   setUsersList,
-  getUsersData,
   setCheckedUsersList,
-  token
 }: OpenFormSceneProps) => {
-  console.log(token)
   const { accounts } = useMsal();
-  // const storadgeKey = `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---`;
-  // const token = JSON.parse(sessionStorage.getItem(storadgeKey)).secret;
-
-  const addUser = async ({ name, email, role, department }) => {
-    const response = await dataAPI.addUser({
-      tid: accounts[0]?.tenantId,
-      token,
-      body: {
-        department,
-        license: 'FREE',
-        role,
-        email,
-        name,
-      },
-    });
-    if (response.status === 200) {
-      setUsersList([]);
-      setIsModuleOpen(false);
-      getUsersData();
-    }
-  };
-
-  const editUser = async ({ name, email, role, id, department }) => {
-    const response = await dataAPI.editUser({
-      tid: accounts[0]?.tenantId,
-      token,
-      userId: id,
-      body: {
-        name,
-        email,
-        role,
-        department,
-      },
-    });
-    if (response.status === 200) {
-      setIsModuleOpen(false);
-      getUsersData();
-    }
-  };
+  const storadgeKey = `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---`;
+  const token = JSON.parse(sessionStorage.getItem(storadgeKey)).secret;
 
   const deleteUser = async ({ id }) => {
     const response = await dataAPI.deleteUser({
@@ -85,21 +44,10 @@ export const OpenFormScene = ({
     if (response.status === 200) {
       setCheckedUsersList([]);
       setIsModuleOpen(false);
-      getUsersData();
     }
   };
   const openFormNamed = () => {
     switch (modalNameOpen) {
-      case 'add':
-        return <AddUserForm onSubmit={addUser} />;
-      case 'edit':
-        return (
-          <EditUserForm
-            setIsModuleOpen={setIsModuleOpen}
-            user={items.filter((item) => item._id === activeUser)}
-            onSubmit={editUser}
-          />
-        );
       case 'delete':
         return (
           <DeleteUserForm

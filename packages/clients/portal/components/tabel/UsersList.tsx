@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
-import { Icon } from '../components/icons/Icon';
-import { formatDate } from '../helpers/utils/date';
-import { truncate } from '../helpers/utils/string';
-import { UserType } from '../types';
-import { Checkbox } from '../components/checkbox/Checkbox';
+import { Icon } from '../icons/Icon';
+import { formatDate } from '../../helpers/utils/date';
+import { truncate } from '../../helpers/utils/string';
+import { UserType } from '../../types';
+import { Checkbox } from '../checkbox/Checkbox';
 
 export type UsersListSceneProps = {
   items: UserType[];
@@ -17,7 +17,7 @@ export type UsersListSceneProps = {
   isMobile: boolean;
 };
 
-export const UsersListScene = ({
+export const UsersList = ({
   items,
   setActiveUser,
   setIsModuleOpen,
@@ -44,56 +44,72 @@ export const UsersListScene = ({
   };
 
   const trElement = (items) =>
-    items.map(({ department, email, role, name, build_version, lastActiveDate, _id, last_date, first_date, product_name }, i) => {
-      return (
-        <tr
-          key={i}
-          className="bg-white border-bhover:bg-blue-50"
-          onMouseOver={() => {
-            setActiveUser(email);
-            setShowMenu(true);
-          }}
-          onMouseOut={() => {
-            setShowMenu(false);
-          }}
-        >
-          <td className="w-4 p-5">
-            <div className="flex items-center">
-              <Checkbox
-                id={_id}
-                handelCheckbox={handelCheckbox}
-                checked={checkedList.includes(_id)}
-              />
-            </div>
-          </td>
-          <th scope="row" className="whitespace-nowrap">
-            <div className="flex items-center gap-4">
-              <Icon name="UserCircleBlue" className="w-10 h-10" />
-              <p className="text-indigo-300 font-normal">{email}</p>
-            </div>
-          </th>
-          <td className="text-indigo-300">{product_name}</td>
-          <td className="text-indigo-300">{truncate(build_version, 20)}</td>
-          <td className="text-indigo-300">{formatDate(+first_date * 1000)}</td>
-          <td className="text-indigo-300 cursor-pointer md:w-24 lg:w-28">
-            {showMenu && activeUser === email ? (
-              <div className="flex justify-around ">
-                <div
-                  onClick={() => {
-                    setIsModuleOpen(true);
-                    setModalNameOpen('delete');
-                  }}
-                >
-                  <Icon name="TrashIcon" className="w-6 h-6 text-blue-500" />
-                </div>
+    items.map(
+      (
+        {
+          department,
+          email,
+          role,
+          name,
+          build_version,
+          lastActiveDate,
+          _id,
+          last_date,
+          first_date,
+          product_name,
+        },
+        i,
+      ) => {
+        return (
+          <tr
+            key={i}
+            className="bg-white border-bhover:bg-blue-50"
+            onMouseOver={() => {
+              setActiveUser(email);
+              setShowMenu(true);
+            }}
+            onMouseOut={() => {
+              setShowMenu(false);
+            }}
+          >
+            <td className="w-4 p-5">
+              <div className="flex items-center">
+                <Checkbox
+                  id={_id}
+                  handelCheckbox={handelCheckbox}
+                  checked={checkedList.includes(_id)}
+                />
               </div>
-            ) : (
-              <p className="pr-4">{formatDate(+last_date * 1000)}</p>
-            )}
-          </td>
-        </tr>
-      );
-    });
+            </td>
+            <th scope="row" className="whitespace-nowrap">
+              <div className="flex items-center gap-4">
+                <Icon name="UserCircleBlue" className="w-10 h-10" />
+                <p className="text-indigo-300 font-normal">{email}</p>
+              </div>
+            </th>
+            <td className="text-indigo-300">{product_name}</td>
+            <td className="text-indigo-300">{truncate(build_version, 20)}</td>
+            <td className="text-indigo-300">{formatDate(+first_date * 1000)}</td>
+            <td className="text-indigo-300 cursor-pointer md:w-24 lg:w-28">
+              {showMenu && activeUser === email ? (
+                <div className="flex justify-around ">
+                  <div
+                    onClick={() => {
+                      setIsModuleOpen(true);
+                      setModalNameOpen('delete');
+                    }}
+                  >
+                    <Icon name="TrashIcon" className="w-6 h-6 text-blue-500" />
+                  </div>
+                </div>
+              ) : (
+                <p className="pr-4">{formatDate(+last_date * 1000)}</p>
+              )}
+            </td>
+          </tr>
+        );
+      },
+    );
 
   const trMobileElment = (items) =>
     items.map(({ department, email, role, name, lastActiveDate, _id }, i) => {
@@ -181,4 +197,4 @@ export const UsersListScene = ({
   return isMobile ? trMobileElment(items) : trElement(items);
 };
 
-export const UsersListSceneMemo = React.memo(UsersListScene);
+export const UsersListMemo = React.memo(UsersList);

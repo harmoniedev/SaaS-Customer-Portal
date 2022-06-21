@@ -1,10 +1,9 @@
-import { useMsal } from '@azure/msal-react';
 import React, { useState, useEffect } from 'react';
 import { useDebounce } from '../../hooks/useDebounce';
 
 import { DeskTabelMemo as DeskTabel } from './DeskTabel';
 import { MobileTabelMemo as MobileTabel } from './MobileTabel';
-import { UsersListSceneMemo as UsersList } from '../../scenes/UsersListScene';
+import { UsersListMemo as UsersList } from './UsersList';
 import { OpenFormSceneMemo as OpenForm } from '../../scenes/OpenFormScene';
 import { ButtonMemo as Button } from '../../components/buttons/Button';
 import { Icon } from '../icons/Icon';
@@ -23,19 +22,14 @@ import {
 } from '../../types';
 import { Filter } from '../filter/Filter';
 
-import DataAPI from '../../api/data';
 import { useRouter } from 'next/router';
 import { Paper } from '../paper/Paper';
 
-const dataAPI = new DataAPI();
-
-export const Tabel = ({ token }) => {
-  const { accounts } = useMsal();
+export const Tabel = ({ listAllUsers, setListAllUsers }) => {
   const { screenWidth } = useBreakpoint();
   const router = useRouter();
 
   const [state, setState] = useState<StaticState>('idle');
-  const [usersList, setUsersList] = useState<UserFields[]>([]);
   const [activeUser, setActiveUser] = useState<string>('');
   const [isCheckAll, setIsCheckAll] = useState<boolean>(false);
   const [isModuleOpen, setIsModuleOpen] = useState<boolean>(false);
@@ -43,6 +37,7 @@ export const Tabel = ({ token }) => {
   const [modalNameOpen, setModalNameOpen] = useState<StaticFormName>('add');
   const [isSelectedAll, setIsSelectedAll] = useState(false);
   const [isShowMobileSearch, setIsShowMobileSearch] = useState(false);
+  const [usersList, setUsersList] = useState([]);
   const [inputValue, setInputValue] = useState<string>(
     firstOf(router.query?.search) || '',
   );
@@ -57,66 +52,10 @@ export const Tabel = ({ token }) => {
 
   const debouncedInputValue = useDebounce(inputValue, 500);
   const isMobile = screenWidth < BREAKPOINTS.md;
-  // const storadgeKey = `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---`;
-  // const token = JSON.parse(sessionStorage.getItem(storadgeKey)).secret;
 
   const getLastShowedResultNumber = () => {
     let lastNumber = pagesInfo[0].perPage * (pageNumber + 1);
     return lastNumber <= pagesInfo[0].total ? lastNumber : pagesInfo[0].total;
-  };
-
-
-  const getUsersData = async () => {
-    setState('loading');
-    // const response = await dataAPI.getUsers({
-    //   tid: accounts[0]?.tenantId,
-    //   token,
-    //   query: debouncedInputValue,
-    //   page: pageNumber,
-    //   perPage: 10,
-    //   orderedby: sortBy,
-    //   direction: sortedFrom,
-    // });
-
-
-    ///here need pass token in future
-    const response = await fetch('https://status-manager.harmon.ie/domain_data/harmon.ie', {
-      headers: {
-        authorization: 'Bearer eyJhbGciOiJFUzUxMiIsImp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtNTIxIiwieCI6IkFZeWFIeUZGejBjYmhkVDZHbHpjazNTVkYwLXpVM1AzdGNkM3RGdnFMUUF0eHZBWGU0eGlGWUVvbTFyWGNDQkZLLTdNUlJ6ZERlYkJ3QXNzMHVzZmg4SHEiLCJ5IjoiQVk0N1F6OWVGNWpSNXVqRU94YXUzcnFzR2dtSUcyZ0d2eHR1OU1uSl9uLWxxSzNlU2lGclNsdTJMVUR6bjVhOGpRVU8wQ2pyb3lQYVJNTW9QdUlzS3ZfNyJ9fQ.eyJleHAiOjE2NTU4MjA5OTMsImh0dHA6Ly9saWNlbnNlLW1hbmFnZXIuaGFybW9uLmllL2FsbC9yZWFkP2RvbWFpbnM9aGFybW9uLmllIjp0cnVlLCJwcm92aWRlciI6InplbmRlc2siLCJ1aWQiOiIzOTIyNzEyNTA2NzEiLCJ1c2VybmFtZSI6InZhZGltIChtYWluc29mdCkifQ.AbOYcOmvTl0Y__KrvmzNMBVCNx7uz2zqaQkDx2KHgwOugzyS0eHd-CiWOsRiWtnrvx1Vm0AtkZLFFxLRcMELHAAlACzDXUm5K6kBo5XwkSChDx14UO54L1qcvPRiwL3o2uEW03Yszh7jtopT08q1AFruscZeaE2oWy0e4hMRNjoyhKz5'
-      }
-    })
-    const text = await response.text()
-    const el = text.split(']]}')[0]
-    const jsonRespBody = JSON.parse(el + ']]}')
-
-    const { rows, columns, count } = jsonRespBody;
-    const users = rows.map(item => {
-      const user = {};
-      item.forEach((value, index) => {
-        if (/[a-z]/gim.test(columns[index])) {
-          user[columns[index]] = value
-        }
-      });
-      return user;
-    }).filter(item => item.build_version || item.product_name)
-    const perPage = 10;
-
-    if (Math.ceil(count[""] / perPage) < +router.query?.page) {
-      addParams([
-        { key: 'page', value: Math.ceil(count[""] / perPage) },
-      ]);
-      return;
-    }
-    setPagesInfo([
-      {
-        maxPage: Math.ceil(count[""] / perPage),
-        total: count[""],
-        perPage: perPage,
-      },
-    ]);
-
-    setUsersList(users);
-    setState('success');
   };
 
   useEffect(() => {
@@ -130,7 +69,45 @@ export const Tabel = ({ token }) => {
 
   useEffect(() => {
     if (typeof window === undefined || !router.query) return;
-    getUsersData();
+    const perPage = 10;
+
+    if (Math.ceil(listAllUsers.length / perPage) < +router.query?.page) {
+      addParams([{ key: 'page', value: Math.ceil(listAllUsers.length / perPage) }]);
+      return;
+    }
+
+    if (debouncedInputValue) {
+      let foundUsersList = listAllUsers.filter((item) =>
+        item.email.toLowerCase().includes(debouncedInputValue),
+      );
+
+      setPagesInfo([
+        {
+          maxPage: Math.ceil(foundUsersList.length / perPage),
+          total: foundUsersList.length,
+          perPage: perPage,
+        },
+      ]);
+      setPageNumber(0);
+      setUsersList(foundUsersList.slice(0, perPage));
+    } else {
+      setPagesInfo([
+        {
+          maxPage: Math.ceil(listAllUsers.length / perPage),
+          total: listAllUsers.length,
+          perPage: perPage,
+        },
+      ]);
+
+      if (pageNumber === 0) {
+        setUsersList(listAllUsers.slice(0, perPage));
+      } else if (pageNumber > 0) {
+        const startSliceFrom = pageNumber * perPage;
+
+        setUsersList(listAllUsers.slice(startSliceFrom, startSliceFrom + perPage));
+      }
+    }
+    setState('success');
   }, [pageNumber, sortedFrom, debouncedInputValue, sortBy]);
 
   useEffect(() => {
@@ -177,16 +154,7 @@ export const Tabel = ({ token }) => {
     if (isSelectedAll) {
       setCheckedUsersList([]);
     } else {
-      const response = await dataAPI.getUsers({
-        tid: accounts[0]?.tenantId,
-        token,
-        query: '',
-        page: 0,
-        perPage: pagesInfo[0].total,
-        orderedby: sortBy,
-        direction: sortedFrom,
-      });
-      setCheckedUsersList([...response.users.map((item) => item._id)]);
+      setCheckedUsersList([...listAllUsers.map((item) => item._id)]);
     }
   };
 
@@ -388,14 +356,13 @@ export const Tabel = ({ token }) => {
       </Paper>
       <Dialog mode="form" onOpenChange={setIsModuleOpen} open={isModuleOpen}>
         <OpenForm
-          token={token}
           activeUser={activeUser}
           checkedUsersList={checkedUsersList}
           isCheckAll={isCheckAll}
           items={usersList}
           modalNameOpen={modalNameOpen}
           setIsModuleOpen={setIsModuleOpen}
-          getUsersData={getUsersData}
+          // getUsersData={getUsersData}
           setUsersList={setUsersList}
           setCheckedUsersList={setCheckedUsersList}
         />
