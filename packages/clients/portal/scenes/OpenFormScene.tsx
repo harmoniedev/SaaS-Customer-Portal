@@ -1,8 +1,6 @@
 import { useMsal } from '@azure/msal-react';
 import React from 'react';
 
-import { AddUserFormMemo as AddUserForm } from '../components/form/AddUserForm';
-import { EditUserFormMemo as EditUserForm } from '../components/form/EditUserForm';
 import { DeleteUserFormMemo as DeleteUserForm } from '../components/form/DeleteUserForm';
 import { DeleteUsersForm as DeleteUsersForm } from '../components/form/DeleteUsersForm';
 

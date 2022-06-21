@@ -71,7 +71,7 @@ export const DeskTabel = ({
                   scope="col"
                   className={cx('py-3 cursor-pointer', {
                     ['pr-8']: id !== sortBy,
-                    ['pl-3']: id === 'name',
+                    ['pl-3']: id === 'email',
                   })}
                   onClick={() => handelSortBtn(id)}
                 >

@@ -1,5 +1,5 @@
 export const tableHeaders = [
-  { name: 'Name', id: 'name' },
+  { name: 'Users', id: 'email' },
   { name: 'Product name', id: 'product_name' },
   { name: 'Build Version', id: 'build_version' },
   { name: 'First Access', id: 'first_date' },
