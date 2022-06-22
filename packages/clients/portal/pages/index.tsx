@@ -1,6 +1,6 @@
 import { useMsal } from '@azure/msal-react';
 import { useIsAuthenticated } from '@azure/msal-react';
-import Cookies from 'js-cookie'
+import Cookies from 'js-cookie';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -22,9 +22,8 @@ export default function Page() {
 
   /// errors handling for field and submit button
 
-
   useEffect(() => {
-    if (isAuthenticated && inProgress === 'none' || token) {
+    if ((isAuthenticated && inProgress === 'none') || token) {
       router.push('/portal/dashboard');
     }
   });
@@ -52,29 +51,27 @@ export default function Page() {
     if (res.status === 200) {
       router.push('/portal/dashboard');
     }
-  }
+  };
 
   if (isAuthenticated) return null;
 
   return (
-    <div className="h-screen overflow-hidden grid grid-rows-[62px_1fr_96px] lg:grid-rows-[92px_1fr_105px]">
+    <div className="h-screen overflow-y-scroll scrollbar-invisible grid grid-rows-[62px_1fr_96px] lg:grid-rows-[92px_1fr_105px]">
       <Head>
         <title>harmon.ie Login</title>
       </Head>
       <Nav showUserMenu={false} />
-      <div className="flex flex-col gap-6 justify-center items-center px-4 mx-auto w-11/12 md:w-3/6 xl:w-4/12 md:max-w-md">
+      <div className="flex flex-col gap-6 justify-center items-center px-4 mx-auto w-11/12 md:w-3/6 xl:w-4/12 md:max-w-md py-4">
         <div>
           <Icon name="HarmonieIcon" className="w-12 h-12" />
         </div>
         <Title size="lg" className="text-indigo-500 text-center font-extrabold">
           Sign in to the harmon.ie Customer Portal{' '}
         </Title>
-        <p className='text-indigo-300'>
-          Please enter your email and password
-        </p>
-        <form className='w-full' onSubmit={onSubmit}>
+        <p className="text-indigo-300">Please enter your email and password</p>
+        <form className="w-full" onSubmit={onSubmit}>
           <InputMemo
-            className='w-full mb-4 border-indigo-50 placeholder-indigo-200'
+            className="w-full mb-4 border-indigo-50 placeholder-indigo-200"
             title="Email"
             name="email"
             placeholder="Email"
@@ -85,7 +82,7 @@ export default function Page() {
             readOnly={true}
           />
           <InputMemo
-            className='w-full border-indigo-50 mb-4 placeholder-indigo-200'
+            className="w-full border-indigo-50 mb-4 placeholder-indigo-200"
             title="Password"
             name="password"
             type="password"
@@ -106,8 +103,10 @@ export default function Page() {
           />
         </form>
 
-        <div className='w-full h-px bg-indigo-50 my-4 relative'>
-          <span className='text-indigo-300 px-4 bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2'>or</span>
+        <div className="w-full h-px bg-indigo-50 my-4 relative">
+          <span className="text-indigo-300 px-4 bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            or
+          </span>
         </div>
         <Button
           label="Sign in with Microsoft"

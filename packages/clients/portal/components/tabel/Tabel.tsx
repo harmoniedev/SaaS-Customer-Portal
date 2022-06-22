@@ -99,7 +99,7 @@ export const Tabel = ({ listAllUsers }) => {
       return;
     }
 
-    if (Boolean(debouncedInputValue)) {
+    if (!!debouncedInputValue) {
       let searchedUser = listAllUsers.filter((item) =>
         item.email.toLowerCase().includes(debouncedInputValue),
       );
@@ -133,18 +133,15 @@ export const Tabel = ({ listAllUsers }) => {
 
     setUsersListPerPage(finalUsersList);
     setState('success');
-  }, [pageNumber, sortBy, sortedFrom, debouncedInputValue]);
+  }, [pageNumber, sortBy, sortedFrom, debouncedInputValue, listAllUsers]);
 
-  // useEffect(() => {
-  //   if (debouncedInputValue) {
-  // let searchedUser = listAllUsers.filter((item) =>
-  //   item.email.toLowerCase().includes(debouncedInputValue),
-  // );
-  //     setUsersList(searchedUser);
-  //   } else {
-  //     setUsersList(listAllUsers);
-  //   }
-  // }, [debouncedInputValue]);
+  useEffect(() => {
+    if (!inputValue) {
+      setUsersList(listAllUsers);
+    } else {
+      setCheckedUsersList([]);
+    }
+  }, [inputValue]);
 
   useEffect(() => {
     if (checkedUsersList.length === pagesInfo[0]?.total) {

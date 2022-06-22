@@ -12,7 +12,8 @@ export const Search = ({ inputValue, setInputValue }: SearchProp) => {
   const [isShowClearBtn, setIsShowClearBtn] = useState<boolean>(false);
 
   useEffect(() => {
-    if (inputValue === '') return;
+    if (!inputValue) return setIsShowClearBtn(false);
+
     setIsShowClearBtn(true);
   }, [inputValue, isShowClearBtn]);
 
