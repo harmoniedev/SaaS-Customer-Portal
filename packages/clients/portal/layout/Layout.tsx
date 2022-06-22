@@ -1,11 +1,11 @@
 import cx from 'classnames';
+import Cookies from 'js-cookie';
 import React, { useState } from 'react';
 import { useMsal } from '@azure/msal-react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { defaultMenuItems } from './LayoutOptions';
 import { useIsAuthenticated } from '@azure/msal-react';
-import { Icon } from '../components/icons/Icon';
 import { Spinner } from '../components/loaders/Spinner';
 import { NavMemo as Nav } from './Nav/Nav';
 import { BREAKPOINTS, useBreakpoint } from '../hooks/useBreakpoint';
@@ -24,6 +24,8 @@ export const Layout = ({ children }: CardProps) => {
   const { screenWidth } = useBreakpoint();
   const isAuthenticated = useIsAuthenticated();
   const isMobile = screenWidth < BREAKPOINTS.lg;
+  const token = Cookies.get('download-token');
+
 
   useEffect(() => {
     setIsLoading(true);
@@ -39,10 +41,12 @@ export const Layout = ({ children }: CardProps) => {
           }
         })
       }
-      const activeItem = allMenuItems.find(item => `/portal${item.external}` === router.asPath);
+      const activeItem = allMenuItems.find(item => `/portal${item.external}` === router.pathname || `/portal${item.external}` === router.asPath);
+      console.log(router)
       if (activeItem) {
         const isNestedPage = defaultMenuItems.findIndex(item => item.external === activeItem.external) === -1;
         setIsIframe(isNestedPage);
+
         setIsNavigation(activeItem.isSideMenu)
       }
       setMenuItems(allMenuItems);
@@ -52,7 +56,7 @@ export const Layout = ({ children }: CardProps) => {
   }, [])
 
   useEffect(() => {
-    if (!isAuthenticated && inProgress === 'none') {
+    if (!isAuthenticated && inProgress === 'none' && !token) {
       router.push('/');
     }
   });
@@ -65,7 +69,7 @@ export const Layout = ({ children }: CardProps) => {
     );
   }
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated && !token) return null;
 
   const renderMenuList = (items) =>
     items.map(({ label, icon, external }, i) => (

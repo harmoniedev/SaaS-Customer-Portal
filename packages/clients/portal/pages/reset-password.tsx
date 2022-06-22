@@ -3,36 +3,22 @@ import { useIsAuthenticated } from '@azure/msal-react';
 import Cookies from 'js-cookie'
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '../components/buttons/Button';
 import { Title } from '../components/title/Title';
 import { Spinner } from '../components/loaders/Spinner';
 import { Icon } from '../components/icons/Icon';
 import { NavMemo as Nav } from '../layout/Nav/Nav';
 import { InputMemo } from '../components/input/Input';
-import hash from 'object-hash';
-
 
 export default function Page() {
-  const { instance, inProgress } = useMsal();
   const router = useRouter();
-  const isAuthenticated = useIsAuthenticated();
-  const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const token = Cookies.get('download-token');
-
-  /// errors handling for field and submit button
 
 
-  useEffect(() => {
-    if (isAuthenticated && inProgress === 'none' || token) {
-      router.push('/portal/dashboard');
-    }
-  });
-
-  if (inProgress !== 'none' || isLoading) {
+  if ( isLoading) {
     return (
       <div className="w-24 h-24 m-auto mt-24">
         <Spinner />
@@ -42,29 +28,27 @@ export default function Page() {
 
   const onSubmit = async (ev) => {
     ev.preventDefault();
-    setIsLoading(true);
-    const hashedPassword = hash({ password });
+    setIsLoading(true)
     const options = {
       method: 'post',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, password: hashedPassword }),
+      body: JSON.stringify({ email }),
     };
-    const res = await fetch(`api/salesforce-login`, options);
+    const res = await fetch(`api/resend-password`, options);
+ 
     if (res.status === 200) {
-      router.push('/portal/dashboard');
+      router.push('/');
     } else {
-      setErrorMessage('Incorrect username or password')
+      setErrorMessage('Incorrect username')
       setIsLoading(false)
     }
   }
 
-  if (isAuthenticated) return null;
-
   return (
-    <div className="h-screen overflow-y-hidden grid grid-rows-[62px_1fr_96px] lg:grid-rows-[92px_1fr_105px]">
+    <div className="h-screen overflow-hidden grid grid-rows-[62px_1fr_96px] lg:grid-rows-[92px_1fr_105px]">
       <Head>
         <title>harmon.ie Login</title>
       </Head>
@@ -74,10 +58,10 @@ export default function Page() {
           <Icon name="HarmonieIcon" className="w-12 h-12" />
         </div>
         <Title size="lg" className="text-indigo-500 text-center font-extrabold">
-          Sign in to the harmon.ie Customer Portal{' '}
+          Resend password for the harmon.ie Customer Portal{' '}
         </Title>
         <p className='text-indigo-300'>
-          Please enter your email and password
+          Please enter your email
         </p>
         <form className='w-full' onSubmit={onSubmit}>
           <InputMemo
@@ -94,55 +78,27 @@ export default function Page() {
             onFocus={(ev) => ev.target.removeAttribute('readOnly')}
             readOnly={true}
           />
-          <InputMemo
-            className='w-full border-indigo-50 placeholder-indigo-200'
-            title="Password"
-            name="password"
-            type="password"
-            placeholder="Password"
-            required
-            value={password}
-            setValue={(value) => {
-              setPassword(value)
-              setErrorMessage('')
-            }}
-            onFocus={(ev) => ev.target.removeAttribute('readOnly')}
-            readOnly={true}
+          <Button
+            label="Send"
+            onClick={onSubmit}
+            theme="blue"
+            iconPosition="before"
+            as="button"
+            stretch
+            disabled={email.trim() === ''}
           />
           <div className='w-full flex justify-end'>
             <Button
-              label="Resend my password"
-              onClick={() => router.push('/reset-password')}
+              label="Back to sign in"
+              onClick={() => router.push('/')}
               theme="blue"
               as="button"
               plain
               align='left'
             />
           </div>
-          <Button
-            label="Sign in"
-            onClick={onSubmit}
-            theme="blue"
-            iconPosition="before"
-            as="button"
-            stretch
-            disabled={password.trim() === '' || email.trim() === ''}
-          />
         </form>
         <p className='text-left text-red-500'>{errorMessage}</p>
-
-        <div className='w-full h-px bg-indigo-50 my-4 relative'>
-          <span className='text-indigo-300 px-4 bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2'>or</span>
-        </div>
-        <Button
-          label="Sign in with Microsoft"
-          onClick={() => instance.loginRedirect()}
-          theme="white"
-          icon="MicrosoftIcon"
-          iconPosition="before"
-          as="button"
-          stretch
-        />
       </div>
       <div className="flex justify-center items-center bg-gray-50 border-t">
         <p className="text-indigo-200">© harmon.ie 2022</p>

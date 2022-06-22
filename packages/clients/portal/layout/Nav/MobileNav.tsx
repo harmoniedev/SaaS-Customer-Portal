@@ -1,5 +1,6 @@
 import React from 'react';
 import cx from 'classnames';
+import Cookies from 'js-cookie'
 import { useMsal } from '@azure/msal-react';
 import { useRouter } from 'next/router';
 
@@ -33,6 +34,16 @@ export const MobileNav = ({
   const { instance, accounts } = useMsal();
   const { breakpoint } = useBreakpoint();
   const responsiveButtonSize: SizeType = responsiveButtonSizes[breakpoint];
+
+  const parseJwt = (key) => {
+    try {
+      const parsed = JSON.parse(atob(Cookies.get('download-token').split('.')[1]));
+      const name = parsed ? parsed[key] : '';
+      return name
+    } catch (e) {
+      return '';
+    }
+  };
 
   const renderMenuList = (items) =>
     items.map(({ label, icon, external }, i) => (
@@ -75,13 +86,20 @@ export const MobileNav = ({
                   />
                 </div>
                 <div>
-                  <p className="font-medium">{accounts[0]?.name}</p>
-                  <p className="text-indigo-300">{accounts[0]?.username}</p>
+                  <p className="font-medium">{accounts[0] ? accounts[0]?.name : parseJwt('name')}</p>
+                  <p className="text-indigo-300">{accounts[0] ? accounts[0]?.username : parseJwt('email')}</p>
                 </div>
               </div>
               <div
                 className="flex gap-2 py-4 px-12 text-indigo-500 w-full"
-                onClick={() => instance.logout()}
+                onClick={() => {
+                  if (accounts[0]) {
+                    instance.logout()
+                  } else {
+                    Cookies.remove('download-token');
+                    router.reload()
+                  }
+                }}
               >
                 <Icon name="LogoutIcon" className="w-8 h-8 text-indigo-200" />
                 <p>Sign out</p>

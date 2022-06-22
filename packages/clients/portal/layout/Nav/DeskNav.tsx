@@ -1,6 +1,8 @@
 import React from 'react';
+import Cookies from 'js-cookie'
 import { Icon } from '../../components/icons/Icon';
 import { useMsal } from '@azure/msal-react';
+import { useRouter } from 'next/router';
 
 export type DeskNavProps = {
   showUserMenu: boolean;
@@ -10,6 +12,17 @@ export type DeskNavProps = {
 
 export const DeskNav = ({ showUserMenu, open, onClickMenu }: DeskNavProps) => {
   const { instance, accounts } = useMsal();
+  const router = useRouter();
+
+  const parseJwt = (key) => {
+    try {
+      const parsed = JSON.parse(atob(Cookies.get('download-token').split('.')[1]));
+      const name = parsed ? parsed[key] : '';
+      return name
+    } catch (e) {
+      return '';
+    }
+  };
 
   return (
     showUserMenu && (
@@ -21,7 +34,7 @@ export const DeskNav = ({ showUserMenu, open, onClickMenu }: DeskNavProps) => {
           className="flex items-center gap-2 ml-3 text-indigo-500 cursor-pointer"
           onClick={onClickMenu}
         >
-          <p>{accounts[0]?.name}</p>
+          <p>{accounts[0] ? accounts[0].name : parseJwt('name')}</p>
           {open ? (
             <Icon name="ChevronUpIcon" className="w-4 h-4" />
           ) : (
@@ -32,7 +45,14 @@ export const DeskNav = ({ showUserMenu, open, onClickMenu }: DeskNavProps) => {
           <div className="fixed z-50 top-20 right-10 shadow-[0_4px_20px_rgba(0,0,0,0.25)] w-72">
             <div
               className="bg-white p-8 flex items-center justify-items-start justify-start gap-5 text-indigo-500 font-medium cursor-pointer"
-              onClick={() => instance.logout()}
+              onClick={() => {
+                if (accounts[0]) {
+                  instance.logout()
+                } else {
+                  Cookies.remove('download-token');
+                  router.reload()
+                }
+              }}
             >
               <Icon name="LogoutIcon" className="w-8 h-8 text-indigo-200" />
               Sign Out

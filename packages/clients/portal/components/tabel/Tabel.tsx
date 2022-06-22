@@ -1,10 +1,10 @@
-import { useMsal } from '@azure/msal-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { CSVLink } from "react-csv";
 import { useDebounce } from '../../hooks/useDebounce';
 
 import { DeskTabelMemo as DeskTabel } from './DeskTabel';
 import { MobileTabelMemo as MobileTabel } from './MobileTabel';
-import { UsersListSceneMemo as UsersList } from '../../scenes/UsersListScene';
+import { UsersListMemo as UsersList } from './UsersList';
 import { OpenFormSceneMemo as OpenForm } from '../../scenes/OpenFormScene';
 import { ButtonMemo as Button } from '../../components/buttons/Button';
 import { Icon } from '../icons/Icon';
@@ -14,28 +14,24 @@ import { BREAKPOINTS, useBreakpoint } from '../../hooks/useBreakpoint';
 import { DialogMemo as Dialog } from '../../components/dialog/Dialog';
 import { Spinner } from '../loaders/Spinner';
 import { firstOf } from '../../helpers/utils/array';
+import { formatDate } from '../../helpers/utils/date';
 import { formatNumberWithCommas } from '../../helpers/utils/string';
+import { fileHeaders, getUsersToExport } from './TabelOptions';
 import {
-  UserFields,
   StaticState,
   StaticFormName,
   ParamsListType,
 } from '../../types';
 import { Filter } from '../filter/Filter';
 
-import DataAPI from '../../api/data';
 import { useRouter } from 'next/router';
 import { Paper } from '../paper/Paper';
 
-const dataAPI = new DataAPI();
-
-export const Tabel = () => {
-  const { accounts } = useMsal();
+export const Tabel = ({ listAllUsers }) => {
   const { screenWidth } = useBreakpoint();
   const router = useRouter();
 
   const [state, setState] = useState<StaticState>('idle');
-  const [usersList, setUsersList] = useState<UserFields[]>([]);
   const [activeUser, setActiveUser] = useState<string>('');
   const [isCheckAll, setIsCheckAll] = useState<boolean>(false);
   const [isModuleOpen, setIsModuleOpen] = useState<boolean>(false);
@@ -43,73 +39,28 @@ export const Tabel = () => {
   const [modalNameOpen, setModalNameOpen] = useState<StaticFormName>('add');
   const [isSelectedAll, setIsSelectedAll] = useState(false);
   const [isShowMobileSearch, setIsShowMobileSearch] = useState(false);
+  const [usersListPerPage, setUsersListPerPage] = useState([]);
+  const [usersList, setUsersList] = useState([...listAllUsers]);
   const [inputValue, setInputValue] = useState<string>(
     firstOf(router.query?.search) || '',
   );
   const [pageNumber, setPageNumber] = useState<number>(+router.query?.page - 1 || 0);
   const [pagesInfo, setPagesInfo] = useState([]);
   const [sortBy, setSortBy] = useState<string>(
-    firstOf(router.query?.sortBy) || 'name',
+    firstOf(router.query?.sortBy) || 'email',
   );
   const [sortedFrom, setSortedFrom] = useState<string>(
     firstOf(router.query?.direction) || 'asc',
   );
+  
+  const usersForExport = useMemo(() => getUsersToExport({ listAllUsers, checkedUsersList }), [listAllUsers, checkedUsersList]);
 
   const debouncedInputValue = useDebounce(inputValue, 500);
   const isMobile = screenWidth < BREAKPOINTS.md;
-  const storadgeKey = `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---`;
-  const token = JSON.parse(sessionStorage.getItem(storadgeKey)).secret;
 
   const getLastShowedResultNumber = () => {
     let lastNumber = pagesInfo[0].perPage * (pageNumber + 1);
     return lastNumber <= pagesInfo[0].total ? lastNumber : pagesInfo[0].total;
-  };
-
-  const getUsersData = async () => {
-    setState('loading');
-    const response = await dataAPI.getUsers({
-      tid: accounts[0]?.tenantId,
-      token,
-      query: debouncedInputValue,
-      page: pageNumber,
-      perPage: 10,
-      orderedby: sortBy,
-      direction: sortedFrom,
-    });
-
-
-    const perPage = 10;
-
-    if (Math.ceil(response.total / perPage) < +router.query?.page) {
-      addParams([
-        { key: 'page', value: Math.ceil(response.total / perPage) },
-      ]);
-      return;
-    }
-    setPagesInfo([
-      {
-        maxPage: Math.ceil(response.total / perPage),
-        total: response.total,
-        perPage: perPage,
-      },
-    ]);
-
-    // if (Math.ceil(response.total / +response.perPage) < +router.query?.page) {
-    //   addParams([
-    //     { key: 'page', value: Math.ceil(response.total / response.perPage) },
-    //   ]);
-    //   return;
-    // }
-    // setPagesInfo([
-    //   {
-    //     maxPage: Math.ceil(response.total / response.perPage),
-    //     total: response.total,
-    //     perPage: Number(response.perPage),
-    //   },
-    // ]);
-
-    setUsersList(response.users);
-    setState('success');
   };
 
   useEffect(() => {
@@ -118,13 +69,85 @@ export const Tabel = () => {
     const sortDirection = firstOf(router.query?.direction) || 'asc';
     setSortedFrom(sortDirection);
     setInputValue(firstOf(router.query?.search) || '');
-    setSortBy(firstOf(router.query?.sortBy) || 'name');
+    setSortBy(firstOf(router.query?.sortBy) || 'email');
   }, [router.query]);
 
   useEffect(() => {
+    if (sortBy === 'email') {
+      setUsersList(
+        usersList.sort((a, b) =>
+          sortedFrom === 'asc'
+            ? a[sortBy].localeCompare(b[sortBy])
+            : b[sortBy].localeCompare(a[sortBy]),
+        ),
+      );
+    } else if (sortBy === 'first_date' || sortBy === 'last_date') {
+      setUsersList(
+        usersList.sort((a, b) => {
+          const newDateA = Date.parse(formatDate(a[sortBy]));
+          const newDateB = Date.parse(formatDate(b[sortBy]));
+          return sortedFrom === 'asc' ? newDateA - newDateB : newDateB - newDateA;
+        }),
+      );
+    }
+  }, [sortBy, sortedFrom]);
+
+  useEffect(() => {
     if (typeof window === undefined || !router.query) return;
-    getUsersData();
-  }, [pageNumber, sortedFrom, debouncedInputValue, sortBy]);
+    const perPage = 10;
+    let finalUsersList = null;
+
+    if (Math.ceil(usersList.length / perPage) < +router.query?.page) {
+      addParams([{ key: 'page', value: Math.ceil(usersList.length / perPage) }]);
+      return;
+    }
+
+    if (Boolean(debouncedInputValue)) {
+      let searchedUser = listAllUsers.filter((item) =>
+        item.email.toLowerCase().includes(debouncedInputValue),
+      );
+      setUsersList(searchedUser);
+      finalUsersList = searchedUser.slice(0, perPage);
+      setPagesInfo([
+        {
+          maxPage: Math.ceil(searchedUser.length / perPage),
+          total: searchedUser.length,
+          perPage: perPage,
+        },
+      ]);
+    } else {
+      setUsersList(listAllUsers);
+
+      if (pageNumber === 0) {
+        finalUsersList = usersList.slice(0, perPage);
+      } else if (pageNumber > 0) {
+        const startSliceFrom = pageNumber * perPage;
+
+        finalUsersList = usersList.slice(startSliceFrom, startSliceFrom + perPage);
+      }
+      setPagesInfo([
+        {
+          maxPage: Math.ceil(usersList.length / perPage),
+          total: usersList.length,
+          perPage: perPage,
+        },
+      ]);
+    }
+
+    setUsersListPerPage(finalUsersList);
+    setState('success');
+  }, [pageNumber, sortBy, sortedFrom, debouncedInputValue]);
+
+  // useEffect(() => {
+  //   if (debouncedInputValue) {
+  // let searchedUser = listAllUsers.filter((item) =>
+  //   item.email.toLowerCase().includes(debouncedInputValue),
+  // );
+  //     setUsersList(searchedUser);
+  //   } else {
+  //     setUsersList(listAllUsers);
+  //   }
+  // }, [debouncedInputValue]);
 
   useEffect(() => {
     if (checkedUsersList.length === pagesInfo[0]?.total) {
@@ -152,8 +175,10 @@ export const Tabel = () => {
 
   useEffect(() => {
     if (!checkedUsersList.length) return setIsCheckAll(false);
-    setIsCheckAll(usersList.every(({ _id }) => checkedUsersList.includes(_id)));
-  }, [checkedUsersList, checkedUsersList.length, usersList]);
+    setIsCheckAll(
+      usersListPerPage.every(({ email }) => checkedUsersList.includes(email)),
+    );
+  }, [checkedUsersList, checkedUsersList.length, usersListPerPage]);
 
   const incrementPage = () => {
     const page =
@@ -170,16 +195,7 @@ export const Tabel = () => {
     if (isSelectedAll) {
       setCheckedUsersList([]);
     } else {
-      const response = await dataAPI.getUsers({
-        tid: accounts[0]?.tenantId,
-        token,
-        query: '',
-        page: 0,
-        perPage: pagesInfo[0].total,
-        orderedby: sortBy,
-        direction: sortedFrom,
-      });
-      setCheckedUsersList([...response.users.map((item) => item._id)]);
+      setCheckedUsersList([...usersList.map((item) => item.email)]);
     }
   };
 
@@ -188,13 +204,13 @@ export const Tabel = () => {
     let newListId;
 
     if (isCheckAll) {
-      newListId = usersList.map((item) => item._id);
+      newListId = usersListPerPage.map((item) => item.email);
 
       setCheckedUsersList([
         ...checkedUsersList.filter((item) => !newListId.includes(item)),
       ]);
     } else {
-      newListId = [...usersList.map((item) => item._id)].filter(
+      newListId = [...usersListPerPage.map((item) => item.email)].filter(
         (item) => !checkedUsersList.includes(item),
       );
 
@@ -263,16 +279,26 @@ export const Tabel = () => {
             />
           </div>
           <Filter isMobile={isMobile} />
-          {Boolean(checkedUsersList.length) ? (
+          {Boolean(checkedUsersList.length) && (
             <>
-              <Button
-                as="button"
-                label={`${isMobile ? '' : 'Export'}`}
-                size="md"
-                icon="ArrowCircleUpIcon"
-                iconPosition="before"
-                align="center"
-              />
+              <div className='relative'>
+                <Button
+                  as="button"
+                  label={`${isMobile ? '' : 'Export'}`}
+                  size="md"
+                  icon="ArrowCircleUpIcon"
+                  iconPosition="before"
+                  align="center"
+                />
+                <CSVLink
+                  className="absolute top-0 left-0 w-full h-full"
+                  headers={fileHeaders}
+                  data={usersForExport}
+                  filename="users.csv"
+                  target="_blank"
+                />
+              </div>
+
               <Button
                 as="button"
                 label={`${isMobile ? '' : 'Delete'}`}
@@ -287,18 +313,6 @@ export const Tabel = () => {
                 }}
               />
             </>
-          ) : (
-            <Button
-              as="button"
-              label={`${isMobile ? 'Add' : 'Add User'}`}
-              onClick={() => {
-                setModalNameOpen('add');
-                setIsModuleOpen(!isModuleOpen);
-              }}
-              // icon="UserAddIcon"
-              size="md"
-              key={'add'}
-            />
           )}
         </div>
       </div>
@@ -307,7 +321,7 @@ export const Tabel = () => {
           <>
             {isMobile ? (
               <MobileTabel
-                items={usersList}
+                items={usersListPerPage}
                 handleSelectAllOnPage={handleSelectAllOnPage}
                 getLastShowedResultNumber={getLastShowedResultNumber}
                 isCheckAll={isCheckAll}
@@ -322,7 +336,7 @@ export const Tabel = () => {
                   checkedList={checkedUsersList}
                   handelCheckbox={handelCheckbox}
                   isMobile={isMobile}
-                  items={usersList}
+                  items={usersListPerPage}
                   setActiveUser={setActiveUser}
                   setIsModuleOpen={setIsModuleOpen}
                   setModalNameOpen={setModalNameOpen}
@@ -334,7 +348,7 @@ export const Tabel = () => {
                 getLastShowedResultNumber={getLastShowedResultNumber}
                 handleSelectAllOnPage={handleSelectAllOnPage}
                 isCheckAll={isCheckAll}
-                items={usersList}
+                items={usersListPerPage}
                 setSortedFrom={(value) => addParams([{ key: 'direction', value }])}
                 sortBy={sortBy}
                 sortedFrom={sortedFrom}
@@ -348,7 +362,7 @@ export const Tabel = () => {
                   checkedList={checkedUsersList}
                   handelCheckbox={handelCheckbox}
                   isMobile={isMobile}
-                  items={usersList}
+                  items={usersListPerPage}
                   setActiveUser={setActiveUser}
                   setIsModuleOpen={setIsModuleOpen}
                   setModalNameOpen={setModalNameOpen}
@@ -366,13 +380,13 @@ export const Tabel = () => {
           </div>
         )}
 
-        {usersList.length === 0 && inputValue !== '' && state !== 'loading' && (
+        {usersListPerPage.length === 0 && inputValue !== '' && state !== 'loading' && (
           <div className="flex gap-4 flex-col min-h-max py-10 items-center justify-center text-indigo-500">
             <Icon name="CommonFileSearch" className="w-10 h-10" />
             <p className="font-bold">No results matching your criteria.</p>
           </div>
         )}
-        {usersList.length === 0 && inputValue === '' && state !== 'loading' && (
+        {usersListPerPage.length === 0 && inputValue === '' && state !== 'loading' && (
           <div className="flex gap-4 flex-col min-h-max py-10 items-center justify-center text-indigo-500">
             <Icon name="UserPlus" className="w-10 h-10" />
             <p className="font-bold">Need to add first user.</p>
@@ -384,10 +398,9 @@ export const Tabel = () => {
           activeUser={activeUser}
           checkedUsersList={checkedUsersList}
           isCheckAll={isCheckAll}
-          items={usersList}
+          items={usersListPerPage}
           modalNameOpen={modalNameOpen}
           setIsModuleOpen={setIsModuleOpen}
-          getUsersData={getUsersData}
           setUsersList={setUsersList}
           setCheckedUsersList={setCheckedUsersList}
         />

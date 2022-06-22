@@ -69,22 +69,32 @@ export const DeskTabel = ({
                 <th
                   key={id}
                   scope="col"
-                  className={cx('py-3 cursor-pointer', {
+                  className={cx('py-3', {
+                    ['cursor-pointer']:
+                      id !== 'product_name' && id !== 'build_version',
                     ['pr-8']: id !== sortBy,
-                    ['pl-3']: id === 'name',
+                    ['pl-3']: id === 'email',
                   })}
-                  onClick={() => handelSortBtn(id)}
+                  onClick={() =>
+                    id === 'product_name' || id === 'build_version'
+                      ? null
+                      : handelSortBtn(id)
+                  }
                 >
                   <div className="flex items-center gap-2">
                     <p>{name.toUpperCase()}</p>
-                    {id === sortBy && (
-                      <Icon
-                        name={
-                          sortedFrom === 'desc' ? 'ChevronUpIcon' : 'ChevronDownIcon'
-                        }
-                        className="w-6 h-6"
-                      />
-                    )}
+                    {id === sortBy &&
+                      id !== 'product_name' &&
+                      id !== 'build_version' && (
+                        <Icon
+                          name={
+                            sortedFrom === 'desc'
+                              ? 'ChevronUpIcon'
+                              : 'ChevronDownIcon'
+                          }
+                          className="w-6 h-6"
+                        />
+                      )}
                   </div>
                 </th>
               ))}
