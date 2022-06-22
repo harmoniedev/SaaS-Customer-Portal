@@ -18,6 +18,8 @@ export default function Page() {
   const isAuthenticated = useIsAuthenticated();
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const token = Cookies.get('download-token');
 
   /// errors handling for field and submit button
@@ -28,7 +30,7 @@ export default function Page() {
     }
   });
 
-  if (inProgress !== 'none') {
+  if (inProgress !== 'none' || isLoading) {
     return (
       <div className="w-24 h-24 m-auto mt-24">
         <Spinner />
@@ -38,6 +40,7 @@ export default function Page() {
 
   const onSubmit = async (ev) => {
     ev.preventDefault();
+    setIsLoading(true);
     const hashedPassword = hash({ password });
     const options = {
       method: 'post',
@@ -50,6 +53,9 @@ export default function Page() {
     const res = await fetch(`api/salesforce-login`, options);
     if (res.status === 200) {
       router.push('/portal/dashboard');
+    } else {
+      setErrorMessage('Incorrect username or password');
+      setIsLoading(false);
     }
   };
 
@@ -77,22 +83,38 @@ export default function Page() {
             placeholder="Email"
             required
             value={email}
-            setValue={(value) => setEmail(value)}
+            setValue={(value) => {
+              setEmail(value);
+              setErrorMessage('');
+            }}
             onFocus={(ev) => ev.target.removeAttribute('readOnly')}
             readOnly={true}
           />
           <InputMemo
-            className="w-full border-indigo-50 mb-4 placeholder-indigo-200"
+            className="w-full border-indigo-50 placeholder-indigo-200"
             title="Password"
             name="password"
             type="password"
             placeholder="Password"
             required
             value={password}
-            setValue={(value) => setPassword(value)}
+            setValue={(value) => {
+              setPassword(value);
+              setErrorMessage('');
+            }}
             onFocus={(ev) => ev.target.removeAttribute('readOnly')}
             readOnly={true}
           />
+          <div className="w-full flex justify-end">
+            <Button
+              label="Resend my password"
+              onClick={() => router.push('/reset-password')}
+              theme="blue"
+              as="button"
+              plain
+              align="left"
+            />
+          </div>
           <Button
             label="Sign in"
             onClick={onSubmit}
@@ -100,8 +122,10 @@ export default function Page() {
             iconPosition="before"
             as="button"
             stretch
+            disabled={password.trim() === '' || email.trim() === ''}
           />
         </form>
+        <p className="text-left text-red-500">{errorMessage}</p>
 
         <div className="w-full h-px bg-indigo-50 my-4 relative">
           <span className="text-indigo-300 px-4 bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">

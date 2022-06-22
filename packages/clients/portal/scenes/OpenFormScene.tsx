@@ -17,12 +17,9 @@ export type OpenFormSceneProps = {
 export const OpenFormScene = ({
   modalNameOpen,
   setIsModuleOpen,
-  items,
   activeUser,
   checkedUsersList,
   isCheckAll,
-  setUsersList,
-  setCheckedUsersList,
 }: OpenFormSceneProps) => {
   const deleteUser = async ({ email }) => {
     console.log(email);

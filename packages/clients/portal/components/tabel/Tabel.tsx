@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { CSVLink } from "react-csv";
 import { useDebounce } from '../../hooks/useDebounce';
 
 import { DeskTabelMemo as DeskTabel } from './DeskTabel';
@@ -15,8 +16,8 @@ import { Spinner } from '../loaders/Spinner';
 import { firstOf } from '../../helpers/utils/array';
 import { formatDate } from '../../helpers/utils/date';
 import { formatNumberWithCommas } from '../../helpers/utils/string';
+import { fileHeaders, getUsersToExport } from './TabelOptions';
 import {
-  UserFields,
   StaticState,
   StaticFormName,
   ParamsListType,
@@ -51,6 +52,8 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
   const [sortedFrom, setSortedFrom] = useState<string>(
     firstOf(router.query?.direction) || 'asc',
   );
+  
+  const usersForExport = useMemo(() => getUsersToExport({ listAllUsers, checkedUsersList }), [listAllUsers, checkedUsersList]);
 
   const debouncedInputValue = useDebounce(inputValue, 500);
   const isMobile = screenWidth < BREAKPOINTS.md;
@@ -279,14 +282,24 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
           />
           {Boolean(checkedUsersList.length) && (
             <>
-              <Button
-                as="button"
-                label={`${isMobile ? '' : 'Export'}`}
-                size="md"
-                icon="ArrowCircleUpIcon"
-                iconPosition="before"
-                align="center"
-              />
+              <div className='relative'>
+                <Button
+                  as="button"
+                  label={`${isMobile ? '' : 'Export'}`}
+                  size="md"
+                  icon="ArrowCircleUpIcon"
+                  iconPosition="before"
+                  align="center"
+                />
+                <CSVLink
+                  className="absolute top-0 left-0 w-full h-full"
+                  headers={fileHeaders}
+                  data={usersForExport}
+                  filename="users.csv"
+                  target="_blank"
+                />
+              </div>
+
               <Button
                 as="button"
                 label={`${isMobile ? '' : 'Delete'}`}

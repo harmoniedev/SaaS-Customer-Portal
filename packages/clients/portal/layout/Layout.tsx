@@ -26,6 +26,7 @@ export const Layout = ({ children }: CardProps) => {
   const isMobile = screenWidth < BREAKPOINTS.lg;
   const token = Cookies.get('download-token');
 
+
   useEffect(() => {
     setIsLoading(true);
     const getMenuItems = async () => {
@@ -40,17 +41,18 @@ export const Layout = ({ children }: CardProps) => {
           }
         })
       }
-      const activeItem = allMenuItems.find(item => `/portal${item.external}` === router.asPath);
+      const activeItem = allMenuItems.find(item => `/portal${item.external}` === router.pathname || `/portal${item.external}` === router.asPath);
       if (activeItem) {
         const isNestedPage = defaultMenuItems.findIndex(item => item.external === activeItem.external) === -1;
         setIsIframe(isNestedPage);
+
         setIsNavigation(activeItem.isSideMenu)
       }
       setMenuItems(allMenuItems);
       setIsLoading(false);
     }
     getMenuItems();
-  }, [])
+  }, [router.asPath, router.pathname])
 
   useEffect(() => {
     if (!isAuthenticated && inProgress === 'none' && !token) {
