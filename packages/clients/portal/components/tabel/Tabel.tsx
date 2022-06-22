@@ -14,6 +14,7 @@ import { BREAKPOINTS, useBreakpoint } from '../../hooks/useBreakpoint';
 import { DialogMemo as Dialog } from '../../components/dialog/Dialog';
 import { Spinner } from '../loaders/Spinner';
 import { firstOf } from '../../helpers/utils/array';
+import { formatDate } from '../../helpers/utils/date';
 import { formatNumberWithCommas } from '../../helpers/utils/string';
 import { fileHeaders, getUsersToExport } from './TabelOptions';
 import {
@@ -26,7 +27,7 @@ import { Filter } from '../filter/Filter';
 import { useRouter } from 'next/router';
 import { Paper } from '../paper/Paper';
 
-export const Tabel = ({ listAllUsers, setListAllUsers }) => {
+export const Tabel = ({ listAllUsers }) => {
   const { screenWidth } = useBreakpoint();
   const router = useRouter();
 
@@ -38,7 +39,8 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
   const [modalNameOpen, setModalNameOpen] = useState<StaticFormName>('add');
   const [isSelectedAll, setIsSelectedAll] = useState(false);
   const [isShowMobileSearch, setIsShowMobileSearch] = useState(false);
-  const [usersList, setUsersList] = useState([]);
+  const [usersListPerPage, setUsersListPerPage] = useState([]);
+  const [usersList, setUsersList] = useState([...listAllUsers]);
   const [inputValue, setInputValue] = useState<string>(
     firstOf(router.query?.search) || '',
   );
@@ -60,7 +62,7 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
     let lastNumber = pagesInfo[0].perPage * (pageNumber + 1);
     return lastNumber <= pagesInfo[0].total ? lastNumber : pagesInfo[0].total;
   };
-
+  console.log(usersList);
   useEffect(() => {
     if (typeof window === undefined || !router.query) return;
     setPageNumber(+router.query?.page - 1 || 0);
@@ -71,47 +73,81 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
   }, [router.query]);
 
   useEffect(() => {
+    if (sortBy === 'email') {
+      setUsersList(
+        usersList.sort((a, b) =>
+          sortedFrom === 'asc'
+            ? a[sortBy].localeCompare(b[sortBy])
+            : b[sortBy].localeCompare(a[sortBy]),
+        ),
+      );
+    } else if (sortBy === 'first_date' || sortBy === 'last_date') {
+      setUsersList(
+        usersList.sort((a, b) => {
+          const newDateA = Date.parse(formatDate(a[sortBy]));
+          const newDateB = Date.parse(formatDate(b[sortBy]));
+          return sortedFrom === 'asc' ? newDateA - newDateB : newDateB - newDateA;
+        }),
+      );
+    }
+  }, [sortBy, sortedFrom]);
+
+  useEffect(() => {
     if (typeof window === undefined || !router.query) return;
     const perPage = 10;
+    let finalUsersList = null;
 
-    if (Math.ceil(listAllUsers.length / perPage) < +router.query?.page) {
-      addParams([{ key: 'page', value: Math.ceil(listAllUsers.length / perPage) }]);
+    if (Math.ceil(usersList.length / perPage) < +router.query?.page) {
+      addParams([{ key: 'page', value: Math.ceil(usersList.length / perPage) }]);
       return;
     }
 
-    if (debouncedInputValue) {
-      let foundUsersList = listAllUsers.filter((item) =>
+    if (Boolean(debouncedInputValue)) {
+      let searchedUser = listAllUsers.filter((item) =>
         item.email.toLowerCase().includes(debouncedInputValue),
       );
-
+      setUsersList(searchedUser);
+      finalUsersList = searchedUser.slice(0, perPage);
       setPagesInfo([
         {
-          maxPage: Math.ceil(foundUsersList.length / perPage),
-          total: foundUsersList.length,
+          maxPage: Math.ceil(searchedUser.length / perPage),
+          total: searchedUser.length,
           perPage: perPage,
         },
       ]);
-      setPageNumber(0);
-      setUsersList(foundUsersList.slice(0, perPage));
     } else {
-      setPagesInfo([
-        {
-          maxPage: Math.ceil(listAllUsers.length / perPage),
-          total: listAllUsers.length,
-          perPage: perPage,
-        },
-      ]);
+      setUsersList(listAllUsers);
 
       if (pageNumber === 0) {
-        setUsersList(listAllUsers.slice(0, perPage));
+        finalUsersList = usersList.slice(0, perPage);
       } else if (pageNumber > 0) {
         const startSliceFrom = pageNumber * perPage;
 
-        setUsersList(listAllUsers.slice(startSliceFrom, startSliceFrom + perPage));
+        finalUsersList = usersList.slice(startSliceFrom, startSliceFrom + perPage);
       }
+      setPagesInfo([
+        {
+          maxPage: Math.ceil(usersList.length / perPage),
+          total: usersList.length,
+          perPage: perPage,
+        },
+      ]);
     }
+
+    setUsersListPerPage(finalUsersList);
     setState('success');
-  }, [pageNumber, sortedFrom, debouncedInputValue, sortBy]);
+  }, [pageNumber, sortBy, sortedFrom, debouncedInputValue]);
+
+  // useEffect(() => {
+  //   if (debouncedInputValue) {
+  // let searchedUser = listAllUsers.filter((item) =>
+  //   item.email.toLowerCase().includes(debouncedInputValue),
+  // );
+  //     setUsersList(searchedUser);
+  //   } else {
+  //     setUsersList(listAllUsers);
+  //   }
+  // }, [debouncedInputValue]);
 
   useEffect(() => {
     if (checkedUsersList.length === pagesInfo[0]?.total) {
@@ -139,8 +175,10 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
 
   useEffect(() => {
     if (!checkedUsersList.length) return setIsCheckAll(false);
-    setIsCheckAll(usersList.every(({ email }) => checkedUsersList.includes(email)));
-  }, [checkedUsersList, checkedUsersList.length, usersList]);
+    setIsCheckAll(
+      usersListPerPage.every(({ email }) => checkedUsersList.includes(email)),
+    );
+  }, [checkedUsersList, checkedUsersList.length, usersListPerPage]);
 
   const incrementPage = () => {
     const page =
@@ -157,7 +195,7 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
     if (isSelectedAll) {
       setCheckedUsersList([]);
     } else {
-      setCheckedUsersList([...listAllUsers.map((item) => item.email)]);
+      setCheckedUsersList([...usersList.map((item) => item.email)]);
     }
   };
 
@@ -166,13 +204,13 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
     let newListId;
 
     if (isCheckAll) {
-      newListId = usersList.map((item) => item.email);
+      newListId = usersListPerPage.map((item) => item.email);
 
       setCheckedUsersList([
         ...checkedUsersList.filter((item) => !newListId.includes(item)),
       ]);
     } else {
-      newListId = [...usersList.map((item) => item.email)].filter(
+      newListId = [...usersListPerPage.map((item) => item.email)].filter(
         (item) => !checkedUsersList.includes(item),
       );
 
@@ -283,7 +321,7 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
           <>
             {isMobile ? (
               <MobileTabel
-                items={usersList}
+                items={usersListPerPage}
                 handleSelectAllOnPage={handleSelectAllOnPage}
                 getLastShowedResultNumber={getLastShowedResultNumber}
                 isCheckAll={isCheckAll}
@@ -298,7 +336,7 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
                   checkedList={checkedUsersList}
                   handelCheckbox={handelCheckbox}
                   isMobile={isMobile}
-                  items={usersList}
+                  items={usersListPerPage}
                   setActiveUser={setActiveUser}
                   setIsModuleOpen={setIsModuleOpen}
                   setModalNameOpen={setModalNameOpen}
@@ -310,7 +348,7 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
                 getLastShowedResultNumber={getLastShowedResultNumber}
                 handleSelectAllOnPage={handleSelectAllOnPage}
                 isCheckAll={isCheckAll}
-                items={usersList}
+                items={usersListPerPage}
                 setSortedFrom={(value) => addParams([{ key: 'direction', value }])}
                 sortBy={sortBy}
                 sortedFrom={sortedFrom}
@@ -324,7 +362,7 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
                   checkedList={checkedUsersList}
                   handelCheckbox={handelCheckbox}
                   isMobile={isMobile}
-                  items={usersList}
+                  items={usersListPerPage}
                   setActiveUser={setActiveUser}
                   setIsModuleOpen={setIsModuleOpen}
                   setModalNameOpen={setModalNameOpen}
@@ -342,13 +380,13 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
           </div>
         )}
 
-        {usersList.length === 0 && inputValue !== '' && state !== 'loading' && (
+        {usersListPerPage.length === 0 && inputValue !== '' && state !== 'loading' && (
           <div className="flex gap-4 flex-col min-h-max py-10 items-center justify-center text-indigo-500">
             <Icon name="CommonFileSearch" className="w-10 h-10" />
             <p className="font-bold">No results matching your criteria.</p>
           </div>
         )}
-        {usersList.length === 0 && inputValue === '' && state !== 'loading' && (
+        {usersListPerPage.length === 0 && inputValue === '' && state !== 'loading' && (
           <div className="flex gap-4 flex-col min-h-max py-10 items-center justify-center text-indigo-500">
             <Icon name="UserPlus" className="w-10 h-10" />
             <p className="font-bold">Need to add first user.</p>
@@ -360,7 +398,7 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
           activeUser={activeUser}
           checkedUsersList={checkedUsersList}
           isCheckAll={isCheckAll}
-          items={usersList}
+          items={usersListPerPage}
           modalNameOpen={modalNameOpen}
           setIsModuleOpen={setIsModuleOpen}
           setUsersList={setUsersList}

@@ -14,7 +14,7 @@ export const DeleteUsersForm = ({
       className="inline-block lg:w-[45vw]"
       onSubmit={(e) => {
         e.preventDefault();
-        checkedList.map((id) => onSubmit({ id }));
+        checkedList.map((email) => onSubmit({ email }));
       }}
     >
       <div className="shadow-xl bg-white border border-black border-opacity-5 text-center px-8 py-4 lg:px-16 lg:py-10">

@@ -1,12 +1,7 @@
-import { useMsal } from '@azure/msal-react';
 import React from 'react';
 
 import { DeleteUserFormMemo as DeleteUserForm } from '../components/form/DeleteUserForm';
 import { DeleteUsersForm as DeleteUsersForm } from '../components/form/DeleteUsersForm';
-
-import DataAPI from '../api/data';
-
-const dataAPI = new DataAPI();
 
 export type OpenFormSceneProps = {
   modalNameOpen: string;
@@ -29,20 +24,8 @@ export const OpenFormScene = ({
   setUsersList,
   setCheckedUsersList,
 }: OpenFormSceneProps) => {
-  const { accounts } = useMsal();
-  const storadgeKey = `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---`;
-  const token = JSON.parse(sessionStorage.getItem(storadgeKey)).secret;
-
-  const deleteUser = async ({ id }) => {
-    const response = await dataAPI.deleteUser({
-      tid: accounts[0]?.tenantId,
-      token,
-      userId: id,
-    });
-    if (response.status === 200) {
-      setCheckedUsersList([]);
-      setIsModuleOpen(false);
-    }
+  const deleteUser = async ({ email }) => {
+    console.log(email);
   };
   const openFormNamed = () => {
     switch (modalNameOpen) {

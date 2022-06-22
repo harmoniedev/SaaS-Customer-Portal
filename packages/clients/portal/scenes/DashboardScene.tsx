@@ -28,7 +28,7 @@ export const DashboardScene = () => {
         {
           headers: {
             authorization:
-              'Bearer eyJhbGciOiJFUzUxMiIsImp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtNTIxIiwieCI6IkFZeWFIeUZGejBjYmhkVDZHbHpjazNTVkYwLXpVM1AzdGNkM3RGdnFMUUF0eHZBWGU0eGlGWUVvbTFyWGNDQkZLLTdNUlJ6ZERlYkJ3QXNzMHVzZmg4SHEiLCJ5IjoiQVk0N1F6OWVGNWpSNXVqRU94YXUzcnFzR2dtSUcyZ0d2eHR1OU1uSl9uLWxxSzNlU2lGclNsdTJMVUR6bjVhOGpRVU8wQ2pyb3lQYVJNTW9QdUlzS3ZfNyJ9fQ.eyJleHAiOjE2NTU4ODMwNjksImh0dHA6Ly9saWNlbnNlLW1hbmFnZXIuaGFybW9uLmllL2FsbC9yZWFkP2RvbWFpbnM9aGFybW9uLmllIjp0cnVlLCJwcm92aWRlciI6InplbmRlc2siLCJ1aWQiOiIzOTIyNzEyNTA2NzEiLCJ1c2VybmFtZSI6InZhZGltIChtYWluc29mdCkifQ.AVGshyEmPUX4fPbcmVcCp0bjkuw-miMRM-y_9fdo4PNbBStYtP0NybCTk53UCclOiWr6Kbgf_4rLXtCZZgaZWbM9AUOoF3Fm6Ro6A3MVimdN5PLJB5hTytaPbRM5-CjE-AFijETKO6hJj6gAeuTbWc-kGIDZp8-tXrTAlirIeeOjnYH6',
+              'Bearer eyJhbGciOiJFUzUxMiIsImp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtNTIxIiwieCI6IkFZeWFIeUZGejBjYmhkVDZHbHpjazNTVkYwLXpVM1AzdGNkM3RGdnFMUUF0eHZBWGU0eGlGWUVvbTFyWGNDQkZLLTdNUlJ6ZERlYkJ3QXNzMHVzZmg4SHEiLCJ5IjoiQVk0N1F6OWVGNWpSNXVqRU94YXUzcnFzR2dtSUcyZ0d2eHR1OU1uSl9uLWxxSzNlU2lGclNsdTJMVUR6bjVhOGpRVU8wQ2pyb3lQYVJNTW9QdUlzS3ZfNyJ9fQ.eyJleHAiOjE2NTU5Njc3ODIsImh0dHA6Ly9saWNlbnNlLW1hbmFnZXIuaGFybW9uLmllL2FsbC9yZWFkP2RvbWFpbnM9aGFybW9uLmllIjp0cnVlLCJwcm92aWRlciI6InplbmRlc2siLCJ1aWQiOiIzOTIyNzEyNTA2NzEiLCJ1c2VybmFtZSI6InZhZGltIChtYWluc29mdCkifQ.ABLs4CvbGHUxDRQgYHvlc5UaipPb3raBvmrfWbTbDZSX-9ZprsQgrN7rR0_tx6DHB2kY1yGwAumdksK-6p8dD9v7AdsbQfZFWCuV8_b2Gss3DKIwQ1iw9rgPHGySeI1B5K9rb170WDEsWT7Xd0PVsKmE4WyXYYuHA4x1iMZuHCETNvyV',
           },
         },
       );
@@ -106,9 +106,7 @@ export const DashboardScene = () => {
                 </div>
               </Paper>
             </div>
-            {!!listAllUsers && (
-              <Tabel listAllUsers={listAllUsers} setListAllUsers={setListAllUsers} />
-            )}
+            {!!listAllUsers && <Tabel listAllUsers={listAllUsers} />}
           </div>
         </div>
       )}
