@@ -11,7 +11,7 @@ export const Dropdown = ({ children, position = 'top-0 left-3' }) => {
     <div className="relative">
       <div className={`absolute ${position}`}>
         <Paper>
-          <div className="flex flex-col items-start px-3 w-max">{children}</div>
+          <div className="flex flex-col items-start  w-max">{children}</div>
         </Paper>
       </div>
     </div>

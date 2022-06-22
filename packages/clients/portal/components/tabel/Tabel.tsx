@@ -26,7 +26,7 @@ import { Filter } from '../filter/Filter';
 import { useRouter } from 'next/router';
 import { Paper } from '../paper/Paper';
 
-export const Tabel = ({ listAllUsers }) => {
+export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption }) => {
   const { screenWidth } = useBreakpoint();
   const router = useRouter();
 
@@ -59,7 +59,7 @@ export const Tabel = ({ listAllUsers }) => {
     let lastNumber = pagesInfo[0].perPage * (pageNumber + 1);
     return lastNumber <= pagesInfo[0].total ? lastNumber : pagesInfo[0].total;
   };
-  console.log(usersList);
+
   useEffect(() => {
     if (typeof window === undefined || !router.query) return;
     setPageNumber(+router.query?.page - 1 || 0);
@@ -272,7 +272,11 @@ export const Tabel = ({ listAllUsers }) => {
               theme={isSelectedAll ? 'red' : 'green'}
             />
           </div>
-          <Filter isMobile={isMobile} />
+          <Filter
+            isMobile={isMobile}
+            uniqueDomainOption={uniqueDomainOption}
+            uniqueProductOption={uniqueProductOption}
+          />
           {Boolean(checkedUsersList.length) && (
             <>
               <Button

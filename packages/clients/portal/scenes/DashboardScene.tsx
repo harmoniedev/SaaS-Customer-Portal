@@ -17,7 +17,8 @@ export const DashboardScene = () => {
   const [assignedLicensesCount, setAssignedLicensesCount] = useState<number>(0);
   const [listAllUsers, setListAllUsers] = useState([]);
   const [state, setState] = useState<StaticState>('idle');
-
+  const [uniqueProductOption, setUniqueProductOption] = useState([]);
+  const [uniqueDomainOption, setUniqueDomainOption] = useState([]);
   const isMobile = screenWidth < BREAKPOINTS.md;
 
   const getData = async () => {
@@ -52,6 +53,12 @@ export const DashboardScene = () => {
       setLicenseCount(jsonRespBody.count['']);
       setAssignedLicensesCount(jsonRespBody.count.topics);
       setListAllUsers(users);
+      setUniqueProductOption(
+        Array.from(new Set(users.map((user) => user.product_name))),
+      );
+      setUniqueDomainOption(
+        Array.from(new Set(users.map((user) => user.publicsuffix))),
+      );
 
       setState('success');
     } catch (error) {
@@ -113,7 +120,13 @@ export const DashboardScene = () => {
                 </div>
               </Paper>
             </div>
-            {!!listAllUsers && <Tabel listAllUsers={listAllUsers} />}
+            {!!listAllUsers && (
+              <Tabel
+                listAllUsers={listAllUsers}
+                uniqueDomainOption={uniqueDomainOption}
+                uniqueProductOption={uniqueProductOption}
+              />
+            )}
           </div>
         </div>
       )}
