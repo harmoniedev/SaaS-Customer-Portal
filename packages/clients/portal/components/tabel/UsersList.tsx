@@ -96,7 +96,7 @@ export const UsersList = ({
     });
 
   const trMobileElment = (items) =>
-    items.map(({ department, email, role, name, lastActiveDate }, i) => {
+    items.map(({ email, build_version, last_date, first_date, product_name }, i) => {
       return (
         <div key={i} className="border-b">
           <div
@@ -117,12 +117,11 @@ export const UsersList = ({
             <div className="py-2 flex flex-col items-center gap-4 w-full max-w-full overflow-hidden">
               <div className="flex flex-rows items-center gap-4 w-full max-w-full">
                 <Icon name="UserCircleBlue" className="w-8 h-8 shrink-0" />
-                <div className="flex flex-col w-[calc(100%-4rem)]">
-                  <p className="text-indigo-500  font-medium">{name}</p>
-                  <div className="break-words text-indigo-300 font-normal w-full max-w-full">
-                    {email}
-                  </div>
+                {/* <div className="flex flex-col w-[calc(100%-4rem)]"> */}
+                <div className="break-words text-indigo-300 font-normal w-full max-w-full">
+                  {email}
                 </div>
+                {/* </div> */}
               </div>
             </div>
 
@@ -138,32 +137,30 @@ export const UsersList = ({
           {isOpen.includes(email) && (
             <div className="px-12 flex flex-col gap-2">
               <div className="flex justify-between">
-                <p className="text-indigo-300 font-normal">Department:</p>
+                <p className="text-indigo-300 font-normal">Product Name:</p>
                 <p className="text-indigo-500 font-medium text-right">
-                  {department}
+                  {product_name}
+                </p>
+              </div>
+              <div className="flex justify-between">
+                <p className="text-indigo-300 font-normal">Build Version:</p>
+                <p className="text-indigo-500 font-medium text-right">
+                  {build_version}
                 </p>
               </div>
               <div className="flex justify-between">
                 <p className="text-indigo-300 font-normal">Last Active:</p>
                 <p className="text-indigo-500 font-medium text-right">
-                  {formatDate(lastActiveDate)}
+                  {formatDate(first_date)}
                 </p>
               </div>
               <div className="flex justify-between">
                 <p className="text-indigo-300 font-normal">Role:</p>
                 <p className="text-indigo-500 font-medium text-right">
-                  {truncate(role || '', 20)}
+                  {formatDate(last_date)}
                 </p>
               </div>
               <div className="flex justify-end gap-2.5 p-1.5 border-t">
-                <div
-                  onClick={() => {
-                    setIsModuleOpen(true);
-                    setModalNameOpen('edit');
-                  }}
-                >
-                  <Icon name="PencilIcon" className="w-6 h-6 text-indigo-100" />
-                </div>
                 <div
                   onClick={() => {
                     setIsModuleOpen(true);
