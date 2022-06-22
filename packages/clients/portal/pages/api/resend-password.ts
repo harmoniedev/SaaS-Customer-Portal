@@ -5,7 +5,6 @@ const handler = async (req, res) => {
     const { email } = req.body;
     try {
       const password = await getPasswordForUser(email);
-      console.log(password, 33)
       if (password) {
         await sendResetPasswordEmail(email, password);
         return res.status(200).end();

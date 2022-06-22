@@ -42,7 +42,6 @@ export const Layout = ({ children }: CardProps) => {
         })
       }
       const activeItem = allMenuItems.find(item => `/portal${item.external}` === router.pathname || `/portal${item.external}` === router.asPath);
-      console.log(router)
       if (activeItem) {
         const isNestedPage = defaultMenuItems.findIndex(item => item.external === activeItem.external) === -1;
         setIsIframe(isNestedPage);
@@ -53,7 +52,7 @@ export const Layout = ({ children }: CardProps) => {
       setIsLoading(false);
     }
     getMenuItems();
-  }, [])
+  }, [router.asPath, router.pathname])
 
   useEffect(() => {
     if (!isAuthenticated && inProgress === 'none' && !token) {

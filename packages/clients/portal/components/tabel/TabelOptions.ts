@@ -16,7 +16,6 @@ export const fileHeaders =[
 ]
 
 export const getUsersToExport = ({ checkedUsersList, listAllUsers }) => {
-  console.log('here')
   return listAllUsers
     .filter(user => checkedUsersList.includes(user.email))
     .map(user => ({
