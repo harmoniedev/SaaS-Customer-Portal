@@ -15,7 +15,7 @@ import { DialogMemo as Dialog } from '../../components/dialog/Dialog';
 import { Spinner } from '../loaders/Spinner';
 import { firstOf } from '../../helpers/utils/array';
 import { formatNumberWithCommas } from '../../helpers/utils/string';
-import { fileHeaders } from './TabelOptions';
+import { fileHeaders, getUsersToExport } from './TabelOptions';
 import {
   StaticState,
   StaticFormName,
@@ -50,21 +50,8 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
   const [sortedFrom, setSortedFrom] = useState<string>(
     firstOf(router.query?.direction) || 'asc',
   );
-
-  const getUsersToExport = () => {
-    console.log('here')
-    return listAllUsers
-      .filter(user => checkedUsersList.includes(user.email))
-      .map(user => ({
-        "Users/Purchased": user.email,
-        "Base Domain": user.publicsuffix,
-        "Product Name": user.product_name,
-        "Build Version": user.build_version,
-        "First Access": user.first_date ? new Date(user.first_date * 1000).toLocaleString() : '',
-        "Last Access": user.last_date ? new Date(user.last_date * 1000).toLocaleString() : ''
-      }))
-  }
-  const usersForExport = useMemo(() => getUsersToExport(), [listAllUsers, checkedUsersList]);
+  
+  const usersForExport = useMemo(() => getUsersToExport({ listAllUsers, checkedUsersList }), [listAllUsers, checkedUsersList]);
 
   const debouncedInputValue = useDebounce(inputValue, 500);
   const isMobile = screenWidth < BREAKPOINTS.md;
@@ -254,25 +241,26 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
             />
           </div>
           <Filter isMobile={isMobile} />
-          {Boolean(checkedUsersList.length) ? (
+          {Boolean(checkedUsersList.length) && (
             <>
-              {/* <Button
-                as="button"
-                label={`${isMobile ? '' : 'Export'}`}
-                size="md"
-                icon="ArrowCircleUpIcon"
-                iconPosition="before"
-                align="center"
-              > */}
+              <div className='relative'>
+                <Button
+                  as="button"
+                  label={`${isMobile ? '' : 'Export'}`}
+                  size="md"
+                  icon="ArrowCircleUpIcon"
+                  iconPosition="before"
+                  align="center"
+                />
                 <CSVLink
+                  className="absolute top-0 left-0 w-full h-full"
                   headers={fileHeaders}
                   data={usersForExport}
-                  filename="results.csv"
+                  filename="users.csv"
                   target="_blank"
-                >
-                  Export
-                </CSVLink>
-              {/* </Button> */}
+                />
+              </div>
+
               <Button
                 as="button"
                 label={`${isMobile ? '' : 'Delete'}`}
@@ -287,18 +275,6 @@ export const Tabel = ({ listAllUsers, setListAllUsers }) => {
                 }}
               />
             </>
-          ) : (
-            <Button
-              as="button"
-              label={`${isMobile ? 'Add' : 'Add User'}`}
-              onClick={() => {
-                setModalNameOpen('add');
-                setIsModuleOpen(!isModuleOpen);
-              }}
-              // icon="UserAddIcon"
-              size="md"
-              key={'add'}
-            />
           )}
         </div>
       </div>
