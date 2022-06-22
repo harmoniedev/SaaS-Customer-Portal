@@ -102,23 +102,52 @@ export const Tabel = ({ listAllUsers }) => {
       return;
     }
 
-    let searchedUser = listAllUsers.filter((item) =>
-      item.email.toLowerCase().includes(debouncedInputValue),
-    );
+    if (Boolean(debouncedInputValue)) {
+      let searchedUser = listAllUsers.filter((item) =>
+        item.email.toLowerCase().includes(debouncedInputValue),
+      );
+      setUsersList(searchedUser);
+      finalUsersList = searchedUser.slice(0, perPage);
+      setPagesInfo([
+        {
+          maxPage: Math.ceil(searchedUser.length / perPage),
+          total: searchedUser.length,
+          perPage: perPage,
+        },
+      ]);
+    } else {
+      setUsersList(listAllUsers);
 
-    setUsersList(searchedUser);
-    finalUsersList = searchedUser.slice(0, perPage);
-    setPagesInfo([
-      {
-        maxPage: Math.ceil(searchedUser.length / perPage),
-        total: searchedUser.length,
-        perPage: perPage,
-      },
-    ]);
+      if (pageNumber === 0) {
+        finalUsersList = usersList.slice(0, perPage);
+      } else if (pageNumber > 0) {
+        const startSliceFrom = pageNumber * perPage;
+
+        finalUsersList = usersList.slice(startSliceFrom, startSliceFrom + perPage);
+      }
+      setPagesInfo([
+        {
+          maxPage: Math.ceil(usersList.length / perPage),
+          total: usersList.length,
+          perPage: perPage,
+        },
+      ]);
+    }
 
     setUsersListPerPage(finalUsersList);
     setState('success');
   }, [pageNumber, sortBy, sortedFrom, debouncedInputValue]);
+
+  // useEffect(() => {
+  //   if (debouncedInputValue) {
+  // let searchedUser = listAllUsers.filter((item) =>
+  //   item.email.toLowerCase().includes(debouncedInputValue),
+  // );
+  //     setUsersList(searchedUser);
+  //   } else {
+  //     setUsersList(listAllUsers);
+  //   }
+  // }, [debouncedInputValue]);
 
   useEffect(() => {
     if (checkedUsersList.length === pagesInfo[0]?.total) {
@@ -242,7 +271,7 @@ export const Tabel = ({ listAllUsers }) => {
         <div className="flex flex-rows gap-3 lg:gap-6 md:justify-end">
           <div className="mr-auto">
             <Button
-              label={isSelectedAll && checkedUsersList.length > 0 ? 'Deselect All' : 'Select All'}
+              label={isSelectedAll ? 'Deselect All' : 'Select All'}
               align="center"
               size="md"
               onClick={handleSelectAll}
