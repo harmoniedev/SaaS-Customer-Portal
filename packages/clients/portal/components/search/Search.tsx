@@ -45,7 +45,7 @@ export const Search = ({ inputValue, setInputValue }: SearchProp) => {
           id={'search'}
           value={inputValue}
           setValue={setInputValue}
-          className="text-indigo-300 py-1.5 pl-10 pr-7 font-normal w-full"
+          className="text-indigo-300 py-1.5 pl-10 pr-7 font-normal w-full h-full"
         />
       </div>
     </div>

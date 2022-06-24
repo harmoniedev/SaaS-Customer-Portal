@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { CSVLink } from "react-csv";
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { CSVLink } from 'react-csv';
 import { useDebounce } from '../../hooks/useDebounce';
 
 import { DeskTabelMemo as DeskTabel } from './DeskTabel';
@@ -17,11 +17,7 @@ import { firstOf } from '../../helpers/utils/array';
 import { formatDate } from '../../helpers/utils/date';
 import { formatNumberWithCommas } from '../../helpers/utils/string';
 import { fileHeaders, getUsersToExport } from './TabelOptions';
-import {
-  StaticState,
-  StaticFormName,
-  ParamsListType,
-} from '../../types';
+import { StaticState, StaticFormName, ParamsListType } from '../../types';
 import { Filter } from '../filter/Filter';
 
 import { useRouter } from 'next/router';
@@ -52,8 +48,11 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
   const [sortedFrom, setSortedFrom] = useState<string>(
     firstOf(router.query?.direction) || 'asc',
   );
-  
-  const usersForExport = useMemo(() => getUsersToExport({ listAllUsers, checkedUsersList }), [listAllUsers, checkedUsersList]);
+
+  const usersForExport = useMemo(
+    () => getUsersToExport({ listAllUsers, checkedUsersList }),
+    [listAllUsers, checkedUsersList],
+  );
 
   const debouncedInputValue = useDebounce(inputValue, 500);
   const isMobile = screenWidth < BREAKPOINTS.md;
@@ -238,7 +237,7 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
             </div>
           )}
           <div className="ml-auto">
-            {isMobile ? (
+            {isMobile && (
               <div className="flex items-center gap-2">
                 {isShowMobileSearch && (
                   <Search
@@ -255,17 +254,10 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
                   onClick={() => setIsShowMobileSearch(!isShowMobileSearch)}
                 />
               </div>
-            ) : (
-              <Search
-                inputValue={inputValue}
-                setInputValue={(value) => {
-                  addParams([{ key: 'search', value }]);
-                }}
-              />
             )}
           </div>
         </div>
-        <div className="flex flex-rows gap-3 lg:gap-6 md:justify-end">
+        <div className="flex flex-rows gap-3 lg:gap-3 md:justify-end">
           <div className="mr-auto">
             <Button
               label={isSelectedAll ? 'Deselect All' : 'Select All'}
@@ -275,46 +267,49 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
               theme={isSelectedAll ? 'red' : 'green'}
             />
           </div>
+          {!isMobile && (
+            <Search
+              inputValue={inputValue}
+              setInputValue={(value) => {
+                addParams([{ key: 'search', value }]);
+              }}
+            />
+          )}
           <Filter
             isMobile={isMobile}
             uniqueDomainOption={uniqueDomainOption}
             uniqueProductOption={uniqueProductOption}
           />
-          {Boolean(checkedUsersList.length) && (
-            <>
-              <div className='relative'>
-                <Button
-                  as="button"
-                  label={`${isMobile ? '' : 'Export'}`}
-                  size="md"
-                  icon="ArrowCircleUpIcon"
-                  iconPosition="before"
-                  align="center"
-                />
-                <CSVLink
-                  className="absolute top-0 left-0 w-full h-full"
-                  headers={fileHeaders}
-                  data={usersForExport}
-                  filename="users.csv"
-                  target="_blank"
-                />
-              </div>
 
-              <Button
-                as="button"
-                label={`${isMobile ? '' : 'Delete'}`}
-                size="md"
-                icon="TrashIcon"
-                iconPosition="before"
-                theme="red"
-                align="center"
-                onClick={() => {
-                  setModalNameOpen('deleteAll');
-                  setIsModuleOpen(true);
-                }}
-              />
-            </>
-          )}
+          <div className="relative">
+            <Button
+              as="button"
+              size="md"
+              icon="ArrowCircleUpIcon"
+              iconPosition="before"
+              align="center"
+            />
+            <CSVLink
+              className="absolute top-0 left-0 w-full h-full"
+              headers={fileHeaders}
+              data={usersForExport}
+              filename="users.csv"
+              target="_blank"
+            />
+          </div>
+
+          <Button
+            as="button"
+            size="md"
+            icon="TrashIcon"
+            iconPosition="before"
+            theme="red"
+            align="center"
+            onClick={() => {
+              setModalNameOpen('deleteAll');
+              setIsModuleOpen(true);
+            }}
+          />
         </div>
       </div>
       <Paper>
