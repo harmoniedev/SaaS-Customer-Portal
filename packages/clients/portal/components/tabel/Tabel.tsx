@@ -54,7 +54,7 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
     [listAllUsers, checkedUsersList],
   );
 
-  const debouncedInputValue = useDebounce(inputValue, 500);
+  const debouncedInputValue = useDebounce(inputValue, 1000);
   const isMobile = screenWidth < BREAKPOINTS.md;
 
   const getLastShowedResultNumber = () => {
@@ -62,96 +62,97 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
     return lastNumber <= pagesInfo[0].total ? lastNumber : pagesInfo[0].total;
   };
 
-  useEffect(() => {
-    if (typeof window === undefined || !router.query) return;
-    setPageNumber(+router.query?.page - 1 || 0);
-    const sortDirection = firstOf(router.query?.direction) || 'asc';
-    setSortedFrom(sortDirection);
-    setInputValue(firstOf(router.query?.search) || '');
-    setSortBy(firstOf(router.query?.sortBy) || 'email');
-  }, [router.query]);
+  // useEffect(() => {
+  //   if (typeof window === undefined || !router.query) return;
+  //   setPageNumber(+router.query?.page - 1 || 0);
+  //   const sortDirection = firstOf(router.query?.direction) || 'asc';
+  //   setSortedFrom(sortDirection);
+  //   setInputValue(firstOf(router.query?.search) || '');
+  //   setSortBy(firstOf(router.query?.sortBy) || 'email');
+  // }, [router.query]);
+
+  // useEffect(() => {
+  //   if (sortBy === 'email') {
+  //     setUsersList(
+  //       usersList.sort((a, b) =>
+  //         sortedFrom === 'asc'
+  //           ? a[sortBy].localeCompare(b[sortBy])
+  //           : b[sortBy].localeCompare(a[sortBy]),
+  //       ),
+  //     );
+  //   } else if (sortBy === 'first_date' || sortBy === 'last_date') {
+  //     setUsersList(
+  //       usersList.sort((a, b) => {
+  //         const newDateA = Date.parse(formatDate(a[sortBy]));
+  //         const newDateB = Date.parse(formatDate(b[sortBy]));
+  //         return sortedFrom === 'asc' ? newDateA - newDateB : newDateB - newDateA;
+  //       }),
+  //     );
+  //   }
+  // }, [sortBy, sortedFrom]);
+
+  // useEffect(() => {
+  //   if (typeof window === undefined || !router.query) return;
+  //   const perPage = 10;
+  //   let finalUsersList = null;
+
+  //   if (Math.ceil(usersList.length / perPage) < +router.query?.page) {
+  //     addParams([{ key: 'page', value: Math.ceil(usersList.length / perPage) }]);
+  //     return;
+  //   }
+
+  //   if (!!debouncedInputValue) {
+  //     let searchedUser = listAllUsers.filter((item) =>
+  //       item.email.toLowerCase().includes(debouncedInputValue),
+  //     );
+  //     setUsersList(searchedUser);
+  //     finalUsersList = searchedUser.slice(0, perPage);
+  //     setPagesInfo([
+  //       {
+  //         maxPage: Math.ceil(searchedUser.length / perPage),
+  //         total: searchedUser.length,
+  //         perPage: perPage,
+  //       },
+  //     ]);
+  //   } else {
+  //     setUsersList(listAllUsers);
+
+  //     if (pageNumber === 0) {
+  //       finalUsersList = usersList.slice(0, perPage);
+  //     } else if (pageNumber > 0) {
+  //       const startSliceFrom = pageNumber * perPage;
+
+  //       finalUsersList = usersList.slice(startSliceFrom, startSliceFrom + perPage);
+  //     }
+  //     setPagesInfo([
+  //       {
+  //         maxPage: Math.ceil(usersList.length / perPage),
+  //         total: usersList.length,
+  //         perPage: perPage,
+  //       },
+  //     ]);
+  //   }
+
+  //   setUsersListPerPage(finalUsersList);
+  //   setState('success');
+  // }, [pageNumber, sortBy, sortedFrom, debouncedInputValue, listAllUsers]);
 
   useEffect(() => {
-    if (sortBy === 'email') {
-      setUsersList(
-        usersList.sort((a, b) =>
-          sortedFrom === 'asc'
-            ? a[sortBy].localeCompare(b[sortBy])
-            : b[sortBy].localeCompare(a[sortBy]),
-        ),
-      );
-    } else if (sortBy === 'first_date' || sortBy === 'last_date') {
-      setUsersList(
-        usersList.sort((a, b) => {
-          const newDateA = Date.parse(formatDate(a[sortBy]));
-          const newDateB = Date.parse(formatDate(b[sortBy]));
-          return sortedFrom === 'asc' ? newDateA - newDateB : newDateB - newDateA;
-        }),
-      );
-    }
-  }, [sortBy, sortedFrom]);
-
-  useEffect(() => {
-    if (typeof window === undefined || !router.query) return;
-    const perPage = 10;
-    let finalUsersList = null;
-
-    if (Math.ceil(usersList.length / perPage) < +router.query?.page) {
-      addParams([{ key: 'page', value: Math.ceil(usersList.length / perPage) }]);
-      return;
-    }
-
-    if (!!debouncedInputValue) {
-      let searchedUser = listAllUsers.filter((item) =>
-        item.email.toLowerCase().includes(debouncedInputValue),
-      );
-      setUsersList(searchedUser);
-      finalUsersList = searchedUser.slice(0, perPage);
-      setPagesInfo([
-        {
-          maxPage: Math.ceil(searchedUser.length / perPage),
-          total: searchedUser.length,
-          perPage: perPage,
-        },
-      ]);
-    } else {
-      setUsersList(listAllUsers);
-
-      if (pageNumber === 0) {
-        finalUsersList = usersList.slice(0, perPage);
-      } else if (pageNumber > 0) {
-        const startSliceFrom = pageNumber * perPage;
-
-        finalUsersList = usersList.slice(startSliceFrom, startSliceFrom + perPage);
-      }
-      setPagesInfo([
-        {
-          maxPage: Math.ceil(usersList.length / perPage),
-          total: usersList.length,
-          perPage: perPage,
-        },
-      ]);
-    }
-
-    setUsersListPerPage(finalUsersList);
-    setState('success');
-  }, [pageNumber, sortBy, sortedFrom, debouncedInputValue, listAllUsers]);
-
-  useEffect(() => {
+    addParams([{ key: 'search', value: debouncedInputValue }])
     if (!inputValue) {
       setUsersList(listAllUsers);
     } else {
       setCheckedUsersList([]);
     }
-  }, [inputValue]);
+  }, [debouncedInputValue]);
 
-  useEffect(() => {
-    if (checkedUsersList.length === pagesInfo[0]?.total) {
-      setIsSelectedAll(true);
-    } else {
-      setIsSelectedAll(false);
-    }
-  }, [checkedUsersList.length, pagesInfo]);
+  // useEffect(() => {
+  //   if (checkedUsersList.length === pagesInfo[0]?.total) {
+  //     setIsSelectedAll(true);
+  //   } else {
+  //     setIsSelectedAll(false);
+  //   }
+  // }, [checkedUsersList.length, pagesInfo]);
 
   const addParams = (list: ParamsListType[] = []) => {
     let newPairs = {};
@@ -164,17 +165,19 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
       {},
     );
 
-    router.push({ pathname: router.pathname, query: newQuery }, undefined, {
-      shallow: true,
+    router.push(
+      { pathname: router.pathname, query: newQuery },
+      undefined, {
+      shallow: false,
     });
   };
 
-  useEffect(() => {
-    if (!checkedUsersList.length) return setIsCheckAll(false);
-    setIsCheckAll(
-      usersListPerPage.every(({ email }) => checkedUsersList.includes(email)),
-    );
-  }, [checkedUsersList, checkedUsersList.length, usersListPerPage]);
+  // useEffect(() => {
+  //   if (!checkedUsersList.length) return setIsCheckAll(false);
+  //   setIsCheckAll(
+  //     usersListPerPage.every(({ email }) => checkedUsersList.includes(email)),
+  //   );
+  // }, [checkedUsersList, checkedUsersList.length, usersListPerPage]);
 
   const incrementPage = () => {
     const page =
@@ -243,7 +246,8 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
                   <Search
                     inputValue={inputValue}
                     setInputValue={(value) => {
-                      addParams([{ key: 'search', value }]);
+                      setInputValue(value)
+                      // addParams([{ key: 'search', value }]);
                     }}
                   />
                 )}
@@ -271,7 +275,8 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
             <Search
               inputValue={inputValue}
               setInputValue={(value) => {
-                addParams([{ key: 'search', value }]);
+                setInputValue(value)
+                // addParams([{ key: 'search', value }]);
               }}
             />
           )}

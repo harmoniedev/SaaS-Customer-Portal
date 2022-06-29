@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-// import Cookies from 'js-cookie';
+import Cookies from 'js-cookie';
 
 import { TitleMemo as Title } from '../components/title/Title';
 import { PaperMemo as Paper } from '../components/paper/Paper';
@@ -8,6 +8,7 @@ import { TabelMemo as Tabel } from '../components/tabel/Tabel';
 import { Icon } from '../components/icons/Icon';
 import { Spinner } from '../components/loaders/Spinner';
 import { StaticState } from '../types';
+import { useMsal } from '@azure/msal-react';
 
 export const DashboardScene = () => {
   const [licenseCount, setLicenseCount] = useState<number>(0);
@@ -17,11 +18,16 @@ export const DashboardScene = () => {
   const [uniqueProductOption, setUniqueProductOption] = useState([]);
   const [uniqueDomainOption, setUniqueDomainOption] = useState([]);
 
+  const { accounts } = useMsal();
+  const storadgeKey = accounts[0] ? `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---` : null;
+  const token = accounts[0] ? JSON.parse(sessionStorage.getItem(storadgeKey)).secret : Cookies.get('download-token');
+
   const getData = async () => {
     try {
       setState('loading');
+      // pass here token defined in 23 string
       const response = await fetch(
-        'https://status-manager.harmon.ie/domain_data/harmon.ie',
+        process.env.API_URL,
         {
           headers: {
             authorization:
@@ -29,8 +35,6 @@ export const DashboardScene = () => {
           },
         },
       );
-
-
       const text = await response.text();
       const el = text.split(']]}')[0];
 
@@ -67,6 +71,7 @@ export const DashboardScene = () => {
   };
 
   useEffect(() => {
+    console.log('hehbejbj')
     getData();
   }, []);
 
