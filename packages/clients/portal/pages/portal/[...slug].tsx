@@ -2,6 +2,8 @@ import type { GetServerSideProps } from 'next';
 import { LayoutMemo as Layout } from '../../layout/Layout';
 import { LandingPageSceneMemo as LandingPageScene } from '../../scenes/LandingPageScene';
 
+// this page is used to display nested from harmonie pages
+
 function Page({ slug }) {
   const link = slug.join('/');
   return (

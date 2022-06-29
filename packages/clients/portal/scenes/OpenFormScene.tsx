@@ -24,6 +24,7 @@ export const OpenFormScene = ({
   const deleteUser = async ({ email }) => {
     console.log(email);
   };
+  
   const openFormNamed = () => {
     switch (modalNameOpen) {
       case 'delete':

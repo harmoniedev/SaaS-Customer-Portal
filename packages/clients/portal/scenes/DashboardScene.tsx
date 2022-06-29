@@ -8,18 +8,14 @@ import { TabelMemo as Tabel } from '../components/tabel/Tabel';
 import { Icon } from '../components/icons/Icon';
 import { Spinner } from '../components/loaders/Spinner';
 import { StaticState } from '../types';
-import { BREAKPOINTS, useBreakpoint } from '../hooks/useBreakpoint';
-import { Button } from '../components/buttons/Button';
 
 export const DashboardScene = () => {
-  const { screenWidth } = useBreakpoint();
   const [licenseCount, setLicenseCount] = useState<number>(0);
   const [assignedLicensesCount, setAssignedLicensesCount] = useState<number>(0);
   const [listAllUsers, setListAllUsers] = useState([]);
   const [state, setState] = useState<StaticState>('idle');
   const [uniqueProductOption, setUniqueProductOption] = useState([]);
   const [uniqueDomainOption, setUniqueDomainOption] = useState([]);
-  const isMobile = screenWidth < BREAKPOINTS.md;
 
   const getData = async () => {
     try {
@@ -29,12 +25,16 @@ export const DashboardScene = () => {
         {
           headers: {
             authorization:
-              'Bearer eyJhbGciOiJFUzUxMiIsImp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtNTIxIiwieCI6IkFZeWFIeUZGejBjYmhkVDZHbHpjazNTVkYwLXpVM1AzdGNkM3RGdnFMUUF0eHZBWGU0eGlGWUVvbTFyWGNDQkZLLTdNUlJ6ZERlYkJ3QXNzMHVzZmg4SHEiLCJ5IjoiQVk0N1F6OWVGNWpSNXVqRU94YXUzcnFzR2dtSUcyZ0d2eHR1OU1uSl9uLWxxSzNlU2lGclNsdTJMVUR6bjVhOGpRVU8wQ2pyb3lQYVJNTW9QdUlzS3ZfNyJ9fQ.eyJleHAiOjE2NTYxNDA3NDYsImh0dHA6Ly9saWNlbnNlLW1hbmFnZXIuaGFybW9uLmllL2FsbC9yZWFkP2RvbWFpbnM9aGFybW9uLmllIjp0cnVlLCJwcm92aWRlciI6InplbmRlc2siLCJ1aWQiOiIzOTIyNzEyNTA2NzEiLCJ1c2VybmFtZSI6InZhZGltIChtYWluc29mdCkifQ.AFmzIW-uPho3YPBrXj3ooMkLQCjrNXLPI8nZe3u7sMWsJubzBjEPcRoMaC5Ht4lZu72D3u-Y-UTB3_EzgJ2sHB2kAbOz3Nanuful2z_nkjB4vPIRIPvkDeN0Kp3vUkYxuPi4PE_o6zeB28giRri-ewqBR_tnx4ct549gfK3EoYGffJfE',
+              'Bearer eyJhbGciOiJFUzUxMiIsImp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtNTIxIiwieCI6IkFZeWFIeUZGejBjYmhkVDZHbHpjazNTVkYwLXpVM1AzdGNkM3RGdnFMUUF0eHZBWGU0eGlGWUVvbTFyWGNDQkZLLTdNUlJ6ZERlYkJ3QXNzMHVzZmg4SHEiLCJ5IjoiQVk0N1F6OWVGNWpSNXVqRU94YXUzcnFzR2dtSUcyZ0d2eHR1OU1uSl9uLWxxSzNlU2lGclNsdTJMVUR6bjVhOGpRVU8wQ2pyb3lQYVJNTW9QdUlzS3ZfNyJ9fQ.eyJleHAiOjE2NTY1NzM5NDYsImh0dHA6Ly9saWNlbnNlLW1hbmFnZXIuaGFybW9uLmllL2FsbC9yZWFkP2RvbWFpbnM9aGFybW9uLmllIjp0cnVlLCJwcm92aWRlciI6InplbmRlc2siLCJ1aWQiOiIzOTIyNzEyNTA2NzEiLCJ1c2VybmFtZSI6InZhZGltIChtYWluc29mdCkifQ.AJGNuG3V552904P8XEEzAvmXJin6i2pbz2VIZi-qnYNdoxvIKrtQJOblCFkocuK6AszPtU-wXM5k8GVpqb2wNp1qACEi5oCaBRG9xbpHsJI9ll7hIqny8iqZ5Tqlh_GezlRNMlldARoXxnyJ3AZfoYiaPY4Wboja8kNrcJKoLkq-S-Ba',
           },
         },
       );
+
+
       const text = await response.text();
       const el = text.split(']]}')[0];
+
+      /// Your api gives in response not correct object(actually not the object at all), thats why I am using this
       const jsonRespBody = JSON.parse(el + ']]}');
 
       const { rows, columns, count } = jsonRespBody;
@@ -50,7 +50,7 @@ export const DashboardScene = () => {
         })
         .filter((item) => item.build_version || item.product_name);
 
-      setLicenseCount(jsonRespBody.count['']);
+      setLicenseCount(count['']);
       setAssignedLicensesCount(jsonRespBody.count.topics);
       setListAllUsers(users);
       setUniqueProductOption(

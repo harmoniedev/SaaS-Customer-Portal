@@ -81,7 +81,7 @@ export const Filter = ({ isMobile, uniqueDomainOption, uniqueProductOption }) =>
         >
           <Checkbox checked={isChecked} handelCheckbox={handelCheckbox} id={item} />
           <button type="button">
-            <p className="text-indigo-500 text-normal">{item}</p>
+            <p className="text-indigo-500 text-normal text-left">{item}</p>
           </button>
         </div>
       );

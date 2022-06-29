@@ -19,13 +19,14 @@ export const Layout = ({ children }: CardProps) => {
   const [menuItems, setMenuItems] = useState(defaultMenuItems);
   const [isLoading, setIsLoading] = useState(false);
   const [isIframe, setIsIframe] = useState(false);
-  const router = useRouter();
-  const { inProgress } = useMsal();
-  const { screenWidth } = useBreakpoint();
-  const isAuthenticated = useIsAuthenticated();
-  const isMobile = screenWidth < BREAKPOINTS.lg;
-  const token = Cookies.get('download-token');
 
+  const router = useRouter();
+  const { screenWidth } = useBreakpoint();
+  const isMobile = screenWidth < BREAKPOINTS.lg;
+  
+  const { inProgress } = useMsal();
+  const isAuthenticated = useIsAuthenticated();
+  const token = Cookies.get('download-token');
 
   useEffect(() => {
     setIsLoading(true);
@@ -56,6 +57,7 @@ export const Layout = ({ children }: CardProps) => {
 
   useEffect(() => {
     if (!isAuthenticated && inProgress === 'none' && !token) {
+      // here we check if user is Authenticated via Salesforce or Azure
       router.push('/');
     }
   });

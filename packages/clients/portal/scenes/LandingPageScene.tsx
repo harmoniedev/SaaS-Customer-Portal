@@ -8,12 +8,11 @@ export type LandingPageSceneProps = {
   slug?: string;
 };
 
-
 export const LandingPageScene = ({ slug }: LandingPageSceneProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isConsent, setIsConsent] = useState(false);
-  const [noUrl, setNoUrl] = useState('');
-  const [yesUrl, setYesUrl] = useState('')
+  const [noUrl, setNoUrl] = useState(''); // variables provided in sanity
+  const [yesUrl, setYesUrl] = useState(''); // variables provided in sanity
 
   const handleLoad = () => {
     const isIFrame = (input: HTMLElement | null): input is HTMLIFrameElement => input !== null && input.tagName === 'IFRAME';
@@ -52,6 +51,7 @@ export const LandingPageScene = ({ slug }: LandingPageSceneProps) => {
           </div>
         )
       }
+      {/* here instead of Dialog you need to open consent window if isConsent === true, and can pass there redirect urls if user press yes ir no */}
       <Dialog mode="form" onOpenChange={(value) => setIsConsent(value)} open={isConsent}>
         <div className='lg:max-w-lg shadow-xl bg-white border border-black border-opacity-5 px-8 py-4 lg:px-16 lg:py-10'>
           <Title size='xs'>

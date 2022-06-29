@@ -4,7 +4,7 @@ import cx from 'classnames';
 import { TitleMemo as Title } from '../components/title/Title';
 import { ArticleCardMemo as ArticleCard } from '../components/cards/ArticleCard';
 import { AccordionMemo as Accordion } from '../components/accordion/Accordion';
-import { accordionItems, listCardItems } from './SupportSceneOptions';
+import { accordionItems, listCardItems } from '../helpers/options/support';
 
 export const SupportScene = () => {
   return (
