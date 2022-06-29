@@ -7,7 +7,8 @@ const nextConfig = {
     LOGOUT_REDIRECT_URI: process.env.LOGOUT_REDIRECT_URI,
     API_URL: process.env.API_URL,
     BASE_IFRAME_API: process.env.BASE_IFRAME_API,
-    IFRAME_KEY: process.env.IFRAME_KEY
+    IFRAME_KEY: process.env.IFRAME_KEY,
+    TEMP_TOKEN: process.env.TEMP_TOKEN
   },
   webpack(config) {
     config.module.rules.push({

@@ -6,7 +6,6 @@ import { Button } from '../buttons/Button';
 import { Dropdown } from '../dropdown/Dropdown';
 import { Title } from '../title/Title';
 import { Checkbox } from '../checkbox/Checkbox';
-import { ParamsListType } from '../../types';
 
 export type FilterProps = {
   isMobile: boolean;
