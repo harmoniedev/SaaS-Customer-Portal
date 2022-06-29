@@ -1,3 +1,5 @@
+import { formatDate } from "../../helpers/utils/date";
+
 export const tableHeaders = [
   { name: 'Users', id: 'email' },
   { name: 'Product name', id: 'product_name' },
@@ -26,4 +28,22 @@ export const getUsersToExport = ({ checkedUsersList, listAllUsers }) => {
       "First Access": user.first_date ? new Date(user.first_date * 1000).toLocaleString() : '',
       "Last Access": user.last_date ? new Date(user.last_date * 1000).toLocaleString() : ''
     }))
+}
+
+export const getSorted = ({ sortBy, listAllUsers, sortedFrom }) => {
+  let sortedList = []
+  if (sortBy === 'email') {  
+    sortedList = [...listAllUsers].sort((a, b) =>
+      sortedFrom === 'asc'
+        ? a[sortBy].localeCompare(b[sortBy])
+        : b[sortBy].localeCompare(a[sortBy]),
+    )
+  } else if (sortBy === 'first_date' || sortBy === 'last_date') {
+    sortedList = [...listAllUsers].sort((a, b) => {
+      const newDateA = Date.parse(formatDate(a[sortBy]));
+      const newDateB = Date.parse(formatDate(b[sortBy]));
+      return sortedFrom === 'asc' ? newDateA - newDateB : newDateB - newDateA;
+    })
+  }
+  return sortedList;
 }

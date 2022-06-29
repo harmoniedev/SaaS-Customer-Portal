@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/router';
 import { CSVLink } from 'react-csv';
 import { useDebounce } from '../../hooks/useDebounce';
 
@@ -14,13 +15,10 @@ import { BREAKPOINTS, useBreakpoint } from '../../hooks/useBreakpoint';
 import { DialogMemo as Dialog } from '../../components/dialog/Dialog';
 import { Spinner } from '../loaders/Spinner';
 import { firstOf } from '../../helpers/utils/array';
-import { formatDate } from '../../helpers/utils/date';
 import { formatNumberWithCommas } from '../../helpers/utils/string';
-import { fileHeaders, getUsersToExport } from './TabelOptions';
+import { fileHeaders, getUsersToExport, getSorted } from './TabelOptions';
 import { StaticState, StaticFormName, ParamsListType } from '../../types';
 import { Filter } from '../filter/Filter';
-
-import { useRouter } from 'next/router';
 import { Paper } from '../paper/Paper';
 
 export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption }) => {
@@ -37,122 +35,69 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
   const [isShowMobileSearch, setIsShowMobileSearch] = useState(false);
   const [usersListPerPage, setUsersListPerPage] = useState([]);
   const [usersList, setUsersList] = useState([...listAllUsers]);
-  const [inputValue, setInputValue] = useState<string>(
-    firstOf(router.query?.search) || '',
-  );
+  const [filterByDomain, setFilterByDomain] = useState<string>(firstOf(router.query?.domain) || '');
+  const [filterByProduct, setFilterByProduct] = useState<string>(firstOf(router.query?.product) || '');
+  const [inputValue, setInputValue] = useState<string>(firstOf(router.query?.search) || '');
   const [pageNumber, setPageNumber] = useState<number>(+router.query?.page - 1 || 0);
   const [pagesInfo, setPagesInfo] = useState([]);
-  const [sortBy, setSortBy] = useState<string>(
-    firstOf(router.query?.sortBy) || 'email',
-  );
-  const [sortedFrom, setSortedFrom] = useState<string>(
-    firstOf(router.query?.direction) || 'asc',
-  );
-
+  const [sortBy, setSortBy] = useState<string>(firstOf(router.query?.sortBy) || 'email');
+  const [sortedFrom, setSortedFrom] = useState<string>(firstOf(router.query?.direction) || 'asc',);  
+  const debouncedInputValue = useDebounce(inputValue, 1);
+  const isMobile = screenWidth < BREAKPOINTS.md;
   const usersForExport = useMemo(
     () => getUsersToExport({ listAllUsers, checkedUsersList }),
     [listAllUsers, checkedUsersList],
   );
-
-  const debouncedInputValue = useDebounce(inputValue, 1000);
-  const isMobile = screenWidth < BREAKPOINTS.md;
 
   const getLastShowedResultNumber = () => {
     let lastNumber = pagesInfo[0].perPage * (pageNumber + 1);
     return lastNumber <= pagesInfo[0].total ? lastNumber : pagesInfo[0].total;
   };
 
-  // useEffect(() => {
-  //   if (typeof window === undefined || !router.query) return;
-  //   setPageNumber(+router.query?.page - 1 || 0);
-  //   const sortDirection = firstOf(router.query?.direction) || 'asc';
-  //   setSortedFrom(sortDirection);
-  //   setInputValue(firstOf(router.query?.search) || '');
-  //   setSortBy(firstOf(router.query?.sortBy) || 'email');
-  // }, [router.query]);
-
-  // useEffect(() => {
-  //   if (sortBy === 'email') {
-  //     setUsersList(
-  //       usersList.sort((a, b) =>
-  //         sortedFrom === 'asc'
-  //           ? a[sortBy].localeCompare(b[sortBy])
-  //           : b[sortBy].localeCompare(a[sortBy]),
-  //       ),
-  //     );
-  //   } else if (sortBy === 'first_date' || sortBy === 'last_date') {
-  //     setUsersList(
-  //       usersList.sort((a, b) => {
-  //         const newDateA = Date.parse(formatDate(a[sortBy]));
-  //         const newDateB = Date.parse(formatDate(b[sortBy]));
-  //         return sortedFrom === 'asc' ? newDateA - newDateB : newDateB - newDateA;
-  //       }),
-  //     );
-  //   }
-  // }, [sortBy, sortedFrom]);
-
-  // useEffect(() => {
-  //   if (typeof window === undefined || !router.query) return;
-  //   const perPage = 10;
-  //   let finalUsersList = null;
-
-  //   if (Math.ceil(usersList.length / perPage) < +router.query?.page) {
-  //     addParams([{ key: 'page', value: Math.ceil(usersList.length / perPage) }]);
-  //     return;
-  //   }
-
-  //   if (!!debouncedInputValue) {
-  //     let searchedUser = listAllUsers.filter((item) =>
-  //       item.email.toLowerCase().includes(debouncedInputValue),
-  //     );
-  //     setUsersList(searchedUser);
-  //     finalUsersList = searchedUser.slice(0, perPage);
-  //     setPagesInfo([
-  //       {
-  //         maxPage: Math.ceil(searchedUser.length / perPage),
-  //         total: searchedUser.length,
-  //         perPage: perPage,
-  //       },
-  //     ]);
-  //   } else {
-  //     setUsersList(listAllUsers);
-
-  //     if (pageNumber === 0) {
-  //       finalUsersList = usersList.slice(0, perPage);
-  //     } else if (pageNumber > 0) {
-  //       const startSliceFrom = pageNumber * perPage;
-
-  //       finalUsersList = usersList.slice(startSliceFrom, startSliceFrom + perPage);
-  //     }
-  //     setPagesInfo([
-  //       {
-  //         maxPage: Math.ceil(usersList.length / perPage),
-  //         total: usersList.length,
-  //         perPage: perPage,
-  //       },
-  //     ]);
-  //   }
-
-  //   setUsersListPerPage(finalUsersList);
-  //   setState('success');
-  // }, [pageNumber, sortBy, sortedFrom, debouncedInputValue, listAllUsers]);
+  useEffect(() => {
+    if (typeof window === undefined || !router.query) return;
+    setPageNumber(+router.query?.page - 1 || 0);
+    setSortedFrom(firstOf(router.query?.direction) || 'asc');
+    setInputValue(firstOf(router.query?.search) || '');
+    setFilterByDomain(firstOf(router.query?.domain) || '');
+    setFilterByProduct(firstOf(router.query?.product) || '');
+    setSortBy(firstOf(router.query?.sortBy) || 'email');
+  }, [router.query]);
 
   useEffect(() => {
-    addParams([{ key: 'search', value: debouncedInputValue }])
-    if (!inputValue) {
-      setUsersList(listAllUsers);
-    } else {
-      setCheckedUsersList([]);
-    }
+    setState('loading')
+    const perPage = 10;
+    const startSliceFrom = pageNumber * perPage;
+    let sortedList = getSorted({ sortBy, sortedFrom, listAllUsers })
+    let finalUsersList = [];
+    let filteredList = sortedList;
+    const domains = filterByDomain.length ? JSON.parse(decodeURIComponent(filterByDomain)) : uniqueDomainOption;
+    const products = filterByProduct.length ? JSON.parse(decodeURIComponent(filterByProduct)) : uniqueProductOption;
+    filteredList = filteredList
+      .filter(item => products.includes(item.product_name))
+      .filter(item => domains.includes(item.publicsuffix))
+      .filter((item) => item.email.toLowerCase().includes(debouncedInputValue.toLowerCase()))
+    finalUsersList = filteredList.slice(startSliceFrom, startSliceFrom + perPage);
+    setUsersList(filteredList);
+    setPagesInfo([
+      {
+        maxPage: Math.ceil(filteredList.length / perPage),
+        total: filteredList.length,
+        perPage: perPage,
+      },
+    ]);
+    setUsersListPerPage(finalUsersList);
+    setState('success');
+  }, [pageNumber, sortBy, sortedFrom, debouncedInputValue, listAllUsers, filterByDomain, filterByProduct]);
+
+  useEffect(() => {
+    addParams([{ key: 'search', value: debouncedInputValue }, { key: 'page', value: 1 }])
+    setCheckedUsersList([]);
   }, [debouncedInputValue]);
 
-  // useEffect(() => {
-  //   if (checkedUsersList.length === pagesInfo[0]?.total) {
-  //     setIsSelectedAll(true);
-  //   } else {
-  //     setIsSelectedAll(false);
-  //   }
-  // }, [checkedUsersList.length, pagesInfo]);
+  useEffect(() => {
+    setIsSelectedAll(checkedUsersList.length === pagesInfo[0]?.total && usersList.length > 0);
+  }, [checkedUsersList.length, pagesInfo]);
 
   const addParams = (list: ParamsListType[] = []) => {
     let newPairs = {};
@@ -164,24 +109,18 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
       (a, [k, v]) => (v ? ((a[k] = v), a) : a), // remove falsy values
       {},
     );
-
-    router.push(
-      { pathname: router.pathname, query: newQuery },
-      undefined, {
-      shallow: false,
-    });
+    router.push({ pathname: router.pathname, query: newQuery }, undefined, { shallow: true });
   };
 
-  // useEffect(() => {
-  //   if (!checkedUsersList.length) return setIsCheckAll(false);
-  //   setIsCheckAll(
-  //     usersListPerPage.every(({ email }) => checkedUsersList.includes(email)),
-  //   );
-  // }, [checkedUsersList, checkedUsersList.length, usersListPerPage]);
+  useEffect(() => {
+    if (!checkedUsersList.length) return setIsCheckAll(false);
+    setIsCheckAll(
+      usersListPerPage.every(({ email }) => checkedUsersList.includes(email)),
+    );
+  }, [checkedUsersList, checkedUsersList.length, usersListPerPage]);
 
   const incrementPage = () => {
-    const page =
-      pagesInfo[0].maxPage !== pageNumber ? pageNumber + 1 : pagesInfo[0].maxPage;
+    const page = pagesInfo[0].maxPage !== pageNumber ? pageNumber + 1 : pagesInfo[0].maxPage;
     addParams([{ key: 'page', value: page + 1 }]);
   };
 
@@ -201,7 +140,6 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
   const handleSelectAllOnPage = (e) => {
     setIsCheckAll(!isCheckAll);
     let newListId;
-
     if (isCheckAll) {
       newListId = usersListPerPage.map((item) => item.email);
 
@@ -212,14 +150,12 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
       newListId = [...usersListPerPage.map((item) => item.email)].filter(
         (item) => !checkedUsersList.includes(item),
       );
-
       setCheckedUsersList([...checkedUsersList, ...newListId]);
     }
   };
 
   const handelCheckbox = (e) => {
     const { id, checked } = e.target;
-
     setIsCheckAll(false);
     setCheckedUsersList([...checkedUsersList, id]);
     if (!checked) {
@@ -247,7 +183,6 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
                     inputValue={inputValue}
                     setInputValue={(value) => {
                       setInputValue(value)
-                      // addParams([{ key: 'search', value }]);
                     }}
                   />
                 )}
@@ -267,6 +202,7 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
               label={isSelectedAll ? 'Deselect All' : 'Select All'}
               align="center"
               size="md"
+              disabled={usersList.length === 0}
               onClick={handleSelectAll}
               theme={isSelectedAll ? 'red' : 'green'}
             />
@@ -276,7 +212,6 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
               inputValue={inputValue}
               setInputValue={(value) => {
                 setInputValue(value)
-                // addParams([{ key: 'search', value }]);
               }}
             />
           )}
@@ -284,8 +219,10 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
             isMobile={isMobile}
             uniqueDomainOption={uniqueDomainOption}
             uniqueProductOption={uniqueProductOption}
+            addParams={(value) => addParams(value)}
+            filterByProduct={filterByProduct}
+            filterByDomain={filterByDomain}
           />
-
           <div className="relative">
             <Button
               as="button"
@@ -372,7 +309,6 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
             )}
           </>
         )}
-
         {state === 'loading' && (
           <div className="w-full py-12 flex justify-center">
             <div className="w-20 h-20">
@@ -380,14 +316,13 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
             </div>
           </div>
         )}
-
         {usersListPerPage.length === 0 && inputValue !== '' && state !== 'loading' && (
           <div className="flex gap-4 flex-col min-h-max py-10 items-center justify-center text-indigo-500">
             <Icon name="CommonFileSearch" className="w-10 h-10" />
             <p className="font-bold">No results matching your criteria.</p>
           </div>
         )}
-        {usersListPerPage.length === 0 && inputValue === '' && state !== 'loading' && (
+        {usersListPerPage.length === 0 && inputValue === '' && state !== 'loading' && listAllUsers.length === 0 && (
           <div className="flex gap-4 flex-col min-h-max py-10 items-center justify-center text-indigo-500">
             <Icon name="UserPlus" className="w-10 h-10" />
             <p className="font-bold">Need to add first user.</p>

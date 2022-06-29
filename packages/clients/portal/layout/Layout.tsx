@@ -28,7 +28,7 @@ export const Layout = ({ children }: CardProps) => {
   const isAuthenticated = useIsAuthenticated();
   const token = Cookies.get('download-token');
 
-  useEffect(() => {
+  const getNewItems = () => {
     setIsLoading(true);
     const getMenuItems = async () => {
       const res = await fetch('/api/sanity-data');
@@ -53,7 +53,16 @@ export const Layout = ({ children }: CardProps) => {
       setIsLoading(false);
     }
     getMenuItems();
-  }, [router.asPath, router.pathname])
+  }
+
+  useEffect(() => {
+    getNewItems()
+  }, [router.pathname])
+
+  useEffect(() => {
+    if(!router.query.slug) return
+    getNewItems()
+  }, [router.query.slug])
 
   useEffect(() => {
     if (!isAuthenticated && inProgress === 'none' && !token) {

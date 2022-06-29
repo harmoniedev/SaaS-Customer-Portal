@@ -7,7 +7,14 @@ import { Dropdown } from '../dropdown/Dropdown';
 import { Title } from '../title/Title';
 import { Checkbox } from '../checkbox/Checkbox';
 
-export const Filter = ({ isMobile, uniqueDomainOption, uniqueProductOption }) => {
+export const Filter = ({
+  isMobile,
+  uniqueDomainOption,
+  uniqueProductOption,
+  filterByProduct,
+  filterByDomain,
+  addParams
+}) => {
   const optionList = {
     product: [...uniqueProductOption],
     domain: [...uniqueDomainOption],
@@ -19,12 +26,12 @@ export const Filter = ({ isMobile, uniqueDomainOption, uniqueProductOption }) =>
   const [checkedOptionListProduct, setCheckedOptionListProduct] = useState([]);
 
   useEffect(() => {
-    if (!window.localStorage.getItem('filteredBy')) return;
-    const { domain, product } = JSON.parse(
-      window.localStorage.getItem('filteredBy'),
-    );
-    setCheckedOptionListDomain(domain);
-    setCheckedOptionListProduct(product);
+    if (filterByDomain) {
+      setCheckedOptionListDomain(JSON.parse(decodeURIComponent(filterByDomain)));
+    }
+    if (filterByProduct) {
+      setCheckedOptionListProduct(JSON.parse(decodeURIComponent(filterByProduct)));
+    }
   }, []);
 
   const handelCheckbox = (e) => {
@@ -46,24 +53,21 @@ export const Filter = ({ isMobile, uniqueDomainOption, uniqueProductOption }) =>
       }
     }
   };
+  const resetAllOptions = (e) => {
+    addParams([{ key: 'product', value: '' }, { key: 'domain', value: '' }, , { key: 'page', value: 1 }])
+    setCheckedOptionListProduct([]);
+    setCheckedOptionListDomain([]);
+    setIsOpenOptions(false);
+    setIsOpenFilters(false);
+  };
 
   const applyFilterOptions = (e) => {
-    window.localStorage.setItem(
-      'filteredBy',
-      JSON.stringify({
-        domain: checkedOptionListDomain,
-        product: checkedOptionListProduct,
-      }),
-    );
+    const domain = checkedOptionListDomain.length ? encodeURIComponent(JSON.stringify(checkedOptionListDomain)) : '';
+    const product = checkedOptionListProduct.length ? encodeURIComponent(JSON.stringify(checkedOptionListProduct)) : ''
+    addParams([{ key: 'domain', value: domain }, { key: 'product', value: product } , { key: 'page', value: 1 }])
     setIsOpenOptions(false);
     setIsOpenFilters(false);
     setActiveOptions('');
-  };
-
-  const resetAllOptions = (e) => {
-    window.localStorage.removeItem('filteredBy');
-    setCheckedOptionListProduct([]);
-    setCheckedOptionListDomain([]);
   };
 
   const listOption = (items) =>
@@ -103,7 +107,7 @@ export const Filter = ({ isMobile, uniqueDomainOption, uniqueProductOption }) =>
         }}
       />
       {isOpenFilters && (
-        <Dropdown position={isMobile ? 'right-0' : 'right-0'}>
+        <Dropdown position={'right-0'}>
           {!isOpenOptions && (
             <div className="flex flex-col items-start px-3 py-5 w-full">
               <div className="flex justify-between items-center gap-2 w-full mb-2.5 pr-2.5">

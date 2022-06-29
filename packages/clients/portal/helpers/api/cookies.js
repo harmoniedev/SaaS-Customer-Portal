@@ -4,7 +4,6 @@ import { serialize } from 'cookie';
  * This sets `cookie` on `res` object
  */
 const cookie = (res, name, value, options = {}) => {
-  console.log()
   const stringValue = typeof value === 'object' ? `j:${JSON.stringify(value)}` : String(value);
 
   const modifiedOptions = options;
