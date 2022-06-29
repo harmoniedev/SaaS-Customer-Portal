@@ -17,11 +17,20 @@ import { Spinner } from '../loaders/Spinner';
 import { firstOf } from '../../helpers/utils/array';
 import { formatNumberWithCommas } from '../../helpers/utils/string';
 import { fileHeaders, getUsersToExport, getSorted } from './TabelOptions';
-import { StaticState, StaticFormName, ParamsListType } from '../../types';
+import { StaticState, StaticFormName, ParamsListType, UserType } from '../../types';
 import { Filter } from '../filter/Filter';
 import { Paper } from '../paper/Paper';
 
-export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption }) => {
+export type TabelProps = {
+  listAllUsers: UserType[];
+  uniqueDomainOption: string[];
+  uniqueProductOption: string[];
+};
+export const Tabel = ({
+  listAllUsers,
+  uniqueDomainOption,
+  uniqueProductOption,
+}: TabelProps) => {
   const { screenWidth } = useBreakpoint();
   const router = useRouter();
 
@@ -30,18 +39,28 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
   const [isCheckAll, setIsCheckAll] = useState<boolean>(false);
   const [isModuleOpen, setIsModuleOpen] = useState<boolean>(false);
   const [checkedUsersList, setCheckedUsersList] = useState<string[]>([]);
-  const [modalNameOpen, setModalNameOpen] = useState<StaticFormName>('add');
-  const [isSelectedAll, setIsSelectedAll] = useState(false);
-  const [isShowMobileSearch, setIsShowMobileSearch] = useState(false);
-  const [usersListPerPage, setUsersListPerPage] = useState([]);
-  const [usersList, setUsersList] = useState([...listAllUsers]);
-  const [filterByDomain, setFilterByDomain] = useState<string>(firstOf(router.query?.domain) || '');
-  const [filterByProduct, setFilterByProduct] = useState<string>(firstOf(router.query?.product) || '');
-  const [inputValue, setInputValue] = useState<string>(firstOf(router.query?.search) || '');
+  const [modalNameOpen, setModalNameOpen] = useState<StaticFormName>('delete');
+  const [isSelectedAll, setIsSelectedAll] = useState<boolean>(false);
+  const [isShowMobileSearch, setIsShowMobileSearch] = useState<boolean>(false);
+  const [usersListPerPage, setUsersListPerPage] = useState<UserType[]>([]);
+  const [usersList, setUsersList] = useState<UserType[]>([...listAllUsers]);
+  const [filterByDomain, setFilterByDomain] = useState<string>(
+    firstOf(router.query?.domain) || '',
+  );
+  const [filterByProduct, setFilterByProduct] = useState<string>(
+    firstOf(router.query?.product) || '',
+  );
+  const [inputValue, setInputValue] = useState<string>(
+    firstOf(router.query?.search) || '',
+  );
   const [pageNumber, setPageNumber] = useState<number>(+router.query?.page - 1 || 0);
   const [pagesInfo, setPagesInfo] = useState([]);
-  const [sortBy, setSortBy] = useState<string>(firstOf(router.query?.sortBy) || 'email');
-  const [sortedFrom, setSortedFrom] = useState<string>(firstOf(router.query?.direction) || 'asc',);  
+  const [sortBy, setSortBy] = useState<string>(
+    firstOf(router.query?.sortBy) || 'email',
+  );
+  const [sortedFrom, setSortedFrom] = useState<string>(
+    firstOf(router.query?.direction) || 'asc',
+  );
   const debouncedInputValue = useDebounce(inputValue, 1);
   const isMobile = screenWidth < BREAKPOINTS.md;
   const usersForExport = useMemo(
@@ -65,18 +84,24 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
   }, [router.query]);
 
   useEffect(() => {
-    setState('loading')
+    setState('loading');
     const perPage = 10;
     const startSliceFrom = pageNumber * perPage;
-    let sortedList = getSorted({ sortBy, sortedFrom, listAllUsers })
+    let sortedList = getSorted({ sortBy, sortedFrom, listAllUsers });
     let finalUsersList = [];
     let filteredList = sortedList;
-    const domains = filterByDomain.length ? JSON.parse(decodeURIComponent(filterByDomain)) : uniqueDomainOption;
-    const products = filterByProduct.length ? JSON.parse(decodeURIComponent(filterByProduct)) : uniqueProductOption;
+    const domains = filterByDomain.length
+      ? JSON.parse(decodeURIComponent(filterByDomain))
+      : uniqueDomainOption;
+    const products = filterByProduct.length
+      ? JSON.parse(decodeURIComponent(filterByProduct))
+      : uniqueProductOption;
     filteredList = filteredList
-      .filter(item => products.includes(item.product_name))
-      .filter(item => domains.includes(item.publicsuffix))
-      .filter((item) => item.email.toLowerCase().includes(debouncedInputValue.toLowerCase()))
+      .filter((item) => products.includes(item.product_name))
+      .filter((item) => domains.includes(item.publicsuffix))
+      .filter((item) =>
+        item.email.toLowerCase().includes(debouncedInputValue.toLowerCase()),
+      );
     finalUsersList = filteredList.slice(startSliceFrom, startSliceFrom + perPage);
     setUsersList(filteredList);
     setPagesInfo([
@@ -88,15 +113,28 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
     ]);
     setUsersListPerPage(finalUsersList);
     setState('success');
-  }, [pageNumber, sortBy, sortedFrom, debouncedInputValue, listAllUsers, filterByDomain, filterByProduct]);
+  }, [
+    pageNumber,
+    sortBy,
+    sortedFrom,
+    debouncedInputValue,
+    listAllUsers,
+    filterByDomain,
+    filterByProduct,
+  ]);
 
   useEffect(() => {
-    addParams([{ key: 'search', value: debouncedInputValue }, { key: 'page', value: 1 }])
+    addParams([
+      { key: 'search', value: debouncedInputValue },
+      { key: 'page', value: 1 },
+    ]);
     setCheckedUsersList([]);
   }, [debouncedInputValue]);
 
   useEffect(() => {
-    setIsSelectedAll(checkedUsersList.length === pagesInfo[0]?.total && usersList.length > 0);
+    setIsSelectedAll(
+      checkedUsersList.length === pagesInfo[0]?.total && usersList.length > 0,
+    );
   }, [checkedUsersList.length, pagesInfo]);
 
   const addParams = (list: ParamsListType[] = []) => {
@@ -109,7 +147,9 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
       (a, [k, v]) => (v ? ((a[k] = v), a) : a), // remove falsy values
       {},
     );
-    router.push({ pathname: router.pathname, query: newQuery }, undefined, { shallow: true });
+    router.push({ pathname: router.pathname, query: newQuery }, undefined, {
+      shallow: true,
+    });
   };
 
   useEffect(() => {
@@ -120,7 +160,8 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
   }, [checkedUsersList, checkedUsersList.length, usersListPerPage]);
 
   const incrementPage = () => {
-    const page = pagesInfo[0].maxPage !== pageNumber ? pageNumber + 1 : pagesInfo[0].maxPage;
+    const page =
+      pagesInfo[0].maxPage !== pageNumber ? pageNumber + 1 : pagesInfo[0].maxPage;
     addParams([{ key: 'page', value: page + 1 }]);
   };
 
@@ -182,7 +223,7 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
                   <Search
                     inputValue={inputValue}
                     setInputValue={(value) => {
-                      setInputValue(value)
+                      setInputValue(value);
                     }}
                   />
                 )}
@@ -211,7 +252,7 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
             <Search
               inputValue={inputValue}
               setInputValue={(value) => {
-                setInputValue(value)
+                setInputValue(value);
               }}
             />
           )}
@@ -322,12 +363,15 @@ export const Tabel = ({ listAllUsers, uniqueDomainOption, uniqueProductOption })
             <p className="font-bold">No results matching your criteria.</p>
           </div>
         )}
-        {usersListPerPage.length === 0 && inputValue === '' && state !== 'loading' && listAllUsers.length === 0 && (
-          <div className="flex gap-4 flex-col min-h-max py-10 items-center justify-center text-indigo-500">
-            <Icon name="UserPlus" className="w-10 h-10" />
-            <p className="font-bold">Need to add first user.</p>
-          </div>
-        )}
+        {usersListPerPage.length === 0 &&
+          inputValue === '' &&
+          state !== 'loading' &&
+          listAllUsers.length === 0 && (
+            <div className="flex gap-4 flex-col min-h-max py-10 items-center justify-center text-indigo-500">
+              <Icon name="UserPlus" className="w-10 h-10" />
+              <p className="font-bold">Need to add first user.</p>
+            </div>
+          )}
       </Paper>
       <Dialog mode="form" onOpenChange={setIsModuleOpen} open={isModuleOpen}>
         <OpenForm

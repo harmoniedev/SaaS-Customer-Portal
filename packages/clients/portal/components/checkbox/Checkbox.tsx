@@ -1,6 +1,11 @@
 import React from 'react';
 
-export const Checkbox = ({ id, handelCheckbox, checked }) => {
+export type CheckboxProps = {
+  id: string;
+  checked: boolean;
+  handelCheckbox: React.ChangeEventHandler<HTMLInputElement>;
+};
+export const Checkbox = ({ id, handelCheckbox, checked }: CheckboxProps) => {
   return (
     <input
       type="checkbox"

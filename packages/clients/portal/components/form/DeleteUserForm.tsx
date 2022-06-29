@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 
 import { Title } from '../title/Title';
 import { Button } from '../buttons/Button';
 
-export const DeleteUserForm = ({ setIsModuleOpen, activeUser, onSubmit }) => {
+export type DeleteUserForm = {
+  setIsModuleOpen: Dispatch<SetStateAction<boolean>>;
+  activeUser: string;
+  onSubmit: (values: any) => void;
+};
+
+export const DeleteUserForm = ({
+  setIsModuleOpen,
+  activeUser,
+  onSubmit,
+}: DeleteUserForm) => {
   return (
     <form
       className="inline-block lg:w-[45vw]"
