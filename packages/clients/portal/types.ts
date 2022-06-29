@@ -1,28 +1,24 @@
 export type UserType = {
-  license: string;
-  role: string;
   email: string;
-  name: string;
-  department: string;
+  first_date: string;
+  last_date: string;
+  product_name: string;
+  publicsuffix: string;
+  build_version: string;
 };
 
 export type MenuItem = {
-  label: string,
-  external: string,
-  key: string,
-  icon?: any
-}
-
-export type UserFields = {
-  _id: string;
-  lastActiveDate: string;
-} & UserType;
+  label: string;
+  external: string;
+  key: string;
+  icon?: any;
+};
 
 export type SortOrder = 'asc' | 'desc';
 
 export type StaticState = 'loading' | 'idle' | 'success' | 'error';
 
-export type StaticFormName = 'edit' | 'add' | 'delete' | 'deleteAll';
+export type StaticFormName = 'delete' | 'deleteAll';
 
 export type ParamsListType = {
   key: string;

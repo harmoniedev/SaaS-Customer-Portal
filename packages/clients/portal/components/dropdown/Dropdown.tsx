@@ -3,7 +3,7 @@ import { Paper } from '../paper/Paper';
 import { motion } from 'framer-motion';
 
 export type DropdownProps = {
-  children: any;
+  children: React.ReactElement | React.ReactNode;
   position: string;
 };
 

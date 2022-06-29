@@ -6,6 +6,16 @@ import { Button } from '../buttons/Button';
 import { Dropdown } from '../dropdown/Dropdown';
 import { Title } from '../title/Title';
 import { Checkbox } from '../checkbox/Checkbox';
+import { ParamsListType } from '../../types';
+
+export type FilterProps = {
+  isMobile: boolean;
+  uniqueDomainOption: string[];
+  uniqueProductOption: string[];
+  filterByProduct: string;
+  filterByDomain: string;
+  addParams: (value: any) => void;
+};
 
 export const Filter = ({
   isMobile,
@@ -13,17 +23,21 @@ export const Filter = ({
   uniqueProductOption,
   filterByProduct,
   filterByDomain,
-  addParams
-}) => {
+  addParams,
+}: FilterProps) => {
   const optionList = {
     product: [...uniqueProductOption],
     domain: [...uniqueDomainOption],
   };
-  const [isOpenFilters, setIsOpenFilters] = useState(false);
-  const [isOpenOptions, setIsOpenOptions] = useState(false);
-  const [activeOptions, setActiveOptions] = useState('');
-  const [checkedOptionListDomain, setCheckedOptionListDomain] = useState([]);
-  const [checkedOptionListProduct, setCheckedOptionListProduct] = useState([]);
+  const [isOpenFilters, setIsOpenFilters] = useState<boolean>(false);
+  const [isOpenOptions, setIsOpenOptions] = useState<boolean>(false);
+  const [activeOptions, setActiveOptions] = useState<string>('');
+  const [checkedOptionListDomain, setCheckedOptionListDomain] = useState<string[]>(
+    [],
+  );
+  const [checkedOptionListProduct, setCheckedOptionListProduct] = useState<string[]>(
+    [],
+  );
 
   useEffect(() => {
     if (filterByDomain) {
@@ -54,7 +68,12 @@ export const Filter = ({
     }
   };
   const resetAllOptions = (e) => {
-    addParams([{ key: 'product', value: '' }, { key: 'domain', value: '' }, , { key: 'page', value: 1 }])
+    addParams([
+      { key: 'product', value: '' },
+      { key: 'domain', value: '' },
+      ,
+      { key: 'page', value: 1 },
+    ]);
     setCheckedOptionListProduct([]);
     setCheckedOptionListDomain([]);
     setIsOpenOptions(false);
@@ -62,9 +81,17 @@ export const Filter = ({
   };
 
   const applyFilterOptions = (e) => {
-    const domain = checkedOptionListDomain.length ? encodeURIComponent(JSON.stringify(checkedOptionListDomain)) : '';
-    const product = checkedOptionListProduct.length ? encodeURIComponent(JSON.stringify(checkedOptionListProduct)) : ''
-    addParams([{ key: 'domain', value: domain }, { key: 'product', value: product } , { key: 'page', value: 1 }])
+    const domain = checkedOptionListDomain.length
+      ? encodeURIComponent(JSON.stringify(checkedOptionListDomain))
+      : '';
+    const product = checkedOptionListProduct.length
+      ? encodeURIComponent(JSON.stringify(checkedOptionListProduct))
+      : '';
+    addParams([
+      { key: 'domain', value: domain },
+      { key: 'product', value: product },
+      { key: 'page', value: 1 },
+    ]);
     setIsOpenOptions(false);
     setIsOpenFilters(false);
     setActiveOptions('');
