@@ -131,6 +131,7 @@ export default function Page() {
           <span className="text-indigo-300 px-4 bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             or
           </span>
+          
         </div>
         <Button
           label="Sign in with Microsoft (Coming soon)"
