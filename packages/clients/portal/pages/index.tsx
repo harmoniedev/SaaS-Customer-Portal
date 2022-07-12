@@ -133,14 +133,16 @@ export default function Page() {
           </span>
         </div>
         <Button
-          label="Sign in with Microsoft"
+          label="Sign in with Microsoft (Coming soon)"
           onClick={() => instance.loginRedirect()}
-          theme="white"
+          theme="lightblue"
           icon="MicrosoftIcon"
           iconPosition="before"
           as="button"
           stretch
+          disabled
         />
+        <p className="text-indigo-200 text-sm"></p>
       </div>
       <div className="flex justify-center items-center bg-gray-50 border-t">
         <p className="text-indigo-200">© harmon.ie 2022</p>
