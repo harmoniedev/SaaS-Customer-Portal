@@ -11,6 +11,7 @@ import { Icon } from '../components/icons/Icon';
 import { NavMemo as Nav } from '../layout/Nav/Nav';
 import { InputMemo } from '../components/input/Input';
 import hash from 'object-hash';
+import { DashboardScene } from '../scenes/DashboardScene';
 
 export default function Page() {
   const { instance, inProgress } = useMsal();
@@ -28,6 +29,7 @@ export default function Page() {
     if ((isAuthenticated && inProgress === 'none') || token) {
       router.push('/portal/dashboard');
     }
+
   });
 
   if (inProgress !== 'none' || isLoading) {
@@ -37,7 +39,21 @@ export default function Page() {
       </div>
     );
   }
+  const loginWithMicrosoft = async () => {
+    let queryParams = {
+      tenant: `common`,
+      client_id: `6e3b9f6a-7571-4c86-8bae-825a23e9b616`,
+      response_type: 'code',
+      scope: `https://graph.microsoft.com/User.Read`,
+      redirect_uri: `http://localhost:3000/portal/test`,
+    };
+    let url = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?`;
+    let queryParamsString = new URLSearchParams(queryParams).toString();
+    let authorizeEndpoint = url + queryParamsString;
+    window.location.assign(authorizeEndpoint)
 
+    //instance.loginRedirect()
+  }
   const onSubmit = async (ev) => {
     ev.preventDefault();
     setIsLoading(true);
@@ -46,11 +62,11 @@ export default function Page() {
       method: 'post',
       headers: {
         Accept: 'application/json',
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ email, password: hashedPassword }),
     };
-    const res = await fetch(`api/salesforce-login`, options);
+    const res = await fetch(`http://localhost:8080/salesforce/login`, options);
     if (res.status === 200) {
       router.push('/portal/dashboard');
     } else {
@@ -133,14 +149,14 @@ export default function Page() {
           </span>
         </div>
         <Button
-          label="Sign in with Microsoft (Coming soon)"
-          onClick={() => instance.loginRedirect()}
-          theme="lightblue"
+          label="Sign in with Microsoft"
+          onClick={loginWithMicrosoft}
+          theme="white"
           icon="MicrosoftIcon"
           iconPosition="before"
           as="button"
           stretch
-          disabled
+
         />
         <p className="text-indigo-200 text-sm"></p>
       </div>
