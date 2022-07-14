@@ -1,14 +1,13 @@
 import cx from 'classnames';
 import Cookies from 'js-cookie';
 import React, { useState } from 'react';
-import { useMsal } from '@azure/msal-react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { defaultMenuItems } from './LayoutOptions';
-import { useIsAuthenticated } from '@azure/msal-react';
 import { Spinner } from '../components/loaders/Spinner';
 import { NavMemo as Nav } from './Nav/Nav';
 import { BREAKPOINTS, useBreakpoint } from '../hooks/useBreakpoint';
+const msToken = Cookies.get('ms-token');
 
 export type CardProps = {
   children: React.ReactElement | React.ReactNode;
@@ -23,10 +22,8 @@ export const Layout = ({ children }: CardProps) => {
   const router = useRouter();
   const { screenWidth } = useBreakpoint();
   const isMobile = screenWidth < BREAKPOINTS.lg;
-  
-  const { inProgress } = useMsal();
-  const isAuthenticated = useIsAuthenticated();
   const token = Cookies.get('download-token');
+  const msToken = Cookies.get('ms-token');
 
   const getNewItems = () => {
     setIsLoading(true);
@@ -65,21 +62,20 @@ export const Layout = ({ children }: CardProps) => {
   }, [router.query.slug])
 
   useEffect(() => {
-    if (!isAuthenticated && inProgress === 'none' && !token) {
-      // here we check if user is Authenticated via Salesforce or Azure
+    if (!msToken && !token) {
       router.push('/');
     }
   });
 
-  if (inProgress !== 'none' || isLoading) {
-    return (
-      <div className="w-24 h-24 m-auto mt-24">
-        <Spinner />
-      </div>
-    );
-  }
+  // if (inProgress !== 'none' || isLoading) {
+  //   return (
+  //     <div className="w-24 h-24 m-auto mt-24">
+  //       <Spinner />
+  //     </div>
+  //   );
+  // }
 
-  if (!isAuthenticated && !token) return null;
+  if (!msToken && !token) return null;
 
   const renderMenuList = (items) =>
     items.map(({ label, icon, external }, i) => (

@@ -8,7 +8,6 @@ import { TabelMemo as Tabel } from '../components/tabel/Tabel';
 import { Icon } from '../components/icons/Icon';
 import { Spinner } from '../components/loaders/Spinner';
 import { StaticState } from '../types';
-import { useMsal } from '@azure/msal-react';
 
 export const DashboardScene = () => {
   const [licenseCount, setLicenseCount] = useState<number>(0);
@@ -17,14 +16,7 @@ export const DashboardScene = () => {
   const [state, setState] = useState<StaticState>('idle');
   const [uniqueProductOption, setUniqueProductOption] = useState<string[]>([]);
   const [uniqueDomainOption, setUniqueDomainOption] = useState<string[]>([]);
-
-  const { accounts } = useMsal();
-  const storadgeKey = accounts[0]
-    ? `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---`
-    : null;
-  // const token = accounts[0] ? JSON.parse(sessionStorage.getItem(storadgeKey)).secret : Cookies.get('download-token');
-  // this is the test token, use token defined on 23 str
-  const token = process.env.TEMP_TOKEN;
+  const token = Cookies.get('ms-token') || Cookies.get('download-token');
   const getData = async () => {
     try {
       setState('loading');

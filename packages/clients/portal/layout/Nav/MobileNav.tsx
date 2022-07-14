@@ -1,7 +1,6 @@
 import React from 'react';
 import cx from 'classnames';
 import Cookies from 'js-cookie'
-import { useMsal } from '@azure/msal-react';
 import { useRouter } from 'next/router';
 
 import { Button } from '../../components/buttons/Button';
@@ -31,13 +30,13 @@ export const MobileNav = ({
   menuItems
 }: MobileNavProps) => {
   const router = useRouter();
-  const { instance, accounts } = useMsal();
   const { breakpoint } = useBreakpoint();
   const responsiveButtonSize: SizeType = responsiveButtonSizes[breakpoint];
+  const msToken = Cookies.get('ms-token');
 
-  const parseJwt = (key) => {
+  const parseJwt = (key, cookieName) => {
     try {
-      const parsed = JSON.parse(atob(Cookies.get('download-token').split('.')[1]));
+      const parsed = JSON.parse(atob(Cookies.get(cookieName).split('.')[1]));
       const name = parsed ? parsed[key] : '';
       return name
     } catch (e) {
@@ -86,15 +85,15 @@ export const MobileNav = ({
                   />
                 </div>
                 <div>
-                  <p className="font-medium">{accounts[0] ? accounts[0]?.name : parseJwt('name')}</p>
-                  <p className="text-indigo-300">{accounts[0] ? accounts[0]?.username : parseJwt('email')}</p>
+                  <p className="font-medium">{msToken ? parseJwt('username', 'ms-token') : parseJwt('name', 'download-token')}</p>
                 </div>
               </div>
               <div
                 className="flex gap-2 py-4 px-12 text-indigo-500 w-full"
                 onClick={() => {
-                  if (accounts[0]) {
-                    instance.logout()
+                  if (msToken) {
+                    Cookies.remove('ms-token');
+                    router.reload()
                   } else {
                     Cookies.remove('download-token');
                     router.reload()

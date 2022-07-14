@@ -6,6 +6,7 @@ import { LandingPageSceneMemo as LandingPageScene } from '../../scenes/LandingPa
 
 function Page({ slug }) {
   const link = slug.join('/');
+
   return (
     <Layout>
       <LandingPageScene slug={link} />
