@@ -1,14 +1,14 @@
 import cx from 'classnames';
 import Cookies from 'js-cookie';
 import React, { useState } from 'react';
-import { useMsal } from '@azure/msal-react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { defaultMenuItems } from './LayoutOptions';
-import { useIsAuthenticated } from '@azure/msal-react';
 import { Spinner } from '../components/loaders/Spinner';
 import { NavMemo as Nav } from './Nav/Nav';
 import { BREAKPOINTS, useBreakpoint } from '../hooks/useBreakpoint';
+import { setSyntheticLeadingComments } from 'typescript';
+const msToken = Cookies.get('ms-token');
 
 export type CardProps = {
   children: React.ReactElement | React.ReactNode;
@@ -18,15 +18,45 @@ export const Layout = ({ children }: CardProps) => {
   const [isNavigation, setIsNavigation] = useState(false);
   const [menuItems, setMenuItems] = useState(defaultMenuItems);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
   const [isIframe, setIsIframe] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   const router = useRouter();
   const { screenWidth } = useBreakpoint();
   const isMobile = screenWidth < BREAKPOINTS.lg;
-  
-  const { inProgress } = useMsal();
-  const isAuthenticated = useIsAuthenticated();
   const token = Cookies.get('download-token');
+  const msToken = Cookies.get('ms-token');
+
+  const getTokenFromMsCode = async ({ code }) => {
+    // uncomment that and send this code to your api where you will recieve that jwt
+    // const res = await fetch('');
+    // const body = await res.json();
+    // const { jwt } = body;
+    const jwt = 'eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTc4NzUzMDgsImh0dHA6Ly9saWNlbnNlLW1hbmFnZXIuaGFybW9uLmllL2FsbC9yZWFkP2RvbWFpbnM9Ijp0cnVlLCJwcm92aWRlciI6Im1pY3Jvc29mdCIsInVpZCI6IjhhMGRmMjUzLTNhM2YtNDQwOC05Y2IxLTdmZjhlNWE0NTNmZiIsInVzZXJuYW1lIjoiYW1pdGFpYkBoYXJtb24uaWUifQ.AbLAOHun6JHOn0qLtwUxDsfmIYOqfGxcFPv752ngERbAubD2FMAVgCWablTCs2dXy-47_hcykhqhN10LjmkkWexAAABafBFFJTylPFHoYiA2jVHg_YYyXE8tCZVaYiiCYCvQO7QeUqJHhLGlCbgfu2aUGbM7jBPISoADb_U1tppJgyhw'
+    if (jwt) {
+      Cookies.set('ms-token', jwt);
+      router.push({
+          pathname: router.pathname,
+          query: {},
+        },
+        undefined,
+        { shallow: true })
+    }
+
+    setIsFetching(false)
+  }
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    if (router.query.code) {
+      setIsFetching(true);
+      getTokenFromMsCode({ code: router.query.code })
+    }
+  }, [router.query])
 
   const getNewItems = () => {
     setIsLoading(true);
@@ -64,14 +94,7 @@ export const Layout = ({ children }: CardProps) => {
     getNewItems()
   }, [router.query.slug])
 
-  useEffect(() => {
-    if (!isAuthenticated && inProgress === 'none' && !token) {
-      // here we check if user is Authenticated via Salesforce or Azure
-      router.push('/');
-    }
-  });
-
-  if (inProgress !== 'none' || isLoading) {
+  if (isFetching || isLoading) {
     return (
       <div className="w-24 h-24 m-auto mt-24">
         <Spinner />
@@ -79,7 +102,11 @@ export const Layout = ({ children }: CardProps) => {
     );
   }
 
-  if (!isAuthenticated && !token) return null;
+  if (!msToken && !token && !isFetching && isClient) {
+    router.push('/');
+  }
+
+  if (!msToken && !token) return null;
 
   const renderMenuList = (items) =>
     items.map(({ label, icon, external }, i) => (

@@ -1,5 +1,3 @@
-import { useMsal } from '@azure/msal-react';
-import { useIsAuthenticated } from '@azure/msal-react';
 import Cookies from 'js-cookie';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -13,30 +11,27 @@ import { InputMemo } from '../components/input/Input';
 import hash from 'object-hash';
 
 export default function Page() {
-  const { instance, inProgress } = useMsal();
   const router = useRouter();
-  const isAuthenticated = useIsAuthenticated();
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const token = Cookies.get('download-token');
+  const msToken = Cookies.get('ms-token');
 
-  /// errors handling for field and submit button
+  // useEffect(() => {
+  //   if ((msToken || token) && ! isLoading) {
+  //     router.push('/portal/dashboard');
+  //   }
+  // });
 
-  useEffect(() => {
-    if ((isAuthenticated && inProgress === 'none') || token) {
-      router.push('/portal/dashboard');
-    }
-  });
-
-  if (inProgress !== 'none' || isLoading) {
-    return (
-      <div className="w-24 h-24 m-auto mt-24">
-        <Spinner />
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="w-24 h-24 m-auto mt-24">
+  //       <Spinner />
+  //     </div>
+  //   );
+  // }
 
   const onSubmit = async (ev) => {
     ev.preventDefault();
@@ -59,7 +54,21 @@ export default function Page() {
     }
   };
 
-  if (isAuthenticated) return null;
+  const loginWithMicrosoft = async () => {
+    setIsLoading(true);
+    let queryParams = {
+      tenant: `common`,
+      client_id: process.env.CLIENT_ID,
+      response_type: 'code',
+      scope: `https://graph.microsoft.com/User.Read`,
+      redirect_uri: `http://localhost:3000/portal/dashboard`,
+      navigate_to_login_request_url: 'false'
+    };
+    let url = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?`;
+    let queryParamsString = new URLSearchParams(queryParams).toString();
+    let authorizeEndpoint = url + queryParamsString;
+    window.location.assign(authorizeEndpoint)
+  }
 
   return (
     <div className="h-screen overflow-y-scroll scrollbar-invisible grid grid-rows-[62px_1fr_96px] lg:grid-rows-[92px_1fr_105px]">
@@ -134,15 +143,15 @@ export default function Page() {
         </div>
         <Button
           label="Sign in with Microsoft (Coming soon)"
-          onClick={() => instance.loginRedirect()}
+          // onClick={() => instance.loginRedirect()}
+          onClick={loginWithMicrosoft}
           theme="lightblue"
           icon="MicrosoftIcon"
           iconPosition="before"
           as="button"
           stretch
-          disabled
+          // disabled
         />
-        <p className="text-indigo-200 text-sm"></p>
       </div>
       <div className="flex justify-center items-center bg-gray-50 border-t">
         <p className="text-indigo-200">© harmon.ie 2022</p>

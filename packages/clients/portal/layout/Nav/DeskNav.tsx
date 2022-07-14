@@ -1,7 +1,6 @@
 import React from 'react';
 import Cookies from 'js-cookie'
 import { Icon } from '../../components/icons/Icon';
-import { useMsal } from '@azure/msal-react';
 import { useRouter } from 'next/router';
 
 export type DeskNavProps = {
@@ -11,12 +10,13 @@ export type DeskNavProps = {
 };
 
 export const DeskNav = ({ showUserMenu, open, onClickMenu }: DeskNavProps) => {
-  const { instance, accounts } = useMsal();
   const router = useRouter();
+  const token = Cookies.get('download-token');
+  const msToken = Cookies.get('ms-token');
 
-  const parseJwt = (key) => {
+  const parseJwt = (key, cookieName) => {
     try {
-      const parsed = JSON.parse(atob(Cookies.get('download-token').split('.')[1]));
+      const parsed = JSON.parse(atob(Cookies.get(cookieName).split('.')[1]));
       const name = parsed ? parsed[key] : '';
       return name
     } catch (e) {
@@ -34,7 +34,7 @@ export const DeskNav = ({ showUserMenu, open, onClickMenu }: DeskNavProps) => {
           className="flex items-center gap-2 ml-3 text-indigo-500 cursor-pointer"
           onClick={onClickMenu}
         >
-          <p>{accounts[0] ? accounts[0].name : parseJwt('name')}</p>
+          <p>{msToken ? parseJwt('username', 'ms-token') : parseJwt('name', 'download-token')}</p>
           {open ? (
             <Icon name="ChevronUpIcon" className="w-4 h-4" />
           ) : (
@@ -46,11 +46,12 @@ export const DeskNav = ({ showUserMenu, open, onClickMenu }: DeskNavProps) => {
             <div
               className="bg-white p-8 flex items-center justify-items-start justify-start gap-5 text-indigo-500 font-medium cursor-pointer"
               onClick={() => {
-                if (accounts[0]) {
-                  instance.logout()
+                if (msToken) {
+                  Cookies.remove('ms-token');
+                  router.push('/')
                 } else {
                   Cookies.remove('download-token');
-                  router.reload()
+                  router.push('/')
                 }
               }}
             >

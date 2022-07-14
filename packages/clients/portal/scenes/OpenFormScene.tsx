@@ -1,5 +1,5 @@
-import { useMsal } from '@azure/msal-react';
 import React from 'react';
+import Cookies from 'js-cookie';
 
 import { DeleteUserFormMemo as DeleteUserForm } from '../components/form/DeleteUserForm';
 import { DeleteUsersForm as DeleteUsersForm } from '../components/form/DeleteUsersForm';
@@ -24,13 +24,7 @@ export const OpenFormScene = ({
   isCheckAll,
 }: OpenFormSceneProps) => {
   const router = useRouter();
-  const { accounts } = useMsal();
-  const storadgeKey = accounts[0]
-    ? `${accounts[0].homeAccountId}-${accounts[0].environment}-idtoken-${accounts[0].idTokenClaims['aud']}-${accounts[0].tenantId}---`
-    : null;
-  // const token = accounts[0] ? JSON.parse(sessionStorage.getItem(storadgeKey)).secret : Cookies.get('download-token');
-  // this is the test token, use token defined on 30 str
-  const token = process.env.TEMP_TOKEN;
+  const token = Cookies.get('ms-token') || Cookies.get('download-token');
   
   const deleteUser = async ({ emails }) => {
     try {

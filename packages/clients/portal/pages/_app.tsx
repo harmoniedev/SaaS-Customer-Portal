@@ -1,6 +1,4 @@
 import type { AppProps } from 'next/app';
-import { MsalProvider } from '@azure/msal-react';
-import { msalInstance } from '../services/msal';
 import React, { useEffect, useState } from 'react';
 import 'tailwindcss/tailwind.css';
 
@@ -20,9 +18,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     return <></>;
   }
   return (
-    <MsalProvider instance={msalInstance}>
-      <Component {...pageProps} />
-    </MsalProvider>
+    <Component {...pageProps} />
   );
 }
 
