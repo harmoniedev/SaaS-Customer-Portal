@@ -93,10 +93,10 @@ export const MobileNav = ({
                 onClick={() => {
                   if (msToken) {
                     Cookies.remove('ms-token');
-                    router.reload()
+                    router.push('/')
                   } else {
                     Cookies.remove('download-token');
-                    router.reload()
+                    router.push('/')
                   }
                 }}
               >

@@ -48,10 +48,10 @@ export const DeskNav = ({ showUserMenu, open, onClickMenu }: DeskNavProps) => {
               onClick={() => {
                 if (msToken) {
                   Cookies.remove('ms-token');
-                  router.reload()
+                  router.push('/')
                 } else {
                   Cookies.remove('download-token');
-                  router.reload()
+                  router.push('/')
                 }
               }}
             >

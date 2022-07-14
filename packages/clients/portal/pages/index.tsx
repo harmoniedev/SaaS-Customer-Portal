@@ -19,39 +19,19 @@ export default function Page() {
   const token = Cookies.get('download-token');
   const msToken = Cookies.get('ms-token');
 
-  const getTokenFromMsCode = async ({ code }) => {
-    setIsLoading(true);
-    // uncomment that and send this code to your api where you will recieve that jwt
-    // const res = await fetch('');
-    // const body = await res.json();
-    // const { jwt } = body;
-    const jwt = 'eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTc4NzUzMDgsImh0dHA6Ly9saWNlbnNlLW1hbmFnZXIuaGFybW9uLmllL2FsbC9yZWFkP2RvbWFpbnM9Ijp0cnVlLCJwcm92aWRlciI6Im1pY3Jvc29mdCIsInVpZCI6IjhhMGRmMjUzLTNhM2YtNDQwOC05Y2IxLTdmZjhlNWE0NTNmZiIsInVzZXJuYW1lIjoiYW1pdGFpYkBoYXJtb24uaWUifQ.AbLAOHun6JHOn0qLtwUxDsfmIYOqfGxcFPv752ngERbAubD2FMAVgCWablTCs2dXy-47_hcykhqhN10LjmkkWexAAABafBFFJTylPFHoYiA2jVHg_YYyXE8tCZVaYiiCYCvQO7QeUqJHhLGlCbgfu2aUGbM7jBPISoADb_U1tppJgyhw'
-    if (jwt) {
-      Cookies.set('ms-token', jwt);
-      router.push('/portal/dashboard');
-    }
-    setIsLoading(false)
-  }
+  // useEffect(() => {
+  //   if ((msToken || token) && ! isLoading) {
+  //     router.push('/portal/dashboard');
+  //   }
+  // });
 
-  useEffect(() => {
-    if (router.query.code) {
-      getTokenFromMsCode({ code: router.query.code })
-    }
-  }, [router.query])
-
-  useEffect(() => {
-    if ((msToken || token) && ! isLoading) {
-      router.push('/portal/dashboard');
-    }
-  });
-
-  if (isLoading) {
-    return (
-      <div className="w-24 h-24 m-auto mt-24">
-        <Spinner />
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="w-24 h-24 m-auto mt-24">
+  //       <Spinner />
+  //     </div>
+  //   );
+  // }
 
   const onSubmit = async (ev) => {
     ev.preventDefault();
@@ -81,8 +61,8 @@ export default function Page() {
       client_id: process.env.CLIENT_ID,
       response_type: 'code',
       scope: `https://graph.microsoft.com/User.Read`,
-      redirect_uri: `http://localhost:3000/portal/test`,
-      navigate_to_login_request_url: 'true'
+      redirect_uri: `http://localhost:3000/portal/dashboard`,
+      navigate_to_login_request_url: 'false'
     };
     let url = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?`;
     let queryParamsString = new URLSearchParams(queryParams).toString();
