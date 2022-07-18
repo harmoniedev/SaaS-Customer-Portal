@@ -28,12 +28,12 @@ export const Layout = ({ children }: CardProps) => {
   const token = Cookies.get('download-token');
   const msToken = Cookies.get('ms-token');
 
-  const getTokenFromMsCode = async ({ code }) => {
+  const getTokenFromMsCode = async ({ jwt }) => {
     // uncomment that and send this code to your api where you will recieve that jwt
     // const res = await fetch('');
     // const body = await res.json();
     // const { jwt } = body;
-    const jwt = 'eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTc4NzUzMDgsImh0dHA6Ly9saWNlbnNlLW1hbmFnZXIuaGFybW9uLmllL2FsbC9yZWFkP2RvbWFpbnM9Ijp0cnVlLCJwcm92aWRlciI6Im1pY3Jvc29mdCIsInVpZCI6IjhhMGRmMjUzLTNhM2YtNDQwOC05Y2IxLTdmZjhlNWE0NTNmZiIsInVzZXJuYW1lIjoiYW1pdGFpYkBoYXJtb24uaWUifQ.AbLAOHun6JHOn0qLtwUxDsfmIYOqfGxcFPv752ngERbAubD2FMAVgCWablTCs2dXy-47_hcykhqhN10LjmkkWexAAABafBFFJTylPFHoYiA2jVHg_YYyXE8tCZVaYiiCYCvQO7QeUqJHhLGlCbgfu2aUGbM7jBPISoADb_U1tppJgyhw'
+    // const jwt = 'eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTc4NzUzMDgsImh0dHA6Ly9saWNlbnNlLW1hbmFnZXIuaGFybW9uLmllL2FsbC9yZWFkP2RvbWFpbnM9Ijp0cnVlLCJwcm92aWRlciI6Im1pY3Jvc29mdCIsInVpZCI6IjhhMGRmMjUzLTNhM2YtNDQwOC05Y2IxLTdmZjhlNWE0NTNmZiIsInVzZXJuYW1lIjoiYW1pdGFpYkBoYXJtb24uaWUifQ.AbLAOHun6JHOn0qLtwUxDsfmIYOqfGxcFPv752ngERbAubD2FMAVgCWablTCs2dXy-47_hcykhqhN10LjmkkWexAAABafBFFJTylPFHoYiA2jVHg_YYyXE8tCZVaYiiCYCvQO7QeUqJHhLGlCbgfu2aUGbM7jBPISoADb_U1tppJgyhw'
     if (jwt) {
       Cookies.set('ms-token', jwt);
       router.push({
@@ -54,7 +54,7 @@ export const Layout = ({ children }: CardProps) => {
   useEffect(() => {
     if (router.query.code) {
       setIsFetching(true);
-      getTokenFromMsCode({ code: router.query.code })
+      getTokenFromMsCode({ jwt: router.query.jwt })
     }
   }, [router.query])
 
@@ -102,7 +102,7 @@ export const Layout = ({ children }: CardProps) => {
     );
   }
 
-  if (!msToken && !token && !isFetching && isClient) {
+  if (!msToken && !token && !isFetching && isClient && !router.query.jwt && !router.query.code) {
     router.push('/');
   }
 
