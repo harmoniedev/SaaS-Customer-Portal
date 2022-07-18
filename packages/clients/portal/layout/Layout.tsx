@@ -52,7 +52,7 @@ export const Layout = ({ children }: CardProps) => {
   }, [])
 
   useEffect(() => {
-    if (router.query.code) {
+    if (router.query.jwt) {
       setIsFetching(true);
       getTokenFromMsCode({ jwt: router.query.jwt })
     }
