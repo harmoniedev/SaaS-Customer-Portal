@@ -8,7 +8,7 @@ import { Spinner } from '../components/loaders/Spinner';
 import { Icon } from '../components/icons/Icon';
 import { NavMemo as Nav } from '../layout/Nav/Nav';
 import { InputMemo } from '../components/input/Input';
-import hash from 'object-hash';
+import { sha1 } from 'crypto-hash';
 
 export default function Page() {
   const router = useRouter();
@@ -16,27 +16,26 @@ export default function Page() {
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const token = Cookies.get('download-token');
   const msToken = Cookies.get('ms-token');
 
-  // useEffect(() => {
-  //   if ((msToken || token) && ! isLoading) {
-  //     router.push('/portal/dashboard');
-  //   }
-  // });
+  useEffect(() => {
+    if ((msToken) && !isLoading) {
+      router.push('/portal/dashboard');
+    }
+  });
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="w-24 h-24 m-auto mt-24">
-  //       <Spinner />
-  //     </div>
-  //   );
-  // }
+  if (isLoading) {
+    return (
+      <div className="w-24 h-24 m-auto mt-24">
+        <Spinner />
+      </div>
+    );
+  }
 
   const onSubmit = async (ev) => {
     ev.preventDefault();
     setIsLoading(true);
-    const hashedPassword = hash({ password });
+    const hashedPassword = await sha1(password)
     const options = {
       method: 'post',
       headers: {
@@ -45,12 +44,12 @@ export default function Page() {
       },
       body: JSON.stringify({ email, password: hashedPassword }),
     };
-    const res = await fetch(`api/salesforce-login`, options);
-    if (res.status === 200) {
-      router.push('/portal/dashboard');
-    } else {
+    const res = await fetch(`http://localhost:8080/login_using_credentials`, options);;
+    if (res.status !== 200) {
       setErrorMessage('Incorrect username or password');
       setIsLoading(false);
+    } else {
+      router.push(res.url)
     }
   };
 
@@ -61,7 +60,7 @@ export default function Page() {
       client_id: process.env.CLIENT_ID,
       response_type: 'code',
       scope: `https://graph.microsoft.com/User.Read`,
-      redirect_uri: `http://localhost:3000/portal/dashboard`,
+      redirect_uri: `http://localhost:8080/login_with_microsoft`,
       navigate_to_login_request_url: 'false'
     };
     let url = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?`;
@@ -150,7 +149,7 @@ export default function Page() {
           iconPosition="before"
           as="button"
           stretch
-          // disabled
+        // disabled
         />
       </div>
       <div className="flex justify-center items-center bg-gray-50 border-t">

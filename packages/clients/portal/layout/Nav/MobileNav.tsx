@@ -85,7 +85,7 @@ export const MobileNav = ({
                   />
                 </div>
                 <div>
-                  <p className="font-medium">{msToken ? parseJwt('username', 'ms-token') : parseJwt('name', 'download-token')}</p>
+                  <p className="font-medium">{msToken && parseJwt('username', 'ms-token')}</p>
                 </div>
               </div>
               <div
@@ -93,9 +93,6 @@ export const MobileNav = ({
                 onClick={() => {
                   if (msToken) {
                     Cookies.remove('ms-token');
-                    router.push('/')
-                  } else {
-                    Cookies.remove('download-token');
                     router.push('/')
                   }
                 }}

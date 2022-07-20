@@ -11,7 +11,6 @@ export type DeskNavProps = {
 
 export const DeskNav = ({ showUserMenu, open, onClickMenu }: DeskNavProps) => {
   const router = useRouter();
-  const token = Cookies.get('download-token');
   const msToken = Cookies.get('ms-token');
 
   const parseJwt = (key, cookieName) => {
@@ -34,7 +33,7 @@ export const DeskNav = ({ showUserMenu, open, onClickMenu }: DeskNavProps) => {
           className="flex items-center gap-2 ml-3 text-indigo-500 cursor-pointer"
           onClick={onClickMenu}
         >
-          <p>{msToken ? parseJwt('username', 'ms-token') : parseJwt('name', 'download-token')}</p>
+          <p>{msToken && parseJwt('username', 'ms-token')}</p>
           {open ? (
             <Icon name="ChevronUpIcon" className="w-4 h-4" />
           ) : (
@@ -48,9 +47,6 @@ export const DeskNav = ({ showUserMenu, open, onClickMenu }: DeskNavProps) => {
               onClick={() => {
                 if (msToken) {
                   Cookies.remove('ms-token');
-                  router.push('/')
-                } else {
-                  Cookies.remove('download-token');
                   router.push('/')
                 }
               }}

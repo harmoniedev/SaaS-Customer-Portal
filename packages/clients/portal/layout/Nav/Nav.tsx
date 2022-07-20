@@ -37,7 +37,7 @@ export const Nav = ({ showUserMenu = true, menuItems = [] }: NavProps) => {
           'flex gap-3 items-center h-full my-auto px-1 border-b-2 border-indigo-50',
         )}
       >
-        <NextLink href="/">
+        <NextLink href="/portal/dashboard">
           <a>{isMobile ? <LogoImageMobile className="w-7 h-7" /> : <LogoImage />}</a>
         </NextLink>
         <Title className="text-indigo-200" size="xs">

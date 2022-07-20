@@ -14,7 +14,6 @@ export default function Page() {
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-
   if ( isLoading) {
     return (
       <div className="w-24 h-24 m-auto mt-24">
@@ -24,24 +23,7 @@ export default function Page() {
   }
 
   const onSubmit = async (ev) => {
-    ev.preventDefault();
-    setIsLoading(true)
-    const options = {
-      method: 'post',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email }),
-    };
-    const res = await fetch(`api/resend-password`, options);
- 
-    if (res.status === 200) {
-      router.push('/');
-    } else {
-      setErrorMessage('Incorrect username')
-      setIsLoading(false)
-    }
+    console.log(email)
   }
 
   return (
