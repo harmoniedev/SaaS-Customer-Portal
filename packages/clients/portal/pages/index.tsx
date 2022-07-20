@@ -8,7 +8,7 @@ import { Spinner } from '../components/loaders/Spinner';
 import { Icon } from '../components/icons/Icon';
 import { NavMemo as Nav } from '../layout/Nav/Nav';
 import { InputMemo } from '../components/input/Input';
-import { sha1 } from 'crypto-hash'; 
+import { sha1 } from 'crypto-hash';
 
 export default function Page() {
   const router = useRouter();
@@ -19,7 +19,7 @@ export default function Page() {
   const msToken = Cookies.get('ms-token');
 
   useEffect(() => {
-    if ((msToken) && ! isLoading) {
+    if ((msToken) && !isLoading) {
       router.push('/portal/dashboard');
     }
   });
@@ -60,7 +60,7 @@ export default function Page() {
       client_id: process.env.CLIENT_ID,
       response_type: 'code',
       scope: `https://graph.microsoft.com/User.Read`,
-      redirect_uri: `http://localhost:3000/portal/dashboard`,
+      redirect_uri: `http://localhost:8080/login_with_microsoft`,
       navigate_to_login_request_url: 'false'
     };
     let url = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?`;
@@ -149,7 +149,7 @@ export default function Page() {
           iconPosition="before"
           as="button"
           stretch
-          // disabled
+        // disabled
         />
       </div>
       <div className="flex justify-center items-center bg-gray-50 border-t">
