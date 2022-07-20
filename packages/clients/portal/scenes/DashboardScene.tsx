@@ -16,7 +16,7 @@ export const DashboardScene = () => {
   const [state, setState] = useState<StaticState>('idle');
   const [uniqueProductOption, setUniqueProductOption] = useState<string[]>([]);
   const [uniqueDomainOption, setUniqueDomainOption] = useState<string[]>([]);
-  const token = Cookies.get('ms-token') || Cookies.get('download-token');
+  const token = Cookies.get('ms-token');
   const getData = async () => {
     try {
       setState('loading');

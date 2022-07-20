@@ -7,8 +7,7 @@ import { defaultMenuItems } from './LayoutOptions';
 import { Spinner } from '../components/loaders/Spinner';
 import { NavMemo as Nav } from './Nav/Nav';
 import { BREAKPOINTS, useBreakpoint } from '../hooks/useBreakpoint';
-import { setSyntheticLeadingComments } from 'typescript';
-const msToken = Cookies.get('ms-token');
+
 
 export type CardProps = {
   children: React.ReactElement | React.ReactNode;
@@ -25,15 +24,9 @@ export const Layout = ({ children }: CardProps) => {
   const router = useRouter();
   const { screenWidth } = useBreakpoint();
   const isMobile = screenWidth < BREAKPOINTS.lg;
-  const token = Cookies.get('download-token');
   const msToken = Cookies.get('ms-token');
 
   const getTokenFromMsCode = async ({ jwt }) => {
-    // uncomment that and send this code to your api where you will recieve that jwt
-    // const res = await fetch('');
-    // const body = await res.json();
-    // const { jwt } = body;
-    // const jwt = 'eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTc4NzUzMDgsImh0dHA6Ly9saWNlbnNlLW1hbmFnZXIuaGFybW9uLmllL2FsbC9yZWFkP2RvbWFpbnM9Ijp0cnVlLCJwcm92aWRlciI6Im1pY3Jvc29mdCIsInVpZCI6IjhhMGRmMjUzLTNhM2YtNDQwOC05Y2IxLTdmZjhlNWE0NTNmZiIsInVzZXJuYW1lIjoiYW1pdGFpYkBoYXJtb24uaWUifQ.AbLAOHun6JHOn0qLtwUxDsfmIYOqfGxcFPv752ngERbAubD2FMAVgCWablTCs2dXy-47_hcykhqhN10LjmkkWexAAABafBFFJTylPFHoYiA2jVHg_YYyXE8tCZVaYiiCYCvQO7QeUqJHhLGlCbgfu2aUGbM7jBPISoADb_U1tppJgyhw'
     if (jwt) {
       Cookies.set('ms-token', jwt);
       router.push({
@@ -102,11 +95,11 @@ export const Layout = ({ children }: CardProps) => {
     );
   }
 
-  if (!msToken && !token && !isFetching && isClient && !router.query.jwt && !router.query.code) {
+  if (!msToken && !isFetching && isClient && !router.query.jwt && !router.query.code) {
     router.push('/');
   }
 
-  if (!msToken && !token) return null;
+  if (!msToken) return null;
 
   const renderMenuList = (items) =>
     items.map(({ label, icon, external }, i) => (
