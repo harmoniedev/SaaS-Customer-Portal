@@ -44,10 +44,12 @@ export default function Page() {
       },
       body: JSON.stringify({ email, password: hashedPassword }),
     };
-    const res = await fetch(`http://localhost:8080/login_using_credentials`, options);
+    const res = await fetch(`http://localhost:8080/login_using_credentials`, options);;
     if (res.status !== 200) {
       setErrorMessage('Incorrect username or password');
       setIsLoading(false);
+    } else {
+      router.push(res.url)
     }
   };
 
