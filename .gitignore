@@ -4,4 +4,4 @@ node_modules/
 .vscode
 *.vscode/*
 .vscode/*
-.ideal/*
+.idea/*
