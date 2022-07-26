@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
 
 import { TitleMemo as Title } from '../components/title/Title';
 import { PaperMemo as Paper } from '../components/paper/Paper';
