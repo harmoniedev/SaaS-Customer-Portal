@@ -1,13 +1,54 @@
-import React, { useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
+import React, {useEffect, useState} from 'react';
 
-import { TitleMemo as Title } from '../components/title/Title';
-import { PaperMemo as Paper } from '../components/paper/Paper';
-import { LinkMemo as Link } from '../components/buttons/Link';
-import { TabelMemo as Tabel } from '../components/tabel/Tabel';
-import { Icon } from '../components/icons/Icon';
-import { Spinner } from '../components/loaders/Spinner';
-import { StaticState } from '../types';
+import {TitleMemo as Title} from '../components/title/Title';
+import {PaperMemo as Paper} from '../components/paper/Paper';
+import {LinkMemo as Link} from '../components/buttons/Link';
+import {TabelMemo as Tabel} from '../components/tabel/Tabel';
+import {Icon} from '../components/icons/Icon';
+import {Spinner} from '../components/loaders/Spinner';
+import {StaticState} from '../types';
+import {parseJWT} from "../helpers/utils/jwt";
+
+type Domain = string;
+type Subdomain = string;
+
+const resolveAllSubdomains = async (domains: Domain[]): Promise<string> => {
+  let promises: Promise<Subdomain[]>[] = [];
+
+  domains.map((domain) => {
+    promises.push(resolveSubdomains(domain))
+  })
+
+  return Promise.all(promises).then((res) => {
+    const subdomains: Subdomain[] = [];
+
+    res.map((keys) => {
+      if (keys) {
+        resolveSubdomainKeys(keys).map((key) => {
+          subdomains.push(key)
+        })
+      }
+    })
+
+    return subdomains.join()
+  })
+}
+
+const resolveSubdomains = async (domain: Domain): Promise<Subdomain[]> => {
+  return new Promise(async (resolve) => {
+    await fetch(`${process.env.API_URL}/subdomains?q=${domain}`, {
+      headers: {
+        authorization: `Bearer ${process.env.TEMP_TOKEN}`
+      },
+    }).then((res) => {
+      resolve(res.json())
+    })
+  })
+}
+
+const resolveSubdomainKeys = (keys: string[]): string[] => {
+  return keys[0].split(":")[1].split(",")
+}
 
 export const DashboardScene = () => {
   const [licenseCount, setLicenseCount] = useState<number>(0);
@@ -16,14 +57,22 @@ export const DashboardScene = () => {
   const [state, setState] = useState<StaticState>('idle');
   const [uniqueProductOption, setUniqueProductOption] = useState<string[]>([]);
   const [uniqueDomainOption, setUniqueDomainOption] = useState<string[]>([]);
-  const token = Cookies.get('ms-token');
+
+  const TEMP_TOKEN = process.env.TEMP_TOKEN;
+
   const getData = async () => {
+    const domain = Object.keys(parseJWT((TEMP_TOKEN)))[1];
+    const queryParameters = new URL(domain).searchParams;
+
+    const subdomains = await resolveAllSubdomains(queryParameters.get("domains").split(","));
+
     try {
       setState('loading');
       // pass here token defined in 23 string
-      const response = await fetch(`${process.env.API_URL}/domain_data/harmon.ie`, {
+
+      const response = await fetch(`${process.env.API_URL}/domain_data/${subdomains}`, {
         headers: {
-          authorization: `Bearer ${token}`,
+          authorization: `Bearer ${TEMP_TOKEN}`,
         },
       });
       const text = await response.text();
