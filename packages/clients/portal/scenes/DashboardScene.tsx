@@ -12,7 +12,7 @@ import {parseJWT} from "../helpers/utils/jwt";
 type Domain = string;
 type Subdomain = string;
 
-const resolveAllSubdomains = async (domains: Domain[]): Promise<string> => {
+const resolveAllSubdomains = async (domains: Domain[]): Promise<Subdomain[]> => {
   let promises: Promise<Subdomain[]>[] = [];
 
   domains.map((domain) => {
@@ -30,7 +30,7 @@ const resolveAllSubdomains = async (domains: Domain[]): Promise<string> => {
       }
     })
 
-    return subdomains.join()
+    return subdomains
   })
 }
 
@@ -70,7 +70,7 @@ export const DashboardScene = () => {
       setState('loading');
       // pass here token defined in 23 string
 
-      const response = await fetch(`${process.env.API_URL}/domain_data/${subdomains}`, {
+      const response = await fetch(`${process.env.API_URL}/domain_data/${subdomains.join()}`, {
         headers: {
           authorization: `Bearer ${TEMP_TOKEN}`,
         },
