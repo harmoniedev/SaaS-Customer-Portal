@@ -24,8 +24,8 @@ const resolveAllSubdomains = async (domains: Domain[]): Promise<string> => {
 
     res.map((keys) => {
       if (keys) {
-        resolveSubdomainKeys(keys).map((key) => {
-          subdomains.push(key)
+        resolveSubdomainsFromKeys(keys).map((subdomain) => {
+          subdomains.push(subdomain)
         })
       }
     })
@@ -46,7 +46,7 @@ const resolveSubdomains = async (domain: Domain): Promise<Subdomain[]> => {
   })
 }
 
-const resolveSubdomainKeys = (keys: string[]): string[] => {
+const resolveSubdomainsFromKeys = (keys: string[]): Subdomain[] => {
   return keys[0].split(":")[1].split(",")
 }
 
