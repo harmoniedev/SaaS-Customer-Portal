@@ -97,12 +97,16 @@ export const DashboardScene = () => {
       setLicenseCount(count['']);
       setAssignedLicensesCount(jsonRespBody.count.topics);
       setListAllUsers(users);
+
       setUniqueProductOption(
         Array.from(new Set(users.map((user) => user.product_name))),
       );
       setUniqueDomainOption(
         Array.from(new Set(users.map((user) => user.publicsuffix))),
       );
+
+      // Update the cookie
+      Cookies.set('token', response.headers.get('authorization').split(' ')[1], {secure: true, sameSite: 'strict'});
 
       setState('success');
     } catch (error) {
