@@ -8,6 +8,7 @@ import {Icon} from '../components/icons/Icon';
 import {Spinner} from '../components/loaders/Spinner';
 import {StaticState} from '../types';
 import {parseJWT} from "../helpers/utils/jwt";
+import Cookies from "js-cookie"
 
 type Domain = string;
 type Subdomain = string;
@@ -58,10 +59,10 @@ export const DashboardScene = () => {
   const [uniqueProductOption, setUniqueProductOption] = useState<string[]>([]);
   const [uniqueDomainOption, setUniqueDomainOption] = useState<string[]>([]);
 
-  const TEMP_TOKEN = process.env.TEMP_TOKEN;
+  const token = Cookies.get('token');
 
   const getData = async () => {
-    const domain = Object.keys(parseJWT((TEMP_TOKEN)))[1];
+    const domain = Object.keys(parseJWT((token)))[1];
     const queryParameters = new URL(domain).searchParams;
 
     const subdomains = await resolveAllSubdomains(queryParameters.get("domains").split(","));
@@ -72,7 +73,7 @@ export const DashboardScene = () => {
 
       const response = await fetch(`${process.env.API_URL}/domain_data/${subdomains.join()}`, {
         headers: {
-          authorization: `Bearer ${TEMP_TOKEN}`,
+          authorization: `Bearer ${token}`,
         },
       });
       const text = await response.text();

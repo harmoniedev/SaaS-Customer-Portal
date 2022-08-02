@@ -16,7 +16,7 @@ export default function Page() {
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const msToken = Cookies.get('ms-token');
+  const msToken = Cookies.get('token');
 
   useEffect(() => {
     if ((msToken) && !isLoading) {

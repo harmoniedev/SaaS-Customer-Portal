@@ -32,7 +32,7 @@ export const MobileNav = ({
   const router = useRouter();
   const { breakpoint } = useBreakpoint();
   const responsiveButtonSize: SizeType = responsiveButtonSizes[breakpoint];
-  const msToken = Cookies.get('ms-token');
+  const msToken = Cookies.get('token');
 
   const parseJwt = (key, cookieName) => {
     try {
@@ -85,14 +85,14 @@ export const MobileNav = ({
                   />
                 </div>
                 <div>
-                  <p className="font-medium">{msToken && parseJwt('username', 'ms-token')}</p>
+                  <p className="font-medium">{msToken && parseJwt('username', 'token')}</p>
                 </div>
               </div>
               <div
                 className="flex gap-2 py-4 px-12 text-indigo-500 w-full"
                 onClick={() => {
                   if (msToken) {
-                    Cookies.remove('ms-token');
+                    Cookies.remove('token');
                     router.push('/')
                   }
                 }}
