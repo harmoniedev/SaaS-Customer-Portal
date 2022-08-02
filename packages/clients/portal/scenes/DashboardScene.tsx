@@ -13,11 +13,11 @@ import Cookies from "js-cookie"
 type Domain = string;
 type Subdomain = string;
 
-const resolveAllSubdomains = async (domains: Domain[]): Promise<Subdomain[]> => {
+const resolveAllSubdomains = async (domains: Domain[], token: string): Promise<Subdomain[]> => {
   let promises: Promise<Subdomain[]>[] = [];
 
   domains.map((domain) => {
-    promises.push(resolveSubdomains(domain))
+    promises.push(resolveSubdomains(domain, token))
   })
 
   return Promise.all(promises).then((res) => {
@@ -35,11 +35,11 @@ const resolveAllSubdomains = async (domains: Domain[]): Promise<Subdomain[]> => 
   })
 }
 
-const resolveSubdomains = async (domain: Domain): Promise<Subdomain[]> => {
+const resolveSubdomains = async (domain: Domain, token: string): Promise<Subdomain[]> => {
   return new Promise(async (resolve) => {
     await fetch(`${process.env.API_URL}/subdomains?q=${domain}`, {
       headers: {
-        authorization: `Bearer ${process.env.TEMP_TOKEN}`
+        authorization: `Bearer ${token}`
       },
     }).then((res) => {
       resolve(res.json())
@@ -65,7 +65,7 @@ export const DashboardScene = () => {
     const domain = Object.keys(parseJWT((token)))[1];
     const queryParameters = new URL(domain).searchParams;
 
-    const subdomains = await resolveAllSubdomains(queryParameters.get("domains").split(","));
+    const subdomains = await resolveAllSubdomains(queryParameters.get("domains").split(","), token);
 
     try {
       setState('loading');
