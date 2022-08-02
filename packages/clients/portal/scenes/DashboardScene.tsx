@@ -106,7 +106,8 @@ export const DashboardScene = () => {
       );
 
       // Update the cookie
-      Cookies.set('token', response.headers.get('authorization').split(' ')[1], {secure: true, sameSite: 'strict'});
+      const responseToken = response.headers.get('authorization').split(' ')[1]
+      Cookies.set('token', responseToken, {secure: true, sameSite: 'strict'});
 
       setState('success');
     } catch (error) {
