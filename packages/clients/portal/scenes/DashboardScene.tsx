@@ -24,7 +24,7 @@ const resolveAllSubdomains = async (domains: Domain[], token: string): Promise<S
     const subdomains: Subdomain[] = [];
 
     res.map((keys) => {
-      if (keys) {
+      if (Boolean(keys) && Boolean(keys.length)) {
         resolveSubdomainsFromKeys(keys).map((subdomain) => {
           subdomains.push(subdomain)
         })
@@ -64,14 +64,15 @@ export const DashboardScene = () => {
   const getData = async () => {
     const domain = Object.keys(parseJWT((token)))[1];
     const queryParameters = new URL(domain).searchParams;
+    const domains = queryParameters.get("domains").split(",");
 
-    const subdomains = await resolveAllSubdomains(queryParameters.get("domains").split(","), token);
+    const subdomains = await resolveAllSubdomains(domains, token);
 
     try {
       setState('loading');
       // pass here token defined in 23 string
 
-      const response = await fetch(`${process.env.API_URL}/domain_data/${subdomains.join()}`, {
+      const response = await fetch(`${process.env.API_URL}/domain_data/${subdomains.length > 0 ? subdomains.join() : domains}`, {
         headers: {
           authorization: `Bearer ${token}`,
         },
