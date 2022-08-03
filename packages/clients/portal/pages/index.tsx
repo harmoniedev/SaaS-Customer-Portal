@@ -16,7 +16,7 @@ export default function Page() {
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const msToken = Cookies.get('ms-token');
+  const msToken = Cookies.get('token');
 
   useEffect(() => {
     if ((msToken) && !isLoading) {
@@ -44,7 +44,7 @@ export default function Page() {
       },
       body: JSON.stringify({ email, password: hashedPassword }),
     };
-    const res = await fetch(`http://localhost:8080/login_using_credentials`, options);;
+    const res = await fetch(`http://localhost:8080/login_using_credentials`, options);
     if (res.status !== 200) {
       setErrorMessage('Incorrect username or password');
       setIsLoading(false);

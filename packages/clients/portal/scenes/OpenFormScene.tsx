@@ -24,7 +24,7 @@ export const OpenFormScene = ({
   isCheckAll,
 }: OpenFormSceneProps) => {
   const router = useRouter();
-  const token = Cookies.get('ms-token');
+  const token = Cookies.get('token');
   
   const deleteUser = async ({ emails }) => {
     try {

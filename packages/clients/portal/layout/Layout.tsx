@@ -24,11 +24,11 @@ export const Layout = ({ children }: CardProps) => {
   const router = useRouter();
   const { screenWidth } = useBreakpoint();
   const isMobile = screenWidth < BREAKPOINTS.lg;
-  const msToken = Cookies.get('ms-token');
+  const msToken = Cookies.get('token');
 
   const getTokenFromMsCode = async ({ jwt }) => {
     if (jwt) {
-      Cookies.set('ms-token', jwt);
+      Cookies.set('token', jwt, {secure: true, sameSite: 'strict'});
       router.push({
           pathname: router.pathname,
           query: {},

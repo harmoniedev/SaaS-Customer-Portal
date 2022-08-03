@@ -2,6 +2,7 @@ import React from 'react';
 import Cookies from 'js-cookie'
 import { Icon } from '../../components/icons/Icon';
 import { useRouter } from 'next/router';
+import {parseJWT} from "../../helpers/utils/jwt";
 
 export type DeskNavProps = {
   showUserMenu: boolean;
@@ -11,17 +12,7 @@ export type DeskNavProps = {
 
 export const DeskNav = ({ showUserMenu, open, onClickMenu }: DeskNavProps) => {
   const router = useRouter();
-  const msToken = Cookies.get('ms-token');
-
-  const parseJwt = (key, cookieName) => {
-    try {
-      const parsed = JSON.parse(atob(Cookies.get(cookieName).split('.')[1]));
-      const name = parsed ? parsed[key] : '';
-      return name
-    } catch (e) {
-      return '';
-    }
-  };
+  const msToken = Cookies.get('token');
 
   return (
     showUserMenu && (
@@ -33,7 +24,7 @@ export const DeskNav = ({ showUserMenu, open, onClickMenu }: DeskNavProps) => {
           className="flex items-center gap-2 ml-3 text-indigo-500 cursor-pointer"
           onClick={onClickMenu}
         >
-          <p>{msToken && parseJwt('username', 'ms-token')}</p>
+          <p>{msToken && parseJWT((Cookies.get('token'))).username}</p>
           {open ? (
             <Icon name="ChevronUpIcon" className="w-4 h-4" />
           ) : (
@@ -46,7 +37,7 @@ export const DeskNav = ({ showUserMenu, open, onClickMenu }: DeskNavProps) => {
               className="bg-white p-8 flex items-center justify-items-start justify-start gap-5 text-indigo-500 font-medium cursor-pointer"
               onClick={() => {
                 if (msToken) {
-                  Cookies.remove('ms-token');
+                  Cookies.remove('token');
                   router.push('/')
                 }
               }}
