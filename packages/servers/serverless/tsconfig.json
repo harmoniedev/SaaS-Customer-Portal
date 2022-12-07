@@ -1,12 +1,10 @@
 {
-  "extends": "../../../tsconfig.json",
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "rootDirs": ["src", "stories"],
-    "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
-    "jsx": "react-jsx",
-    "baseUrl": "./"
-  },
-  "include": ["src"]
+    "module": "commonjs",
+    "target": "es6",
+    "outDir": "dist",
+    "rootDir": ".",
+    "sourceMap": true,
+    "strict": false
+  }
 }

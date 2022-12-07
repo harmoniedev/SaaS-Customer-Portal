@@ -21,7 +21,7 @@
     "jsx": "react",
     "baseUrl": "./",
     "paths": {
-      "@saas-customer-portal/*": ["./packages/*/*/src"]
+      "@saas-customer-portal/portal": ["./packages/clients/portal"]
     }
   }
 }
