@@ -1,6 +1,3 @@
-import { useMsal } from '@azure/msal-react';
-import { useIsAuthenticated } from '@azure/msal-react';
-import Cookies from 'js-cookie'
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
